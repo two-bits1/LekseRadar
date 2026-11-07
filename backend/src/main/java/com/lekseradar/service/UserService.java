@@ -36,6 +36,9 @@ public class UserService {
         if (req.timezone() != null) {
             user.setTimezone(validZone(req.timezone().trim()));
         }
+        if (req.emailReminders() != null) {
+            user.setEmailReminders(req.emailReminders());
+        }
         return UserResponseDTO.from(user);
     }
 
