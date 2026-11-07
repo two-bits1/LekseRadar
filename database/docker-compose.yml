@@ -35,5 +35,22 @@ services:
       - ../ai-content:/ai-content:ro
     command: sh -c "pip install -q -r /ai-content/load/requirements.txt && python -X utf8 /ai-content/load/load.py"
     restart: "no"
+
+  # Тестовые данные (ученик test@lekseradar.no / LekseRadar2026, ДЗ по 12 предметам, квизы, материалы).
+  # Только по запросу: docker compose --profile testdata up -d
+  testdata:
+    image: postgres:16
+    profiles: ["testdata"]
+    depends_on:
+      db:
+        condition: service_healthy
+      content:
+        condition: service_completed_successfully
+    environment:
+      PGPASSWORD: lekseradar
+    volumes:
+      - ./testdata:/testdata:ro
+    command: psql -h db -U lekseradar -d lekseradar -v ON_ERROR_STOP=1 -f /testdata/seed.sql
+    restart: "no"
 volumes:
   pgdata:
