@@ -36,7 +36,7 @@ services:
     command: sh -c "pip install -q -r /ai-content/load/requirements.txt && python -X utf8 /ai-content/load/load.py"
     restart: "no"
 
-  # Тестовые данные (ученик test@lekseradar.no / LekseRadar2026, ДЗ по 12 предметам, квизы, материалы).
+  # Тестовые данные (ученик test@lekseradar.no / LekseRadar2026, ДЗ по 10 предметам, квизы, материалы).
   # Только по запросу: docker compose --profile testdata up -d
   testdata:
     image: postgres:16
