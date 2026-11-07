@@ -18,7 +18,7 @@ flowchart LR
     end
 
     subgraph BE["Backend · Java Spring Boot (№2)"]
-        API["REST /api/*<br/>JWT-вход"]
+        API["REST /api/v1/*<br/>JWT-вход"]
         AI["AiClient<br/>(промпты, вызов модели)"]
     end
 
@@ -49,7 +49,7 @@ flowchart LR
 
 | Часть | Владелец | Отвечает за | Не делает |
 |-------|----------|-------------|-----------|
-| Frontend | №1 | экраны, состояние интерфейса, вызовы `/api/*` | не ходит в базу, ИИ и платформы напрямую |
+| Frontend | №1 | экраны, состояние интерфейса, вызовы `/api/v1/*` | не ходит в базу, ИИ и платформы напрямую |
 | Backend | №2 | вход (JWT), REST API, вызов ИИ, шифрование токенов платформ, вызов функций БД | не дублирует логику квизов/карточек: она в функциях БД |
 | База | №2 + №3 | схема, миграции Flyway, функции квизов, карточек и прогресса | — |
 | Python | №3 | `collect()` сбор ДЗ с 4 платформ, промпты и формат JSON квиза | не хранит данные |
@@ -86,7 +86,7 @@ sequenceDiagram
     participant B as Backend
     participant D as PostgreSQL
     U->>F: email + пароль
-    F->>B: POST /api/auth/login
+    F->>B: POST /api/v1/auth/login
     B->>D: SELECT users (bcrypt-проверка)
     B-->>F: JWT
     Note over F: JWT в заголовке Authorization: Bearer … во всех запросах
@@ -103,10 +103,10 @@ sequenceDiagram
     participant X as Canvas / Teams / itslearning / InSchool
     participant D as PostgreSQL
     U->>F: «Подключить Canvas»: адрес + токен
-    F->>B: POST /api/platforms/canvas
+    F->>B: POST /api/v1/platforms/canvas
     B->>D: platform_connections (credentials_enc, зашифровано)
     U->>F: «Обновить домашку» (или по таймеру)
-    F->>B: POST /api/homework/sync
+    F->>B: POST /api/v1/homework/sync
     B->>P: учётные данные всех платформ
     P->>X: запросы к API платформ (параллельно)
     X-->>P: задания
@@ -127,7 +127,7 @@ sequenceDiagram
     participant D as PostgreSQL
     participant L as Модель ИИ
     U->>F: вопрос (можно из карточки ДЗ)
-    F->>B: POST /api/chats/{id}/messages
+    F->>B: POST /api/v1/chats/{id}/messages
     B->>D: INSERT chat_messages(role='student')
     B->>D: SELECT chat_context (последние 10 реплик)
     B->>D: chat_system_prompt(чат): промпт режима tutor или quiz
@@ -148,7 +148,7 @@ sequenceDiagram
     participant D as PostgreSQL
     participant L as Модель ИИ
     U->>F: предмет + тема + уровень
-    F->>B: POST /api/quizzes {subject, topic, level}
+    F->>B: POST /api/v1/quizzes {subject, topic, level}
     B->>D: find_quiz_set(subject, topic, level, lang)
     alt набора нет
         B->>L: «сделай квиз по quiz.schema.json»
@@ -160,7 +160,7 @@ sequenceDiagram
     B-->>F: quiz_id, current_position, вопросы
     loop каждый вопрос
         U->>F: ответ
-        F->>B: POST /api/quizzes/{id}/answers {position, answer}
+        F->>B: POST /api/v1/quizzes/{id}/answers {position, answer}
         alt вопрос с выбором
             B->>D: save_quiz_answer(quiz, pos, answer) — база проверяет сама
         else текстовый вопрос
@@ -170,7 +170,7 @@ sequenceDiagram
         end
         B-->>F: verdict, пояснение, правильный ответ
     end
-    F->>B: POST /api/quizzes/{id}/finish
+    F->>B: POST /api/v1/quizzes/{id}/finish
     B->>D: finish_quiz(id) → балл 0–100
 ```
 Ошибочные ответы сами попадают в флеш-карты (триггер), прогресс считается видами.
@@ -183,21 +183,21 @@ sequenceDiagram
     participant B as Backend
     participant D as PostgreSQL
     U->>F: «Учить карточками» у квиза
-    F->>B: POST /api/flashcards/from-quiz/{setId}
+    F->>B: POST /api/v1/flashcards/from-quiz/{setId}
     B->>D: add_quiz_set_to_flashcards(user, set)
     U->>F: открыть колоду
-    F->>B: GET /api/flashcards/due
+    F->>B: GET /api/v1/flashcards/due
     B->>D: SELECT flashcards WHERE due
     B-->>F: карточки (front / back / explanation)
     U->>F: перевернул, оценил 0–5
-    F->>B: POST /api/flashcards/{exerciseId}/review {grade}
+    F->>B: POST /api/v1/flashcards/{exerciseId}/review {grade}
     B->>D: review_flashcard(user, exercise, grade) → следующий показ
 ```
 
 ### 4.6 Дашборд, прогресс, история
 ```mermaid
 flowchart LR
-    F["Frontend: Дашборд"] -->|GET /api/dashboard| B["Backend"]
+    F["Frontend: Дашборд"] -->|GET /api/v1/dashboard| B["Backend"]
     B --> V1["user_dashboard<br/>ДЗ todo/overdue/done, квизы, средний балл, активные дни"]
     B --> V2["user_quiz_progress<br/>по предмету и теме"]
     B --> V3["user_topic_progress<br/>освоение %"]
@@ -212,27 +212,27 @@ flowchart LR
 
 | Метод и путь | Экран | Что делает бэкенд | В базе |
 |--------------|-------|-------------------|--------|
-| ✅ `POST /api/auth/register`, `/login` | Вход | создать пользователя / выдать JWT | `users` |
-| ✅ `GET/PUT /api/users/me` | Профиль | профиль | `users` |
-| ✅ `GET/POST /api/chats` 🆕 `{mode: tutor/quiz, subject, topic}`, `PATCH/DELETE /api/chats/{id}` | ИИ-чат | два вида чата: репетитор и генерация квизов | `start_chat`, `user_chats` |
-| ✅ `GET/POST /api/chats/{id}/messages` | ИИ-чат | история / новое сообщение → ИИ | `chat_messages`, `chat_context` |
-| 🆕 `GET /api/platforms`, `POST/DELETE /api/platforms/{platform}` | Настройки | подключить платформу, статус, «войти заново» | `platform_connections` |
-| 🆕 `POST /api/homework/sync`, `GET /api/homework` | Домашка | вызвать `collect()`, сохранить и отдать ДЗ | `assignments` |
-| 🆕 `GET /api/subjects` | Квиз | предметы для выбора | `subjects` |
-| 🆕 `POST /api/quizzes` `{subject, topic, level}` | Квиз | найти или сгенерировать, начать | `find_quiz_set`, `import_quiz_json`, `start_quiz` |
-| 🆕 `GET /api/quizzes/{id}` | Квиз | вопросы без ответов + где остановился | `quiz_questions_public`, `quizzes.current_position` |
-| 🆕 `POST /api/quizzes/{id}/answers` `{position, answer}` | Квиз | проверить и сохранить ответ | `save_quiz_answer` |
-| 🆕 `POST /api/quizzes/{id}/finish` | Квиз | итоговый балл | `finish_quiz` |
-| 🆕 `POST /api/flashcards/from-quiz/{setId}` | Карточки | добавить квиз в колоду | `add_quiz_set_to_flashcards` |
-| 🆕 `GET /api/flashcards/due` | Карточки | что повторять сейчас | вид `flashcards` |
-| 🆕 `POST /api/flashcards/{exerciseId}/review` `{grade}` | Карточки | оценка 0–5 | `review_flashcard` |
-| ✅ `GET /api/progress` → 🆕 `GET /api/dashboard` | Дашборд | сводка и графики | виды `user_*` |
-| 🆕 `GET /api/materials`, `POST /api/materials` (файл) | Материалы | список / загрузить файл, извлечь текст | `user_materials`, `add_material` |
-| 🆕 `GET /api/history` | История | лента действий | `user_events` |
-| 🆕 `GET /api/reminders` | Напоминания | ближайшие дедлайны | `reminders` |
+| ✅ `POST /api/v1/auth/register`, `/login` | Вход | создать пользователя / выдать JWT | `users` |
+| ✅ `GET/PUT /api/v1/users/me` | Профиль | профиль | `users` |
+| ✅ `GET/POST /api/v1/chats` 🆕 `{mode: tutor/quiz, subject, topic}`, `PATCH/DELETE /api/v1/chats/{id}` | ИИ-чат | два вида чата: репетитор и генерация квизов | `start_chat`, `user_chats` |
+| ✅ `GET/POST /api/v1/chats/{id}/messages` | ИИ-чат | история / новое сообщение → ИИ | `chat_messages`, `chat_context` |
+| 🆕 `GET /api/v1/platforms`, `POST/DELETE /api/v1/platforms/{platform}` | Настройки | подключить платформу, статус, «войти заново» | `platform_connections` |
+| 🆕 `POST /api/v1/homework/sync`, `GET /api/v1/homework` | Домашка | вызвать `collect()`, сохранить и отдать ДЗ | `assignments` |
+| 🆕 `GET /api/v1/subjects` | Квиз | предметы для выбора | `subjects` |
+| 🆕 `POST /api/v1/quizzes` `{subject, topic, level}` | Квиз | найти или сгенерировать, начать | `find_quiz_set`, `import_quiz_json`, `start_quiz` |
+| 🆕 `GET /api/v1/quizzes/{id}` | Квиз | вопросы без ответов + где остановился | `quiz_questions_public`, `quizzes.current_position` |
+| 🆕 `POST /api/v1/quizzes/{id}/answers` `{position, answer}` | Квиз | проверить и сохранить ответ | `save_quiz_answer` |
+| 🆕 `POST /api/v1/quizzes/{id}/finish` | Квиз | итоговый балл | `finish_quiz` |
+| 🆕 `POST /api/v1/flashcards/from-quiz/{setId}` | Карточки | добавить квиз в колоду | `add_quiz_set_to_flashcards` |
+| 🆕 `GET /api/v1/flashcards/due` | Карточки | что повторять сейчас | вид `flashcards` |
+| 🆕 `POST /api/v1/flashcards/{exerciseId}/review` `{grade}` | Карточки | оценка 0–5 | `review_flashcard` |
+| 🆕 `GET /api/v1/dashboard` | Дашборд | сводка и графики | виды `user_*` |
+| 🆕 `GET /api/v1/materials`, `POST /api/v1/materials` (файл) | Материалы | список / загрузить файл, извлечь текст | `user_materials`, `add_material` |
+| 🆕 `GET /api/v1/history` | История | лента действий | `user_events` |
+| 🆕 `GET /api/v1/reminders` | Напоминания | ближайшие дедлайны | `reminders` |
 
-В PR #2 уже есть `POST /api/exercises/generate` и `/answer`. Квизы из JSON их заменяют:
-генерация один раз на тему, повторное использование, автопроверка вариантов, прогресс и карточки.
+Старые `exercises/generate` и `/answer` бэкенд уже убрал: их заменяют квизы из JSON
+(генерация один раз на тему, повторное использование, автопроверка, прогресс и карточки).
 
 ## 6. Почему сделано так
 
