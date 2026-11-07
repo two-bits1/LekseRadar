@@ -9,9 +9,9 @@ import { Calendar, Settings, Status, Soon } from './pages/Other';
 import { Auth, Profile } from './pages/Account';
 import { type ThemeChoice, loadThemeChoice, saveThemeChoice, resolveTheme, themeColor } from './theme';
 import { PATHS } from './paths';
-import { AuthProvider, RequireAuth, useAuth, initialOf } from './auth';
+import { AuthProvider, RequireAuth, useAuth } from './auth';
+import { OrbLink } from './components/Orb';
 import './styles.css';
-export function Orb({small=false}:{small?:boolean}) { return <span className={small?'orb small':'orb'} aria-hidden="true"><span/></span>; }
 const darkQuery='(prefers-color-scheme: dark)';
 function useTheme(){
  const [choice,setChoice]=useState<ThemeChoice>(loadThemeChoice);
@@ -32,10 +32,11 @@ function useTheme(){
 }
 // Старые адреса (до API.md) ведут на новые, ?assignment=… сохраняется.
 function Moved({to}:{to:string}){const {search}=useLocation();return <Navigate to={to+search} replace/>;}
+// Справа в шапке: «Logg inn» до входа; после входа пусто — профиль уже есть в меню (вариант B).
 function HeaderUser(){
- const {token,user}=useAuth();
- if(!token)return <Link to={PATHS.login} className="guest"><span className="avatar"><LogIn size={16}/></span><span>Logg inn</span></Link>;
- return <Link to={PATHS.profile} className="guest"><span className="avatar">{initialOf(user)}</span><span>Hei, {user?user.displayName:'…'}<small>{user?.email}</small></span></Link>;
+ const {token}=useAuth();
+ if(token)return null;
+ return <Link to={PATHS.login} className="guest"><span className="avatar"><LogIn size={16}/></span><span>Logg inn</span></Link>;
 }
 function App(){
  const {choice:theme,resolved,setChoice:setTheme}=useTheme();
@@ -43,8 +44,8 @@ function App(){
  const toggle=(id:string)=>setCompleted(items=>items.includes(id)?items.filter(i=>i!==id):[...items,id]);
  return <div className="app" data-theme={resolved}>
   <a className="skip" href="#main">Hopp til innhold</a>
-  <header className="header"><Link to={PATHS.home} className="brand" aria-label="LekseRadar — oversikt"><Radar size={25}/><span>LekseRadar<span className="brand-dot">.</span></span></Link>
-  <nav aria-label="Hovedmeny"><NavLink to={PATHS.homework}><CalendarDays/><span>Kalender</span></NavLink><NavLink to={PATHS.flashcards}><Layers/><span>Læringskort</span></NavLink><NavLink to={PATHS.chats} className="orb-link" aria-label="AI-veileder"><Orb/><span>AI-veileder</span></NavLink><NavLink to={PATHS.profile}><UserRound/><span>Profil</span></NavLink><NavLink to={PATHS.settings}><Settings2/><span>Innstillinger</span></NavLink></nav>
+  <header className="header"><Link to={PATHS.home} className="brand" aria-label="LekseRadar — oversikt"><span className="brand-mark"><Radar size={21}/></span><span>LekseRadar<span className="brand-dot">.</span></span></Link>
+  <nav aria-label="Hovedmeny"><NavLink to={PATHS.homework}><CalendarDays/><span>Kalender</span></NavLink><NavLink to={PATHS.flashcards}><Layers/><span>Læringskort</span></NavLink><OrbLink to={PATHS.chats} label="AI-veileder"/><NavLink to={PATHS.profile}><UserRound/><span>Profil</span></NavLink><NavLink to={PATHS.settings}><Settings2/><span>Innstillinger</span></NavLink></nav>
   <HeaderUser/></header>
   <div className="demo-bar"><span className="live-dot"/>En liten smakebit av en enklere skolehverdag.<Link to={PATHS.status}>Utforsk demoen <ArrowUpRight size={13}/></Link></div>
   <main id="main"><Routes>
