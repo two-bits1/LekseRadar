@@ -6,8 +6,8 @@ import com.lekseradar.dto.flashcard.FlashcardResponseDTO;
 import com.lekseradar.dto.flashcard.ReviewResponseDTO;
 import com.lekseradar.dto.quiz.StartQuizRequestDTO;
 import com.lekseradar.exception.NotFoundException;
+import com.lekseradar.model.FlashcardProgressEntity;
 import com.lekseradar.model.UserEntity;
-import com.lekseradar.repository.ExerciseRepository;
 import com.lekseradar.repository.FlashcardRepository;
 import com.lekseradar.repository.QuizSetRepository;
 import org.springframework.stereotype.Service;
@@ -23,14 +23,11 @@ import java.util.Objects;
 public class FlashcardService {
     private final FlashcardRepository cards;
     private final QuizSetRepository sets;
-    private final ExerciseRepository exercises;
     private final QuizGeneratorService generator;
 
-    public FlashcardService(FlashcardRepository cards, QuizSetRepository sets, ExerciseRepository exercises,
-                            QuizGeneratorService generator) {
+    public FlashcardService(FlashcardRepository cards, QuizSetRepository sets, QuizGeneratorService generator) {
         this.cards = cards;
         this.sets = sets;
-        this.exercises = exercises;
         this.generator = generator;
     }
 
@@ -46,7 +43,10 @@ public class FlashcardService {
 
     /** Оценка 0–5 по SM-2 → когда показать карточку снова. */
     public ReviewResponseDTO review(Long userId, Long exerciseId, int grade) {
-        if (!exercises.existsById(exerciseId)) throw new NotFoundException("Карточка не найдена");
+        // Только карточки из своей колоды: иначе по любому id можно было бы забрать себе чужой вопрос с ответом
+        if (!cards.existsById(new FlashcardProgressEntity.Key(userId, exerciseId))) {
+            throw new NotFoundException("Карточка не найдена");
+        }
         return ReviewResponseDTO.from(cards.review(userId, exerciseId, grade));
     }
 

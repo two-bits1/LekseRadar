@@ -25,4 +25,11 @@ public interface UserEventRepository extends JpaRepository<UserEventEntity, Long
             nativeQuery = true)
     void add(@Param("userId") Long userId, @Param("type") String type, @Param("refTable") String refTable,
              @Param("refId") Long refId);
+
+    /** Событие с данными, например homework_synced {"added": 2, "updated": 5}. */
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO user_events (user_id, type, payload) VALUES (:userId, :type, CAST(:payload AS jsonb))",
+            nativeQuery = true)
+    void addWithPayload(@Param("userId") Long userId, @Param("type") String type, @Param("payload") String payload);
 }

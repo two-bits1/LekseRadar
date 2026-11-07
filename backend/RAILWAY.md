@@ -46,7 +46,9 @@ CORS_ORIGINS=http://localhost:5173
 |---|---|
 | `JWT_SECRET` | `openssl rand -base64 48` у себя в терминале |
 | `OPENAI_API_KEY` | ключ Groq (у Ильи) |
-| `CREDENTIALS_KEY` | `openssl rand -base64 32`, когда будет шаг 1 из [PLAN-BACKEND.md](../docs/PLAN-BACKEND.md). **Сохраните в надёжном месте**: потеряете — все подключения платформ придётся делать заново |
+| `CREDENTIALS_KEY` | **Обязательно**, без него бэкенд не стартует: `openssl rand -base64 32`. **Сохраните в надёжном месте**: потеряете — все подключения платформ придётся делать заново |
+| `MAIL_USERNAME` | **Обязательно для регистрации**: адрес Gmail, с которого уходят коды подтверждения |
+| `MAIL_PASSWORD` | пароль приложения этого Gmail (16 букв, https://myaccount.google.com/apppasswords), не обычный пароль. Без почты регистрация отвечает 503 |
 
 `PORT` задавать не нужно: Railway передаёт его сам, бэкенд читает `server.port: ${PORT:8080}`.
 
