@@ -2,7 +2,6 @@
 export const nb = {
   nav: { main: 'Hovedmeny', calendar: 'Kalender', flashcards: 'Læringskort', tutor: 'AI-veileder', profile: 'Profil', settings: 'Innstillinger' },
   header: { home: 'LekseRadar — oversikt', login: 'Logg inn', skip: 'Hopp til innhold' },
-  demoBar: { text: 'En liten smakebit av en enklere skolehverdag.', link: 'Utforsk demoen' },
   footer: { tagline: 'Lær litt. Forstå mer.', status: 'Prototype · Se utviklingsstatus' },
   settings: {
     eyebrow: 'DITT EGET LILLE HJØRNE', title: 'Akkurat slik du liker det.', intro: 'Gjør LekseRadar litt mer deg.',
