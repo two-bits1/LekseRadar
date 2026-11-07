@@ -12,7 +12,18 @@ export PGOPTIONS="-c client_min_messages=warning"
 url="${1:?usage: migrate.sh DATABASE_URL [--baseline N | --status]}"
 mode="${2:-}"; base="${3:-}"
 dir="$(cd "$(dirname "$0")/migrations" && pwd)"
-psql_() { psql "$url" -X -q -v ON_ERROR_STOP=1 "$@"; }
+if command -v psql >/dev/null; then
+  psql_() { psql "$url" -X -q -v ON_ERROR_STOP=1 "$@"; }
+elif command -v docker >/dev/null; then
+  # psql нет (например, на Mac без brew install libpq): берём его из образа postgres:16.
+  # localhost внутри контейнера — сам контейнер, поэтому адрес базы меняем на host.docker.internal.
+  durl=$(printf '%s' "$url" | sed -E 's#@(localhost|127\.0\.0\.1)([:/])#@host.docker.internal\2#')
+  echo "psql не найден, использую docker (postgres:16)" >&2
+  psql_() { docker run --rm -i --add-host=host.docker.internal:host-gateway -e PGOPTIONS \
+              -v "$dir:$dir:ro" postgres:16 psql "$durl" -X -q -v ON_ERROR_STOP=1 "$@"; }
+else
+  echo "Нужен psql (Mac: brew install libpq && brew link --force libpq) или Docker" >&2; exit 1
+fi
 
 psql_ -c "CREATE TABLE IF NOT EXISTS schema_migrations (
             version INT PRIMARY KEY, file TEXT NOT NULL, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())"
