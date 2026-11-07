@@ -1,7 +1,7 @@
 // Все URL бэкенда из API.md (таблица «Все URL бэкенда», #1–#34). Пути — относительно API_BASE (/api/v1).
 import { api, API_BASE } from './client';
 import type {
-  AnswerRequest, AnswerResult, Assignment, AssignmentStatus, AuthResponse, Dashboard, HistoryEvent, UpdateAssignmentRequest, ChangePasswordRequest, Chat, ChatReply, CreateChatRequest, Deck, Flashcard,
+  AnswerRequest, AnswerResult, Assignment, AssignmentStatus, AuthResponse, Dashboard, HistoryEvent, UpdateAssignmentRequest, ChangePasswordRequest, Chat, ReminderTest, ChatReply, CreateChatRequest, Deck, Flashcard,
   FlashcardStats, Health, LoginRequest, Message, Quiz, QuizProgress, QuizSummary, RegisterRequest, RegisterStarted, VerifyEmailRequest, ReviewResult,
   StartQuizRequest, Subject, UpdateChatRequest, UpdateUserRequest, User, PlatformConnection, PlatformCredentials, PlatformKey, SyncResult, TeamsPoll, TeamsStart,
 } from './types';
@@ -20,6 +20,7 @@ export const usersApi = {
   me: () => api<User>('/users/me'),                                                                      // #3
   update: (body: UpdateUserRequest) => api<User>('/users/me', json('PATCH', body)),                      // #4
   changePassword: (body: ChangePasswordRequest) => api<void>('/users/me/password', json('PUT', body)),   // #5
+  testReminder: () => api<ReminderTest>('/users/me/reminders/test', json('POST')),                     // пробное письмо-напоминание
 };
 
 // 🔒 ИИ-чат (тьютор и квиз-чат)

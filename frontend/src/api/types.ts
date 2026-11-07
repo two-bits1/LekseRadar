@@ -8,6 +8,7 @@ export type User = {
   displayName: string;
   locale: Locale;          // язык интерфейса
   timezone: string;        // "Europe/Oslo"
+  emailReminders?: boolean; // письмо о ДЗ за 24 ч до срока (V25), по умолчанию true
   createdAt: string;       // ISO-8601, UTC
   lastLoginAt: string | null;
 };
@@ -102,7 +103,8 @@ export type RegisterRequest = { email: string; password: string; displayName: st
 export type RegisterStarted = { email: string; expiresInSeconds: number };  // 202: код ушёл на почту, токена нет
 export type VerifyEmailRequest = { email: string; code: string };
 export type LoginRequest = { email: string; password: string };
-export type UpdateUserRequest = Partial<Pick<User, 'displayName' | 'locale' | 'timezone'>>;
+export type UpdateUserRequest = Partial<Pick<User, 'displayName' | 'locale' | 'timezone' | 'emailReminders'>>;
+export type ReminderTest = { email: string; count: number };
 export type ChangePasswordRequest = { currentPassword: string; newPassword: string };
 export type CreateChatRequest = { title?: string; topic?: string; subject?: string; mode?: Chat['mode']; level?: Level; assignmentId?: number | null };
 export type UpdateChatRequest = { title?: string; topic?: string; archived?: boolean };
