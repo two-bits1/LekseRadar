@@ -14,7 +14,7 @@
 
 ```sql
 SELECT content, prompt_id FROM chat_system_prompt(:chat_id);  -- промпт режима чата
-SELECT chat_prompt_vars(:chat_id);                            -- JSON: language, subject, topic, level,
+SELECT chat_prompt_vars(:chat_id);                            -- JSON: language, language_code, subject, topic, level,
                                                               -- homework_title, homework_due, homework_text, weak_topics
 SELECT materials_for_prompt(:user_id, :вопрос_или_тема, :subject_id, 5);  -- {{materials}}
 ```
@@ -27,6 +27,7 @@ SELECT materials_for_prompt(:user_id, :вопрос_или_тема, :subject_id
 2. Язык не спрашивается. `{{language}}` — язык, выбранный на сайте (`users.locale`), в виде названия:
    `norsk bokmål (nb)`, `русский (ru)`… (функция `language_name()`, миграция V17).
    Если у чата задан свой язык (`set_chat_language`), берётся он.
+   Код языка (`ru`) — в `{{language_code}}` (V20): его квиз пишет в поле `"language"` JSON.
 3. Задание, срок, текст ДЗ и слабые темы ИИ получает из базы через `chat_prompt_vars`, поэтому в первом
    ответе он не спрашивает, что задано: коротко называет суть задания и спрашивает, где ученик застрял.
 
