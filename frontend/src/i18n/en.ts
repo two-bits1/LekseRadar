@@ -50,4 +50,17 @@ export const en: Dict = {
     upcoming: 'Coming up', deckEyebrow: 'A LITTLE REVIEW, A BIG DIFFERENCE', deckTitle: 'It’ll stick soon.', deckText: 'Six small cards. A slightly clearer head.', deckCta: 'Try flashcards',
     demoNote1: 'This is demo data.', demoNote2: 'No school account is connected.',
   },
+  chat: {
+    eyebrow: 'YOUR AI TUTOR', title: 'Understand it. Your way.', intro: 'No finished homework. Just a little help to think for yourself.',
+    active: 'Active', archive: 'Archive', newChat: 'New chat', starting: 'Starting …', startingAbout: (title: string) => `Starting a chat about “${title}” …`,
+    loadingList: 'Loading chats …', emptyArchive: 'No archived chats.',
+    empty: 'No chats yet. Start a new one, or tap “Learn with AI” on a task.',
+    notFound: 'Chat not found.', failed: 'Something went wrong.', allChats: 'All chats', loading: 'Loading chat …',
+    tutorEyebrow: 'AI TUTOR', archived: 'ARCHIVED', newName: 'New name', save: 'Save', cancel: 'Cancel',
+    rename: 'Rename', unarchive: 'Restore from archive', archiveAction: 'Archive', remove: 'Delete',
+    confirmDelete: (title: string) => `Delete “${title}” and all its messages? This can’t be undone.`,
+    emptyThread: 'Ask a question about your homework. The tutor helps you think for yourself — not with finished answers.',
+    typing: 'The AI tutor is typing …', retry: 'Try again', inputLabel: 'Your question', placeholder: 'What are you wondering about?', send: 'Send',
+    hint: (n: number, max: number) => `Enter sends · Shift+Enter for a new line · ${n}/${max}`,
+  },
 };
