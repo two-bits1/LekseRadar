@@ -2,7 +2,7 @@
 
 Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO)
 и во фронтенде (TypeScript-типы). База — ветка `PythonAPI`, бэкенд — ветка `JavaAPI-setup`.
-Источник правды — миграции `database/migrations/V1–V20`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
+Источник правды — миграции `database/migrations/V1–V21`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
 поэтому поля сущностей должны совпадать с колонками ниже.
 
 **Состояние бэкенда.** Сейчас в `JavaAPI-setup` есть только `User`, `ChatSession`, `ChatMessage`, `MessageRole`
@@ -135,7 +135,7 @@ erDiagram
 
 #### `assignments`
 
-ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id). Бэкенд: 📝 `Assignment`.
+ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id) через `sync_assignments()` (V21). Бэкенд: 📝 `Assignment`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -485,6 +485,15 @@ erDiagram
 Логику квизов, карточек, промптов и материалов держит база: правила одни для всех, бэкенду достаточно вызвать
 функцию. В Java — `@Query(value = "SELECT ...", nativeQuery = true)` в репозитории или `JdbcTemplate`.
 Функции, которые возвращают `TABLE(...)`, вызываются как `SELECT * FROM f(...)`.
+
+### Домашка
+
+| Функция | Аргументы | Возвращает | Что делает | Эндпоинт |
+|---|---|---|---|---|
+| `sync_assignments` (V21) | `p_user` bigint, `items` jsonb | `TABLE(added int, updated int)` | `CollectResult.assignments` из `collector` → UPSERT в `assignments`. Не откатывает `submitted`/`graded`, выставленные на сайте; пустое описание не затирает сохранённое; пропавшие задания не удаляет | `POST /homework/sync`, `homework.to_db` |
+
+Вызов из Java: `SELECT added, updated FROM sync_assignments(:userId, CAST(:assignments AS jsonb))`, где `:assignments` — массив
+`assignments` из ответа `collector` как строка JSON.
 
 ### Чат и промпты
 
