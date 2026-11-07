@@ -170,3 +170,14 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .tb-side{min-width:0}.tb-link{min-width:0}.tb-link span{overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .settings-row{flex-wrap:wrap}.settings-row .actions{flex-wrap:wrap}
 @media(max-width:360px){.tb-link{padding:6px 2px;font-size:9.5px}.tb-nav{gap:2px}}
+/* ==== Шар: наведение без рывка ====
+   Скорость базовой анимации не меняем (смена длительности = скачок). Вместо этого
+   внутренний слой .orb-in получает своё вращение, которое при наведении «включается»
+   через animation-play-state (продолжает с того же места), а пятна плавно расплываются. */
+.orb-link:hover .orb,.orb-link:focus-visible .orb,.orb-link.thinking .orb{--s:1}
+.orb-in{animation:orb-spin 6s linear infinite;animation-play-state:paused;transition:filter .7s ease}
+.orb-in i{transition:filter .7s ease,opacity .7s ease}
+.orb-sweep{transition:opacity .7s ease}
+.orb-link:hover .orb-in,.orb-link:focus-visible .orb-in,.orb-link.thinking .orb-in{animation-play-state:running}
+.app[data-theme=dark] .orb-link:hover .orb-in i,.app[data-theme=dark] .orb-link:focus-visible .orb-in i{filter:blur(calc(var(--orb-size)*.13))}
+.app[data-theme=dark] .orb-link:hover .orb-in,.app[data-theme=dark] .orb-link:focus-visible .orb-in{filter:saturate(1.3) brightness(1.12)}
