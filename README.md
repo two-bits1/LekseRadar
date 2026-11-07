@@ -7,6 +7,8 @@ Google Classroom) в одном месте и помогает их сделат
 Тестовых данных нет: ученик создаётся регистрацией. Результаты проверки: [README-TEST.md](README-TEST.md),
 что осталось: [TODO.md](TODO.md).
 
+**Railway собран, но пока требует дополнительной настройки:** [RAILWAY-STATUS.md](RAILWAY-STATUS.md).
+
 ```
 браузер ──► frontend (React + Vite) ──/api/v1──► backend (Spring Boot, Java 21) ──► PostgreSQL 16
                                                    │                                  ▲
