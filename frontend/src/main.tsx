@@ -4,7 +4,8 @@ import { BrowserRouter, Routes, Route, NavLink, Link, Navigate, useLocation } fr
 import { CalendarDays, Layers, UserRound, Settings2, ArrowUpRight, Radar, LogIn } from 'lucide-react';
 import { Dashboard } from './pages/Dashboard';
 import { Tutor, Flashcards } from './pages/Learning';
-import { Calendar, Profile, Settings, Auth, Status, Soon, ChatSoon } from './pages/Other';
+import { Calendar, Settings, Status, Soon, ChatSoon } from './pages/Other';
+import { Auth, Profile } from './pages/Account';
 import { type ThemeChoice, loadThemeChoice, saveThemeChoice, resolveTheme, themeColor } from './theme';
 import { PATHS } from './paths';
 import { AuthProvider, RequireAuth, useAuth, initialOf } from './auth';

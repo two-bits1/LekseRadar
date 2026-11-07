@@ -13,6 +13,7 @@ type Auth = {
   login: (body: LoginRequest) => Promise<void>;
   register: (body: RegisterRequest) => Promise<void>;
   logout: () => void;
+  updateUser: (user: User) => void;  // после PATCH /users/me
 };
 
 const AuthContext = createContext<Auth | null>(null);
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login: async body => accept(await authApi.login(body)),
     register: async body => accept(await authApi.register(body)),
     logout: () => { clearToken(); setUser(null); setTokenState(null); },
+    updateUser: setUser,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
