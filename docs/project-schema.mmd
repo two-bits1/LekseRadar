@@ -1,0 +1,81 @@
+%%{init: {"theme":"base","flowchart":{"curve":"basis","nodeSpacing":30,"rankSpacing":55},"themeVariables":{"fontFamily":"Inter, Helvetica, Arial","fontSize":"15px","lineColor":"#64748b"}}}%%
+flowchart TB
+    U(["👤 Ученик"])
+    LEG["<b>Легенда</b><br/><small>сплошная линия — уже работает в main-test<br/>пунктир — ещё не подключено</small>"]
+
+    FE["<b>① Frontend · React + Vite</b><br/><small>frontend/<br/>Дашборд · Календарь · AI-veileder · Læringskort · Профиль<br/>сейчас на демо-данных</small>"]
+
+    subgraph BE["② Backend · Java 21 · Spring Boot · backend/"]
+        direction LR
+        AUTH["Вход и профиль<br/><small>/api/v1/auth · /users/me<br/>JWT, bcrypt</small>"]
+        CHAT["ИИ-чат<br/><small>/api/v1/chats · /messages</small>"]
+        TODO["Нужно добавить<br/><small>ДЗ · квизы · карточки<br/>дашборд · материалы</small>"]
+        AIC["AiClient<br/><small>OpenAI по API-ключу из .env</small>"]
+        CHAT --> AIC
+    end
+
+    LLM(["🤖 Модель ИИ<br/><small>OpenAI API</small>"])
+
+    subgraph DB["③ PostgreSQL 16 · database/ · миграции V1–V15"]
+        direction LR
+        USR["Пользователи<br/><small>users</small>"]
+        HW["Домашка<br/><small>assignments · platform_connections<br/>файл ДЗ → attach_homework_file</small>"]
+        CH["Чаты: tutor / quiz<br/><small>chat_sessions · chat_messages<br/>язык чата · chat_prompt_vars</small>"]
+        PRM["Промпты с версиями<br/><small>ai_prompts · chat_system_prompt</small>"]
+        MAT["Учебные материалы<br/><small>materials · material_chunks<br/>materials_for_prompt</small>"]
+        QZ["Квизы из JSON<br/><small>quiz_sets · exercises<br/>import · start · answer · finish</small>"]
+        FC["Флеш-карты<br/><small>= вопросы квиза · SM-2</small>"]
+        PR["Прогресс · история · ачивки<br/><small>user_events · user_dashboard</small>"]
+        QZ -- "ошибка → карточка" --> FC
+        QZ & FC --> PR
+    end
+
+    subgraph PYC["④ homework-collector · Python"]
+        direction LR
+        COL["collect()<br/><small>Canvas · Teams · itslearning · InSchool<br/>единый формат + демо-режим</small>"]
+    end
+
+    subgraph AIX["⑤ ai-content/"]
+        direction LR
+        PF["prompts/<br/><small>tutor · quiz_generator · answer_checker</small>"]
+        MF["materials/<br/><small>Предмет/Тема/файлы PDF · DOCX · MD</small>"]
+        RS["research/<br/><small>методы обучения → правила промптов</small>"]
+        LD["load/load.py"]
+        RS -- "основа правил" --> PF
+        PF & MF --> LD
+    end
+
+    PLT(["🏫 Школьные платформы"])
+
+    U --> FE
+    FE -- "HTTPS + JWT · /api/v1" --> AUTH
+    FE -- "сообщение" --> CHAT
+    FE -.-> TODO
+    AIC <--> LLM
+    AUTH --> USR
+    CHAT -- "история · chat_context" --> CH
+    CHAT -. "промпт режима + материалы<br/>(подключить)" .-> PRM
+    LD -- "save_prompt" --> PRM
+    LD -- "add_material" --> MAT
+    MAT -.-> CH
+    AIC -. "JSON квиза" .-> QZ
+    TODO -.-> HW & QZ & FC & PR
+    PLT --> COL
+    COL -. "assignments[]<br/>(обёртка: FastAPI или CLI)" .-> HW
+
+    classDef fe fill:#fdf4ff,stroke:#c026d3,color:#701a75
+    classDef be fill:#eff6ff,stroke:#3b82f6,color:#1e3a8a
+    classDef todo fill:#fff,stroke:#94a3b8,color:#475569,stroke-dasharray:5 4
+    classDef db fill:#f5f3ff,stroke:#7c3aed,color:#3b0764
+    classDef py fill:#ecfdf5,stroke:#10b981,color:#064e3b
+    classDef ai fill:#fefce8,stroke:#ca8a04,color:#713f12
+    classDef ext fill:#fff7ed,stroke:#f97316,color:#7c2d12
+    class FE fe
+    class AUTH,CHAT,AIC be
+    class TODO todo
+    class USR,HW,CH,PRM,MAT,QZ,FC,PR db
+    class COL py
+    class PF,MF,RS,LD ai
+    class U,LLM,PLT ext
+    classDef leg fill:#f8fafc,stroke:#cbd5e1,color:#334155
+    class LEG leg
