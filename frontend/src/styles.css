@@ -227,3 +227,6 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 
 /* Чат: панель ввода закреплена внизу экрана, не ездит вместе с перепиской; футер сайта на странице чата скрыт */
 .chat-page{padding-bottom:200px}.chat-dock{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--bg);border-top:1px solid var(--border);padding:10px 18px calc(8px + env(safe-area-inset-bottom))}.chat-dock>*{max-width:748px;margin-left:auto;margin-right:auto}.chat-dock .composer{position:static;margin-top:8px;padding:0}.chat-dock .quick{margin-top:0}.chat-end{scroll-margin-bottom:220px}.app:has(.chat-page)>footer{display:none}
+
+/* Вход и регистрация: логотип не прилипает к подписи под ним */
+.auth-page>.auth-logo{margin-bottom:22px}
