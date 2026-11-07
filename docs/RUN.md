@@ -1,6 +1,6 @@
-# Как запустить и проверить весь LekseRadar (ветка main-test)
+# Как запустить и проверить весь LekseRadar (ветка main-test-1.0)
 
-В main-test слиты три ветки: `PythonAPI` (база, сбор ДЗ, промпты), `Frontend-setup`, `JavaAPI-setup`.
+В main-test-1.0 слиты три ветки: `PythonAPI` (база, сбор ДЗ, промпты), `Frontend-setup`, `JavaAPI-setup`.
 
 ## 1. База (PostgreSQL 16, Docker)
 ```bash
