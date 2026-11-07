@@ -25,22 +25,51 @@ INSERT INTO chat_messages (session_id, role, content, on_topic, created_at) VALU
  (1, 'student', 'At linja krysser y-aksen i 3?', NULL, now() - interval '47 minutes'),
  (1, 'tutor',   'Helt riktig! Vil du prøve en kort quiz om dette?', true, now() - interval '46 minutes');
 
--- Упражнения и квиз
-INSERT INTO exercises (id, user_id, topic, level, statement, correct_answer, answer_type, options) VALUES
- (1, 1, 'lineære funksjoner', 'beginner', 'Hva er stigningstallet i y = -4x + 1?', '-4', 'exact', '["-4","1","4","-1"]'),
- (2, 1, 'lineære funksjoner', 'beginner', 'Hvor krysser y = 3x - 2 y-aksen?', '-2', 'exact', '["3","-2","2","0"]'),
- (3, 1, 'lineære funksjoner', 'intermediate', 'Forklar hva et negativt stigningstall betyr.', 'Grafen synker: y minker når x øker.', 'free', NULL);
-SELECT setval('exercises_id_seq', 3);
-
-INSERT INTO quizzes (id, user_id, chat_session_id, title, topic, level, started_at)
-VALUES (1, 1, 1, 'Quiz: Lineære funksjoner', 'lineære funksjoner', 'beginner', now() - interval '40 minutes');
-SELECT setval('quizzes_id_seq', 1);
-INSERT INTO quiz_questions (quiz_id, position, exercise_id) VALUES (1, 1, 1), (1, 2, 2), (1, 3, 3);
-INSERT INTO exercise_attempts (user_id, exercise_id, quiz_id, answer, verdict, explanation, created_at) VALUES
- (1, 1, 1, '-4', 'correct',   'Riktig.', now() - interval '39 minutes'),
- (1, 2, 1, '3',  'incorrect', 'Se på konstantleddet, ikke tallet foran x.', now() - interval '38 minutes'),
- (1, 2, 1, '-2', 'correct',   'Riktig nå.', now() - interval '37 minutes'),
- (1, 3, 1, 'At grafen går ned', 'partial', 'Bra start. Hva skjer med y når x øker?', now() - interval '36 minutes');
+-- Квиз: ИИ прислал JSON (тот же, что quiz/example.json) → импорт → старт → ответы → итог
+SELECT import_quiz_json($json${
+  "subject": "Matematikk",
+  "topic": "Lineære funksjoner",
+  "level": "beginner",
+  "language": "nb",
+  "title": "Quiz: Lineære funksjoner",
+  "model": "example",
+  "questions": [
+    {
+      "type": "single_choice",
+      "question": "Hva er stigningstallet i y = -4x + 1?",
+      "options": ["-4", "1", "4", "-1"],
+      "correct_answer": "-4",
+      "explanation": "Stigningstallet er tallet foran x."
+    },
+    {
+      "type": "single_choice",
+      "question": "Hvor krysser y = 3x - 2 y-aksen?",
+      "options": ["3", "-2", "2", "0"],
+      "correct_answer": "-2",
+      "explanation": "Konstantleddet viser hvor grafen krysser y-aksen."
+    },
+    {
+      "type": "multiple_choice",
+      "question": "Hvilke funksjoner er synkende?",
+      "options": ["y = -2x + 5", "y = 3x", "y = -x", "y = 4"],
+      "correct_answer": ["y = -2x + 5", "y = -x"],
+      "explanation": "En lineær funksjon synker når stigningstallet er negativt."
+    },
+    {
+      "type": "text",
+      "question": "Forklar med egne ord hva et negativt stigningstall betyr.",
+      "correct_answer": "Grafen synker: y blir mindre når x øker.",
+      "explanation": "Negativt stigningstall betyr at y minker når x øker."
+    }
+  ]
+}$json$::jsonb, 1);
+SELECT start_quiz(1, find_quiz_set('Matematikk', 'Lineære funksjoner', 'beginner'));
+UPDATE quizzes SET chat_session_id = 1, started_at = now() - interval '40 minutes' WHERE id = 1;
+SELECT verdict FROM save_quiz_answer(1, 1, '-4');
+SELECT verdict FROM save_quiz_answer(1, 2, '3');
+SELECT verdict FROM save_quiz_answer(1, 2, '-2');
+SELECT verdict FROM save_quiz_answer(1, 3, '["y = -2x + 5", "y = -x"]');
+SELECT verdict FROM save_quiz_answer(1, 4, 'At grafen går ned', 'partial', 'Bra start. Hva skjer med y når x øker?');
 SELECT finish_quiz(1);
 
 -- История пользователя
@@ -48,8 +77,6 @@ INSERT INTO user_events (user_id, type, ref_table, ref_id, payload, created_at) 
  (1, 'login',             NULL,            NULL, '{}',                         now() - interval '1 hour'),
  (1, 'homework_synced',   NULL,            NULL, '{"platforms":4,"count":6}',  now() - interval '55 minutes'),
  (1, 'chat_started',      'chat_sessions', 1,    '{}',                         now() - interval '50 minutes'),
- (1, 'quiz_started',      'quizzes',       1,    '{}',                         now() - interval '40 minutes'),
- (1, 'exercise_answered', 'exercises',     1,    '{"verdict":"correct"}',      now() - interval '39 minutes'),
  (1, 'quiz_completed',    'quizzes',       1,    '{}',                         now() - interval '35 minutes'),
  (1, 'achievement_unlocked', 'achievements', NULL, '{"code":"first_quiz"}',    now() - interval '35 minutes');
 
