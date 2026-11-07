@@ -1,0 +1,60 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: lekseradar
+  config:
+    # Секреты (OPENAI_API_KEY, JWT_SECRET, пароль БД) — в backend/.env, он в .gitignore. Пример: .env.example
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/lekseradar}
+    username: ${DB_USER:lekseradar}
+    password: ${DB_PASSWORD:lekseradar}
+  jpa:
+    hibernate:
+      # Схему создают миграции из database/ (общие для всей команды), бэкенд таблицы не трогает
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+  web:
+    # Стандартные сообщения валидации ("не должно быть пустым" и т.п.) на русском
+    locale: ru
+    locale-resolver: fixed
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      # Без токена видно только UP/DOWN, подробности (БД, диск) скрыты
+      show-details: never
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+    persist-authorization: true
+
+app:
+  jwt:
+    # Обязательно, минимум 32 символа
+    secret: ${JWT_SECRET}
+    ttl-hours: ${JWT_TTL_HOURS:72}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  openai:
+    # Обязательно
+    api-key: ${OPENAI_API_KEY:}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+    model: ${OPENAI_MODEL:gpt-4o-mini}
+    timeout-seconds: ${OPENAI_TIMEOUT_SECONDS:60}
