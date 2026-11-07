@@ -39,6 +39,11 @@
 | 24 | GET | 🔒 `/api/v1/flashcards/stats` | сводка по колоде | 200 `FlashcardStats` |
 | 25 | POST | 🔒 `/api/v1/flashcards/{exerciseId}/review` | оценка карточки 0–5 | 200 `ReviewResult` |
 | 26 | POST | 🔒 `/api/v1/flashcards/generate` | карточки от ИИ по теме | 201 `Deck` |
+| 30 | GET | 🔒 `/api/v1/homework?status=` | мои ДЗ, сначала ближайший срок | 200 `Assignment[]` |
+| 31 | GET | 🔒 `/api/v1/homework/{id}` | одно ДЗ с полным текстом | 200 `Assignment` |
+| 32 | PATCH | 🔒 `/api/v1/homework/{id}` | отметить сданным / вернуть в «сделать» | 200 `Assignment` |
+| 33 | GET | 🔒 `/api/v1/dashboard` | сводка для главной и прогресса | 200 `Dashboard` |
+| 34 | GET | 🔒 `/api/v1/history?limit=` | лента «что я делал» | 200 `HistoryEvent[]` |
 | 27 | GET | 🔓 `/actuator/health` | сервер и база живы? | 200 `{"status":"UP"}` |
 | 28 | GET | 🔓 `/swagger-ui.html` | интерактивная документация | страница |
 | 29 | GET | 🔓 `/v3/api-docs` | OpenAPI-схема (для генерации клиента) | JSON |
@@ -54,7 +59,7 @@
 
 | Страница | Путь | Доступ | Что на странице | Какие API вызывает |
 |---|---|---|---|---|
-| Главная / дашборд | `/` | 🔒 | приветствие, последние чаты, карточки к повторению, (позже) ДЗ | ✅ `GET /users/me`, ✅ `GET /chats`, ✅ `GET /flashcards/stats` · 🕓 `GET /dashboard` |
+| Главная / дашборд | `/` | 🔒 | приветствие, последние чаты, карточки к повторению, ближайшие ДЗ | ✅ `GET /users/me`, ✅ `GET /chats`, ✅ `GET /flashcards/stats`, ✅ `GET /homework` |
 | Настройки | `/settings` | 🔒 | только фронтенд (своего API нет) | — |
 | Статус | `/status` | 🔓 | карта сайта, только фронтенд (своего API нет) | — |
 | Вход | `/login` | 🔓 | email + пароль | ✅ `POST /auth/login` |
@@ -62,12 +67,12 @@
 | Профиль | `/profile` | 🔒 | имя, язык, часовой пояс, смена пароля, выход | ✅ `GET/PATCH /users/me`, ✅ `PUT /users/me/password` |
 | Список чатов | `/chat` | 🔒 | чаты, кнопка «Новый чат», вкладка «Архив» | ✅ `GET /chats?archived=false/true`, ✅ `POST /chats` |
 | Чат | `/chat/:chatId` | 🔒 | история, поле ввода, «Тьютор печатает…», переименовать / в архив / удалить | ✅ `GET /chats/{id}`, ✅ `GET/POST /chats/{id}/messages`, ✅ `PATCH/DELETE /chats/{id}` |
-| Домашка | `/homework` | 🔒 | ДЗ со всех платформ, кнопка «Обновить» | 🕓 `GET /homework`, 🕓 `POST /homework/sync` |
+| Домашка | `/homework` | 🔒 | ДЗ со всех платформ, фильтр по статусу, «сдано», чат и квиз по заданию | ✅ `GET /homework`, ✅ `GET/PATCH /homework/{id}`, ✅ `POST /chats`, ✅ `POST /quizzes` · 🕓 `POST /homework/sync` |
 | Квиз: выбор | `/quiz` | 🔒 | предмет, тема, уровень, мои квизы | ✅ `GET /subjects`, ✅ `POST /quizzes`, ✅ `GET /quizzes` |
 | Квиз: прохождение | `/quiz/:quizId` | 🔒 | вопрос, ответ, пояснение, итог, «Учить карточками» | ✅ `GET /quizzes/{id}`, ✅ `POST /quizzes/{id}/answers`, ✅ `POST /quizzes/{id}/finish`, ✅ `POST /quiz-sets/{setId}/flashcards` |
 | Флеш-карты | `/flashcards` | 🔒 | карточки к повторению, оценка 0–5, «Карточки от ИИ» | ✅ `GET /flashcards/due`, ✅ `POST /flashcards/{id}/review`, ✅ `POST /flashcards/generate`, ✅ `GET /flashcards/stats` |
-| Прогресс | `/progress` | 🔒 | прогресс по предметам и темам | ✅ `GET /quizzes/progress`, ✅ `GET /flashcards/stats` · 🕓 `GET /dashboard` |
-| История | `/history` | 🔒 | лента «что я делал» | 🕓 `GET /history` |
+| Прогресс | `/progress` | 🔒 | цифры, освоение по темам, активность по дням | ✅ `GET /dashboard`, ✅ `GET /quizzes/progress` |
+| История | `/history` | 🔒 | лента «что я делал» | ✅ `GET /history` |
 | Платформы | `/settings/platforms` | 🔒 | подключить Canvas / Teams / itslearning / InSchool | 🕓 `GET /platforms`, 🕓 `POST/DELETE /platforms/{platform}` |
 | Не найдено | `*` | 🔓 | «Страница не найдена» | — |
 
@@ -421,6 +426,71 @@ GET /chats?archived=false
 
 ---
 
+## Домашка
+
+ДЗ собирает `homework-collector` (`collect()`), для демо — [database/testdata](../database/testdata/README.md).
+
+```ts
+type Assignment = {
+  id: number; source: 'canvas' | 'teams' | 'itslearning' | 'inschool';
+  title: string; course: string; dueAt: string | null;
+  status: 'todo' | 'overdue' | 'submitted' | 'graded';   // todo с прошедшим сроком приходит как overdue
+  url: string | null; kind: string;                      // assignment | exam | quiz | task …
+  description: string;                                   // в списке до 300 символов, полный — в GET /homework/{id}
+};
+```
+
+### `GET /homework?status=`
+- `status` (необязательно): `todo` | `overdue` | `submitted` | `graded`.
+- **200** → `Assignment[]`, сначала ближайший срок, без срока в конце · **400** → неизвестный `status`
+
+### `GET /homework/{id}`
+- **200** → `Assignment` с полным текстом · **404** → нет такого или чужое
+
+### `PATCH /homework/{id}`
+```json
+{ "status": "submitted" }
+```
+- Только `submitted` или `todo`. Оценённое учителем (`graded`) не меняется.
+- **200** → `Assignment` · **400** → другой статус или уже оценено · **404** → нет такого или чужое
+
+Чат и квиз по заданию: `POST /chats {"mode":"tutor","assignmentId":id}` и `POST /quizzes {"subject","topic","assignmentId":id}`:
+ИИ получает текст задания из базы.
+
+---
+
+## Дашборд и история
+
+### `GET /dashboard`
+```ts
+type Dashboard = {
+  homeworkTodo: number; homeworkOverdue: number; homeworkDone: number;
+  quizzesCompleted: number; avgQuizScore: number | null; exercisesAnswered: number;
+  questionsAsked: number; activeDays30: number;
+  flashcards: FlashcardStats;
+  topics: { topic: string; attempts: number; masteryPct: number | null }[];      // освоение по темам
+  days: { day: string; events: number; exercises: number; quizzes: number }[];   // активность по дням
+};
+```
+- **200** → `Dashboard` (у нового ученика нули и пустые списки)
+
+### `GET /history?limit=50`
+- `limit` 1–200, по умолчанию 50. **200** → `HistoryEvent[]`, новые сверху:
+  `{ id, type, refTable, refId, payload, createdAt }`, `type`: `login`, `chat_started`, `quiz_started`,
+  `exercise_answered`, `flashcard_reviewed`, `homework_done`, `material_added`.
+
+---
+
+## Лимиты
+
+| Что | Лимит | Ответ |
+|---|---|---|
+| Неверный пароль | 5 раз на один email за 15 минут, потом вход на этот email закрыт до конца окна | **429** |
+| Запросы, которые могут вызвать ИИ: `POST /chats/{id}/messages`, `POST /quizzes`, `POST /flashcards/generate` | 30 за 10 минут на ученика | **429**, заголовок `Retry-After` |
+| Ответы в квизе `POST /quizzes/{id}/answers` | 120 за 10 минут на ученика | **429** |
+
+---
+
 ## Служебное
 
 ### `GET http://localhost:8080/actuator/health` (без `/api/v1`, без токена)
@@ -447,6 +517,7 @@ GET /chats?archived=false
 | 401 | нет токена / истёк / неверный логин | на экран входа |
 | 404 | не найдено (или чужое) | «Не найдено» |
 | 409 | email уже занят | показать `message` у поля email |
+| 429 | слишком много попыток входа или запросов к ИИ | «Подождите несколько минут» |
 | 502 | ИИ недоступен или дважды прислал квиз в неверном формате | показать `message` и кнопку «Повторить» |
 | 503 | промпты ИИ не загружены в базу (ошибка настройки сервера) | показать `message` |
 | 500 | ошибка сервера | «Что-то пошло не так» |

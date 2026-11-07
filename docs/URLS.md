@@ -24,7 +24,7 @@
 
 | Путь | Доступ | Страница | API на странице |
 |---|---|---|---|
-| `/` | 🔒 | главная: приветствие, последние чаты, карточки к повторению | `GET /users/me`, `GET /chats`, `GET /flashcards/stats` |
+| `/` | 🔒 | главная: приветствие, последние чаты, карточки к повторению, ближайшие ДЗ | `GET /users/me`, `GET /chats`, `GET /flashcards/stats`, `GET /homework` |
 | `/login` | 🔓 | вход | `POST /auth/login` |
 | `/register` | 🔓 | регистрация | `POST /auth/register` |
 | `/profile` | 🔒 | имя, язык, часовой пояс, пароль, выход | `GET/PATCH /users/me`, `PUT /users/me/password` |
@@ -33,9 +33,9 @@
 | `/quiz` | 🔒 | новый квиз (предмет, тема, уровень) и мои квизы | `GET /subjects`, `POST /quizzes`, `GET /quizzes` |
 | `/quiz/:quizId` | 🔒 | вопрос → ответ → пояснение → итог | `GET /quizzes/{id}`, `POST /quizzes/{id}/answers`, `POST /quizzes/{id}/finish`, `POST /quiz-sets/{setId}/flashcards` |
 | `/flashcards` | 🔒 | повторение карточек, «Карточки от ИИ» | `GET /flashcards/due`, `POST /flashcards/{id}/review`, `POST /flashcards/generate`, `GET /flashcards/stats` |
-| `/progress` | 🔒 | прогресс по предметам и темам | `GET /quizzes/progress`, `GET /flashcards/stats` · 🕓 `GET /dashboard` |
-| `/history` | 🔒 | лента «что я делал» | 🕓 `GET /history` |
-| `/homework` | 🔒 | ДЗ со всех платформ | 🕓 `GET /homework`, 🕓 `POST /homework/sync` |
+| `/progress` | 🔒 | цифры, освоение по темам, активность по дням | `GET /dashboard`, `GET /quizzes/progress` |
+| `/history` | 🔒 | лента «что я делал» | `GET /history` |
+| `/homework` | 🔒 | ДЗ со всех платформ, «сдано», чат и квиз по заданию | `GET /homework`, `GET/PATCH /homework/{id}` · 🕓 `POST /homework/sync` |
 | `/settings/platforms` | 🔒 | подключение Canvas / Teams / itslearning / InSchool | 🕓 `GET /platforms`, 🕓 `POST/DELETE /platforms/{platform}` |
 | `/settings` | 🔒 | настройки (только фронтенд) | — |
 | `/status` | 🔓 | карта сайта: что уже работает (только фронтенд) | — |
@@ -87,12 +87,18 @@
 | ✅ 🔒 | POST | `/api/v1/flashcards/generate` | карточки от ИИ по предмету и теме |
 | ✅ 🔒 | POST | `/api/v1/quiz-sets/{setId}/flashcards` | весь квиз в колоду |
 
+### Домашка, дашборд, история
+| | Метод | URL | Что делает |
+|---|---|---|---|
+| ✅ 🔒 | GET | `/api/v1/homework?status=` | домашние задания |
+| ✅ 🔒 | GET | `/api/v1/homework/{id}` | одно задание с полным текстом |
+| ✅ 🔒 | PATCH | `/api/v1/homework/{id}` | отметить сданным / вернуть |
+| ✅ 🔒 | GET | `/api/v1/dashboard` | сводка для главной и прогресса |
+| ✅ 🔒 | GET | `/api/v1/history?limit=` | лента событий |
+
 ### Будет позже
 | | Метод | URL | Что делает |
 |---|---|---|---|
-| 🕓 🔒 | GET | `/api/v1/dashboard` | сводка для главной и прогресса |
-| 🕓 🔒 | GET | `/api/v1/history` | лента событий |
-| 🕓 🔒 | GET | `/api/v1/homework` | домашние задания |
 | 🕓 🔒 | POST | `/api/v1/homework/sync` | обновить ДЗ с платформ |
 | 🕓 🔒 | GET | `/api/v1/platforms` | подключённые платформы |
 | 🕓 🔒 | POST / DELETE | `/api/v1/platforms/{platform}` | подключить / отключить платформу |
