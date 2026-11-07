@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TEST — фоны LekseRadar</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;font:15px/1.4 system-ui,sans-serif;color:#fff;background:#07061a}
+.bg{position:fixed;inset:0;background:center/cover no-repeat;transition:background-image .4s}
+.bar{position:fixed;left:16px;right:16px;bottom:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+button{font:inherit;color:#fff;padding:10px 16px;border-radius:12px;border:1px solid #ffffff33;background:#ffffff1a;backdrop-filter:blur(14px);cursor:pointer}
+button[aria-pressed=true]{background:#ffffff40}
+.card{position:relative;max-width:420px;margin:12vh auto 0;padding:24px;border-radius:20px;background:#ffffff14;border:1px solid #ffffff2a;backdrop-filter:blur(20px);box-shadow:0 0 60px #a070ff33}
+.card p{opacity:.75;margin:.4em 0 0}
+</style></head><body>
+<div class="bg" id="bg"></div>
+<div class="card"><b>TEST: фон для LekseRadar</b><p>Стеклянная карточка поверх фона — так будет выглядеть интерфейс. В приложение фоны пока не подключены.</p></div>
+<div class="bar" id="bar"></div>
+<script>
+const list=[['1-maaneskinn.svg','Måneskinn'],['2-nordlys.svg','Nordlys'],['3-skumring.svg','Skumring'],['4-midnatt.svg','Midnatt']];
+const bg=document.getElementById('bg'),bar=document.getElementById('bar');
+const pick=i=>{bg.style.backgroundImage=`url(${list[i][0]})`;[...bar.children].forEach((b,j)=>b.setAttribute('aria-pressed',i===j))};
+list.forEach(([,n],i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>pick(i);bar.append(b)});
+pick(0);
+</script></body></html>

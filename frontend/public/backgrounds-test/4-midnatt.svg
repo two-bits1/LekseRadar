@@ -1,0 +1,9 @@
+<!-- TEST: «Midnatt» — почти чёрный, слабое фиолетовое свечение (для тёмной темы, текст читается) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"><defs><filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="110"/></filter><filter id="b2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="60"/></filter><filter id="g"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .05 0"/></filter><linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#07061a"/><stop offset="1" stop-color="#0f0a26"/></linearGradient></defs>
+<rect width="1920" height="1080" fill="url(#sky)"/>
+<g filter="url(#b)">
+<circle cx="420" cy="240" r="260" fill="#6b4dff" opacity=".35"/>
+<circle cx="1560" cy="820" r="320" fill="#c04bd8" opacity=".25"/>
+<ellipse cx="1100" cy="300" rx="380" ry="160" fill="#3a8bff" opacity=".18"/>
+</g>
+<rect width="1920" height="1080" filter="url(#g)"/></svg>

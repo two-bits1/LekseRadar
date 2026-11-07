@@ -1,0 +1,10 @@
+<!-- TEST: «Skumring» — сумерки, слива → роза → янтарь -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"><defs><filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="110"/></filter><filter id="b2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="60"/></filter><filter id="g"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .05 0"/></filter><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1150"/><stop offset=".45" stop-color="#8a2f7d"/><stop offset=".7" stop-color="#f06f7a"/><stop offset="1" stop-color="#ffb46b"/></linearGradient></defs>
+<rect width="1920" height="1080" fill="url(#sky)"/>
+<g filter="url(#b)">
+<circle cx="1380" cy="760" r="260" fill="#ffe0a8" opacity=".75"/>
+<ellipse cx="420" cy="260" rx="460" ry="220" fill="#5b2a9e" opacity=".6"/>
+<ellipse cx="1000" cy="460" rx="700" ry="140" fill="#ff8fb5" opacity=".4"/>
+<ellipse cx="300" cy="900" rx="420" ry="160" fill="#ff9a6b" opacity=".45"/>
+</g>
+<rect width="1920" height="1080" filter="url(#g)"/></svg>
