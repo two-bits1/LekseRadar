@@ -1,4 +1,4 @@
-package com.lekseradar.ai;
+package com.lekseradar.service.ai;
 
 /** Одно сообщение для LLM: role = system | user | assistant. */
 public record AiMessage(String role, String content) {
