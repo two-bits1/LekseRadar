@@ -18,7 +18,3 @@ export const PATHS = {
   settings: '/settings',
   status: '/status',
 } as const;
-
-// Демо-ссылки, пока задания не приходят с бэкенда (GET /homework 🕓).
-export const chatAbout = (assignmentId: string) => `${PATHS.chats}?assignment=${assignmentId}`;
-export const homeworkItem = (assignmentId: string) => `${PATHS.homework}?assignment=${assignmentId}`;
