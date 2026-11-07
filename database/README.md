@@ -42,6 +42,7 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V16__no_demo_data.sql` | убран `assignments.is_demo`: пробных данных в базе нет |
 | `V17__language_from_site.sql` | язык ИИ берётся с сайта (`users.locale`), `language_name()` |
 | `V18__dashboard_overdue.sql` | дашборд: `todo` с прошедшим дедлайном считается просроченным |
+| `V19__quiz_answer_errors.sql` | `save_quiz_answer()`: понятная ошибка для пустого ответа и multiple_choice не массивом |
 
 ## Схема
 
