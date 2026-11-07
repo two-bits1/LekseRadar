@@ -13,3 +13,8 @@ export function correctAnswers(type: Question['type'], correct: string): string[
 
 // Оценка карточки 0–5 (SM-2): 0–2 — не помню, 3 — с трудом, 4 — помню, 5 — легко.
 export const GRADES = { again: 1, hard: 3, good: 4, easy: 5 } as const;
+
+// Подсветка варианта: до проверки — выбранный (синий); после — верный зелёным, выбранный неверный красным,
+// верный, который ученик не выбрал, — зелёной пунктирной рамкой.
+export const optionState = (checked: boolean, picked: boolean, right: boolean): string =>
+  !checked ? (picked ? ' picked' : '') : right ? (picked ? ' right' : ' right missed') : picked ? ' wrong' : '';

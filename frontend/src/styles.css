@@ -325,3 +325,14 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .result-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
 @media(max-width:560px){.result-card{padding:24px 18px}.result-main{flex-direction:column;text-align:center;gap:18px}.result-tallies{justify-content:center}.result-actions .btn{flex:1 1 100%}}
 @media(prefers-reduced-motion:reduce){.ring-value{animation:none}}
+/* ==== Варианты ответа: выбранный — синий, после проверки верный зелёный, неверный выбранный красный ==== */
+.option.picked{border-color:color-mix(in srgb,var(--secondary) 60%,transparent);background:color-mix(in srgb,var(--secondary) 10%,transparent)}
+.option.picked .option-mark{background:var(--secondary);border-color:var(--secondary);color:var(--bg)}
+.option.right{border-color:color-mix(in srgb,var(--success) 70%,transparent);background:var(--success-bg)}
+.option.right .option-mark{background:var(--success);border-color:var(--success);color:var(--bg)}
+.option.right.missed{border-style:dashed;background:transparent}
+.option.right.missed .option-mark{background:transparent;color:var(--success)}
+.option.wrong{border-color:color-mix(in srgb,var(--danger) 70%,transparent);background:var(--danger-bg)}
+.option.wrong .option-mark{background:var(--danger);border-color:var(--danger);color:var(--bg)}
+.option:disabled{opacity:1}
+.option:disabled:not(.right):not(.wrong){opacity:.55}
