@@ -37,7 +37,8 @@
   "canvas": {"base_url": "https://uio.instructure.com", "token": "7~abc"},
   "teams": {"access_token": "eyJ…", "refresh_token": "0.A…", "expires_at": 1762520000},
   "itslearning": {"base_url": "https://sms.itslearning.com", "access_token": "…", "refresh_token": "…", "expires_at": 1762520000},
-  "inschool": {"host": "ohg-vgs.inschool.visma.no", "cookies": {"JSESSIONID": "…", "Authorization": "…"}}
+  "inschool": {"host": "ohg-vgs.inschool.visma.no", "cookies": {"JSESSIONID": "…", "Authorization": "…"}},
+  "classroom": {"access_token": "ya29…", "refresh_token": "1//…", "expires_at": 1762520000}
 }
 ```
 
@@ -93,6 +94,15 @@ POST /login/itslearning/exchange  {"base_url": "https://sms.itslearning.com", "c
 → 200 {"base_url": "https://sms.itslearning.com", "access_token": "…", "refresh_token": "…", "expires_at": 1762523600}
 → 400 {"detail": "itslearning не выдал токен, нужно войти заново", "needs_reconnect": true}
 ```
+
+## Google Classroom
+
+Вход через Google, обмен кода на токены и обновление `access_token` по `refresh_token` делает бэкенд:
+секрет клиента Google есть только у него. Collector только читает Classroom API по готовому `access_token`
+(`source: "classroom"`, платформа добавлена миграцией V22). Отдельных `/login/classroom/*` у collector нет.
+
+Ошибки в `sources.classroom`: токен истёк или отозван → `needs_reconnect: true`; нет доступа к курсам (школа запретила
+приложение) → `needs_reconnect: true` с текстом для ученика. Курсы, где у ученика нет прав на задания, пропускаются.
 
 ## Canvas и InSchool
 
