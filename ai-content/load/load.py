@@ -10,7 +10,8 @@
 Промпты:   prompts/<key>.md|.txt          → save_prompt('<key>', текст)   (README.md пропускается)
 Материалы: materials/<Предмет>/<Тема>/файл → add_material(owner, Предмет, Тема, название, текст)
            materials/<Предмет>/файл        → без темы
-Поддерживаются .txt .md .pdf .docx .html. Повторный запуск ничего не дублирует.
+Поддерживаются .txt .md .pdf .docx .html. Повторный запуск ничего не дублирует,
+изменённый файл заменяет свою прошлую версию.
 """
 from __future__ import annotations
 
@@ -118,6 +119,14 @@ def main() -> int:
             if not text:
                 print(f"  пропуск {rel}: текст не извлёкся (скан? нужен OCR)", file=sys.stderr)
                 continue
+            # Файл изменился: старая версия с тем же путём удаляется, иначе тьютор цитирует устаревший текст
+            gone = conn.execute(
+                "DELETE FROM materials WHERE owner_id IS NOT DISTINCT FROM %s AND storage_key = %s"
+                " AND content_hash <> md5(%s)",
+                (args.owner_id, str(rel), text),
+            ).rowcount
+            if gone:
+                print(f"  {rel}: файл изменился, старая версия удалена")
             mid = conn.execute(
                 "SELECT add_material(%s, %s, %s, %s, %s, p_file_name => %s, p_mime_type => %s,"
                 " p_source => 'teacher', p_language => %s, p_storage_key => %s)",
