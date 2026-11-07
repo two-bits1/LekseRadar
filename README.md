@@ -66,7 +66,8 @@ cd homework-collector && pip install -r requirements.txt && python -m homework -
 | [docs/api-map.png](docs/api-map.png) | фронт, бэк | схема: страница → URL → таблицы и функции базы |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | все | как всё работает: сценарии по шагам, какие API ещё нужны, почему так |
 | [docs/project-schema.png](docs/project-schema.png) | все | общая схема проекта (вверху этой страницы) |
-| [database/README.md](database/README.md) | бэк | таблицы, миграции и SQL для каждого сценария |
+| [database/ENTITIES.md](database/ENTITIES.md) | бэк | все таблицы, enum, виды и функции + какие JPA-сущности и DTO нужны |
+| [database/README.md](database/README.md) | бэк | миграции и SQL для каждого сценария |
 | [ai-content/prompts/README.md](ai-content/prompts/README.md) | бэк, №3 | промпты, выбор языка, файл ДЗ, как собрать запрос к ИИ |
 | [ai-content/research/metody-obucheniya.md](ai-content/research/metody-obucheniya.md) | №3 | исследования об обучении, на которых построены промпты |
 | [README-TEST.md](README-TEST.md) | все | что проверено в main-test-1.0 и 19 слабых мест |
