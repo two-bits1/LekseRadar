@@ -74,23 +74,22 @@ export function Profile(){
  </section>;
 }
 
-const timezones=():string[]=>{try{return Intl.supportedValuesOf('timeZone')}catch{return []}};
+// Часовой пояс не выбирается вручную: берём из браузера и сохраняем вместе с именем.
+const browserZone=():string|undefined=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||undefined}catch{return undefined}};
 
 function ProfileForm({user}:{user:User}){
  const {updateUser}=useAuth();const t=useT();const p=t.profile;
  // Язык здесь не меняется — только в настройках (для всего сайта и ИИ).
- const [form,setForm]=useState({displayName:user.displayName,timezone:user.timezone});
+ const [form,setForm]=useState({displayName:user.displayName});
  const [error,setError]=useState<ApiError|null>(null);const [busy,setBusy]=useState(false);const [saved,setSaved]=useState(false);
- const zones=timezones();if(!zones.includes(form.timezone))zones.unshift(form.timezone);
  // PATCH: «меняются только переданные поля» — шлём только изменённые.
- const changes=Object.fromEntries(Object.entries(form).filter(([k,v])=>v!==user[k as keyof typeof form]));
- const set=<K extends keyof typeof form>(k:K)=>(e:ChangeEvent<HTMLInputElement|HTMLSelectElement>)=>{setSaved(false);setForm(f=>({...f,[k]:e.target.value}))};
+ const changes:Record<string,string>=form.displayName!==user.displayName?{displayName:form.displayName}:{};
+ const set=(k:keyof typeof form)=>(e:ChangeEvent<HTMLInputElement>)=>{setSaved(false);setForm(f=>({...f,[k]:e.target.value}))};
  const submit=async(e:FormEvent)=>{e.preventDefault();if(!Object.keys(changes).length)return;setBusy(true);setError(null);
-  try{updateUser(await usersApi.update(changes));setSaved(true)}catch(err){setError(asApiError(err,t.common))}finally{setBusy(false)}};
- const selectError=(k:string)=>fieldError(error,k);
+  const zone=browserZone();const body=zone&&zone!==user.timezone?{...changes,timezone:zone}:changes;
+  try{updateUser(await usersApi.update(body));setSaved(true)}catch(err){setError(asApiError(err,t.common))}finally{setBusy(false)}};
  return <form className="lesson-card" onSubmit={submit} noValidate><h2>{p.about}</h2>
   <Field name="displayName" label={t.auth.name} type="text" autoComplete="name" required maxLength={100} value={form.displayName} onChange={set('displayName')} error={fieldError(error,'displayName')}/>
-  <label className="field">{p.timezone}<select name="timezone" value={form.timezone} onChange={set('timezone')} aria-invalid={!!selectError('timezone')}>{zones.map(z=><option key={z} value={z}>{z.replace(/_/g,' ')}</option>)}</select>{selectError('timezone')&&<span className="field-error">{selectError('timezone')}</span>}</label>
   {generalError(error)&&<p role="alert" className="feedback danger">{generalError(error)}</p>}
   {saved&&<p role="status" className="feedback success"><Check size={17}/>{t.common.saved}</p>}
   <button className="button dark-button" disabled={busy||!Object.keys(changes).length}>{busy?t.common.saving:p.save}</button>
