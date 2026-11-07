@@ -16,6 +16,9 @@ public interface ChatSessionRepository extends JpaRepository<ChatSessionEntity, 
 
     Optional<ChatSessionEntity> findByIdAndUserId(Long id, Long userId);
 
+    /** Квиз-чат пользователя, в котором ИИ составил этот набор вопросов. */
+    Optional<ChatSessionEntity> findFirstByUserIdAndQuizSetIdOrderByUpdatedAtDesc(Long userId, Long quizSetId);
+
     /**
      * Новый чат через функцию базы: mode = "tutor" или "quiz", предмет создаётся сам по названию.
      * subject, topic, title, assignmentId можно не передавать (null). Возвращает id чата.
