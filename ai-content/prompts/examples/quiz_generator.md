@@ -2,7 +2,7 @@
 
 Используется, когда `find_quiz_set(subject, topic, level, language)` ничего не нашёл.
 Ответ модели сохраняется как есть через `import_quiz_json(ответ::jsonb, user_id)`.
-Формат строго по [`database/quiz/quiz.schema.json`](../database/quiz/quiz.schema.json).
+Формат строго по [`database/quiz/quiz.schema.json`](../../../database/quiz/quiz.schema.json).
 Если API модели поддерживает JSON-режим / structured output, передай туда эту схему.
 
 | Переменная | Откуда |
