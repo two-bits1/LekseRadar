@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { authApi, chatsApi, flashcardsApi, health, platformsApi, quizzesApi, subjectsApi, usersApi } from './endpoints';
+import { authApi, chatsApi, dashboardApi, flashcardsApi, health, homeworkApi, platformsApi, quizzesApi, subjectsApi, usersApi } from './endpoints';
 import { api, getToken, setToken } from './client';
 
 // Тесты идут в node: подменяем localStorage, window.location и fetch.
@@ -59,6 +59,13 @@ describe('URL бэкенда из API.md', () => {
     ['🕓 подключить Canvas', () => platformsApi.connect('canvas', { base_url: 'https://skole.instructure.com', token: 'abc' }), 'POST', '/api/v1/platforms/canvas', { base_url: 'https://skole.instructure.com', token: 'abc' }],
     ['🕓 отключить', () => platformsApi.disconnect('teams'), 'DELETE', '/api/v1/platforms/teams'],
     ['#26 карточки от ИИ', () => flashcardsApi.generate({ subject: 'Matematikk', topic: 'Brøk' }), 'POST', '/api/v1/flashcards/generate', { subject: 'Matematikk', topic: 'Brøk' }],
+    ['#30 мои ДЗ', () => homeworkApi.list(), 'GET', '/api/v1/homework'],
+    ['#30 просроченные ДЗ', () => homeworkApi.list('overdue'), 'GET', '/api/v1/homework?status=overdue'],
+    ['#31 одно ДЗ', () => homeworkApi.get(3), 'GET', '/api/v1/homework/3'],
+    ['#32 ДЗ сдано', () => homeworkApi.update(3, { status: 'submitted' }), 'PATCH', '/api/v1/homework/3', { status: 'submitted' }],
+    ['#33 дашборд', () => dashboardApi.get(), 'GET', '/api/v1/dashboard'],
+    ['#34 история', () => dashboardApi.history(), 'GET', '/api/v1/history'],
+    ['#34 история limit', () => dashboardApi.history(20), 'GET', '/api/v1/history?limit=20'],
   ];
   it.each(cases)('%s', async (_name, call, method, url, body) => {
     const fetch = mockFetch(200, {});
