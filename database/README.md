@@ -1,7 +1,7 @@
 # База данных LekseRadar (PostgreSQL 16)
 
 Хранит всё, что Python-сервисы не хранят: пользователей, собранные ДЗ, историю ИИ-чата,
-упражнения и квизы, историю действий, прогресс, напоминания, флеш-карты и ачивки.
+упражнения и квизы, историю действий, прогресс, напоминания и ачивки. Флеш-карты — это вопросы квизов в режиме повторения, отдельной сущности для них нет.
 Работает с ней Java API (Spring Boot).
 
 ## Запуск
@@ -26,9 +26,10 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V3__chat.sql` | `chat_sessions`, `chat_messages`, вид `chat_context` (последние 10 реплик для тьютора) |
 | `V4__exercises_quizzes.sql` | `exercises`, `quizzes`, `quiz_questions`, `exercise_attempts`, функция `finish_quiz()` |
 | `V5__history_progress.sql` | `user_events` (история пользователя), виды `user_topic_progress`, `user_daily_activity`, `user_dashboard` |
-| `V6__reminders_flashcards_achievements.sql` | `reminders`, `flashcards`, `achievements`, `user_achievements` |
+| `V6__reminders_achievements.sql` | `reminders`, `achievements`, `user_achievements` |
 | `V7__subjects_quiz_sets.sql` | `subjects`, `quiz_sets`: сохранённые квизы от ИИ; новые поля у `exercises` и `quizzes` |
 | `V8__quiz_functions.sql` | `find_quiz_set()`, `import_quiz_json()`, `start_quiz()`, `save_quiz_answer()`, виды `quiz_questions_public`, `user_quiz_progress` |
+| `V9__flashcards_from_quizzes.sql` | `flashcard_progress`, вид `flashcards`, `add_quiz_set_to_flashcards()`, `review_flashcard()`, ошибка в квизе → карточка |
 
 ## Схема
 
@@ -47,7 +48,9 @@ erDiagram
     quizzes |o--o{ exercise_attempts : ""
     users ||--o{ user_events : "история действий"
     users ||--o{ reminders : ""
-    users ||--o{ flashcards : ""
+    users ||--o{ flashcard_progress : "колода"
+    exercises ||--o{ flashcard_progress : "карточка = вопрос"
+    quiz_sets ||--o{ exercises : "вопросы"
     users ||--o{ user_achievements : ""
     achievements ||--o{ user_achievements : ""
 ```
@@ -104,6 +107,17 @@ SQL
 
 Прогресс по квизам: `SELECT * FROM user_quiz_progress WHERE user_id = ?` (по предмету и теме: пройдено,
 в процессе, лучший и последний балл).
+
+**Флеш-карты = тот же квиз.** Карточка — это вопрос квиза: лицевая сторона `statement`, обратная — правильный
+ответ и `explanation`. Один JSON от ИИ даёт сразу и квиз, и колоду, ничего не генерируется дважды.
+Хранится только прогресс повторения (`flashcard_progress`, алгоритм SM-2).
+```sql
+SELECT add_quiz_set_to_flashcards(:user_id, :set_id);            -- весь квиз в колоду
+SELECT * FROM flashcards WHERE user_id = ? AND due ORDER BY next_review_at;   -- что повторять сейчас
+SELECT * FROM review_flashcard(:user_id, :exercise_id, 4);       -- оценка 0–5 → следующий показ
+SELECT * FROM user_flashcard_stats WHERE user_id = ?;            -- всего, к повторению, выучено
+```
+Неверный или частичный ответ в квизе сам добавляет вопрос в колоду с показом «сейчас».
 
 **Прогресс и дашборд.**
 ```sql
