@@ -7,9 +7,9 @@ from datetime import datetime, timezone
 import httpx
 
 from .models import Assignment, CollectResult, Credentials, SourceError, SourceResult, utcnow
-from .sources import canvas, inschool, itslearning, teams
+from .sources import canvas, classroom, inschool, itslearning, teams
 
-SOURCES = {"canvas": canvas, "teams": teams, "itslearning": itslearning, "inschool": inschool}
+SOURCES = {"canvas": canvas, "teams": teams, "itslearning": itslearning, "inschool": inschool, "classroom": classroom}
 STATUS_ORDER = {"overdue": 0, "todo": 1, "submitted": 2, "graded": 3}
 FAR = datetime.max.replace(tzinfo=timezone.utc)
 

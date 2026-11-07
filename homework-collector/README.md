@@ -14,6 +14,7 @@ result = collect({
     "teams": {"access_token": "...", "refresh_token": "...", "expires_at": 1762500000},
     "itslearning": {"base_url": "https://sms.itslearning.com", "refresh_token": "..."},
     "inschool": {"host": "ohg-vgs.inschool.visma.no", "cookies": {"JSESSIONID": "...", "Authorization": "..."}},
+    "classroom": {"access_token": "ya29..."},
 })
 
 result.model_dump(mode="json")   # готовый JSON для ответа бэкенда
@@ -43,7 +44,7 @@ COLLECTOR_KEY=$(openssl rand -hex 32) uvicorn homework.server:app --port 8090   
 
 | поле | значение |
 |------|----------|
-| `source` | `canvas` / `teams` / `itslearning` / `inschool` |
+| `source` | `canvas` / `teams` / `itslearning` / `inschool` / `classroom` |
 | `id` | id в исходной платформе |
 | `title`, `course` | название и предмет |
 | `due` | дедлайн, ISO 8601 в UTC, или `null` |
@@ -65,6 +66,7 @@ COLLECTOR_KEY=$(openssl rand -hex 32) uvicorn homework.server:app --port 8090   
 | Teams | Microsoft Graph `/education/me/assignments`, вход по коду устройства | `teams.start_device_login()` → вводит код на microsoft.com/devicelogin → `teams.poll_device_login()` | да, но школа может запретить согласие |
 | itslearning | REST `restapi/personal/tasks/v1`, OAuth-клиент мобильного приложения | `itslearning.authorize_url()` → вход через Feide → `itslearning.exchange_code(адрес itsl-itslearning://login?code=...)` | нет (серая зона) |
 | InSchool | внутренний API веб-приложения по cookie | входит через ID-porten, cookie сессии передаются в `inschool` | нет |
+| Google Classroom | официальный Classroom API | вход через Google и обновление токена делает бэкенд, сюда приходит готовый `access_token` | да |
 
 Для Teams нужно приложение в Entra ID: мультитенантное («Accounts in any organizational directory»),
 с включённым «Allow public client flows» и делегированными правами `EduAssignments.ReadBasic`,
