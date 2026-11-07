@@ -21,7 +21,7 @@ Vercel (фронт) ──https──► backend ──private──► collecto
 ```bash
 export DATABASE_URL='<DATABASE_PUBLIC_URL>'
 pip install -r ai-content/load/requirements.txt              # psycopg и др.; psql и Docker не нужны
-python database/migrate.py "$DATABASE_URL"                   # V1–V21, учёт в schema_migrations
+python database/migrate.py "$DATABASE_URL"                   # V1–V22, учёт в schema_migrations
 python ai-content/load/load.py                               # промпты и учебные материалы
 python database/migrate.py "$DATABASE_URL" --status          # все ✓
 ```

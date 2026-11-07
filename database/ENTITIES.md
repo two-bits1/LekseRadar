@@ -2,7 +2,7 @@
 
 Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO)
 и во фронтенде (TypeScript-типы). База — ветка `PythonAPI`, бэкенд — ветка `JavaAPI-setup`.
-Источник правды — миграции `database/migrations/V1–V21`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
+Источник правды — миграции `database/migrations/V1–V22`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
 поэтому поля сущностей должны совпадать с колонками ниже.
 
 **Состояние бэкенда.** Сейчас в `JavaAPI-setup` есть только `User`, `ChatSession`, `ChatMessage`, `MessageRole`
@@ -38,7 +38,7 @@ SQL для каждого сценария — [README.md](README.md).
 |---|---|---|---|---|
 | `chat_role` | `student`, `tutor`, `system` | `MessageRole` | `chat_messages.role` | ✅ |
 | `chat_mode` | `tutor`, `quiz` | `ChatMode` | `chat_sessions.mode`, `chat_mode_prompts.mode` | 📝 |
-| `platform` | `canvas`, `teams`, `itslearning`, `inschool` | `Platform` | `platform_connections.platform`, `assignments.source` | 📝 |
+| `platform` | `canvas`, `teams`, `itslearning`, `inschool`, `classroom` (V22) | `Platform` | `platform_connections.platform`, `assignments.source` | 📝 |
 | `assignment_status` | `todo`, `overdue`, `submitted`, `graded` | `AssignmentStatus` | `assignments.status` | 📝 |
 | `exercise_level` | `beginner`, `intermediate`, `advanced` | `ExerciseLevel` | `exercises`, `quizzes`, `quiz_sets`, `chat_sessions.level` | 📝 |
 | `answer_type` | `exact`, `free` | `AnswerType` | `exercises.answer_type` | 📝 |
@@ -124,7 +124,7 @@ erDiagram
 |---|---|---|---|---|---|---|
 | `id` | bigint | Long | нет | `авто` | PK | ключ |
 | `user_id` | bigint | Long | нет |  | FK → users.id CASCADE | ученик |
-| `platform` | platform | enum `Platform` + конвертер | нет |  |  | canvas / teams / itslearning / inschool |
+| `platform` | platform | enum `Platform` + конвертер | нет |  |  | canvas / teams / itslearning / inschool / classroom |
 | `credentials_enc` | bytea | byte[] | нет |  |  | токены или cookie, зашифрованы бэкендом (AES-GCM) |
 | `needs_reconnect` | boolean | Boolean | нет | `false` |  | нужно войти заново (из `SourceResult.needs_reconnect`) |
 | `last_synced_at` | timestamptz | Instant | да |  |  | последний удачный сбор ДЗ |
