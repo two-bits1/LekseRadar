@@ -252,17 +252,15 @@ flowchart LR
 
 ## 7. Что надо согласовать (важно)
 
-1. **Одна схема базы.** В PR #2 своя миграция `backend/.../db/migration/V1__init.sql`
-   (`users`, `chat_sessions`, `chat_messages`, `exercises`, `exercise_attempts`) и `ddl-auto: validate`.
-   В `database/migrations` те же таблицы, но шире. Вдвоём они не запустятся (две V1).
-   Предложение: бэкенд берёт `database/migrations/*` вместо своей V1 и подгоняет JPA-сущности под эти таблицы.
+1. **Одна схема базы — решено.** Бэкенд убрал свою V1, Flyway и H2, таблицы создаёт только `database/`
+   (`ddl-auto: none`). Проверено: бэкенд из main-test работает на этой базе.
 2. **Как бэкенд вызывает `collect()`.** Python-функция; проще всего тонкая обёртка FastAPI `POST /collect`
    или запуск `python -m homework --creds file --json`. Выбирает №2.
 3. **Язык промптов и квизов** (`language` в JSON: `nb`, `en`, `ru`).
 
 ## 8. Порядок работы
 
-1. №2: перейти на миграции из `database/`, запустить `docker compose up -d` (там демо-ученик `demo@lekseradar.no` / `demo1234`).
+1. Все: запустить базу из `database/`: `docker compose up -d` (там демо-ученик `demo@lekseradar.no` / `demo1234`).
 2. №2: эндпоинты квиза и карточек (п. 5) — это вызовы готовых функций БД.
 3. №1: экраны Квиз и Карточки по сценариям 4.4 и 4.5, дашборд по 4.6.
 4. №3: промпты в `ai-content/prompts`, учебные файлы в `ai-content/materials`, загрузка `ai-content/load/load.py`; обёртка для `collect()`.
