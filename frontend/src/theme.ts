@@ -7,7 +7,7 @@ export const EVENING_START = 20; // с 20:00…
 export const MORNING_END = 7;    // …до 07:00 — тёмная тема в режиме auto
 
 const STORAGE_KEY = 'lekseradar-theme';
-const THEME_COLOR: Record<Theme, string> = { light: '#faf8f3', dark: '#1e2124' };
+const THEME_COLOR: Record<Theme, string> = { light: '#faf8f3', dark: '#07080a' };
 
 export const isEvening = (date: Date) => { const h = date.getHours(); return h >= EVENING_START || h < MORNING_END; };
 
@@ -16,7 +16,7 @@ export const resolveTheme = (choice: ThemeChoice, systemDark: boolean, date: Dat
 
 export function loadThemeChoice(): ThemeChoice {
   try { const v = localStorage.getItem(STORAGE_KEY); if (v === 'light' || v === 'dark' || v === 'auto') return v; } catch {}
-  return 'auto';
+  return 'dark';  // как в референсе (Raycast): тёмная по умолчанию, auto и lyst — в настройках
 }
 
 export function saveThemeChoice(choice: ThemeChoice) {
