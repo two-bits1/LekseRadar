@@ -3,7 +3,7 @@ import { api, API_BASE } from './client';
 import type {
   AnswerRequest, AnswerResult, Assignment, AssignmentStatus, AuthResponse, Dashboard, HistoryEvent, UpdateAssignmentRequest, ChangePasswordRequest, Chat, ChatReply, CreateChatRequest, Deck, Flashcard,
   FlashcardStats, Health, LoginRequest, Message, Quiz, QuizProgress, QuizSummary, RegisterRequest, RegisterStarted, VerifyEmailRequest, ReviewResult,
-  StartQuizRequest, Subject, UpdateChatRequest, UpdateUserRequest, User, PlatformConnection, PlatformCredentials, PlatformKey,
+  StartQuizRequest, Subject, UpdateChatRequest, UpdateUserRequest, User, PlatformConnection, PlatformCredentials, PlatformKey, SyncResult, TeamsPoll, TeamsStart,
 } from './types';
 
 const json = (method: string, body?: unknown): RequestInit => body === undefined ? { method } : { method, body: JSON.stringify(body) };
@@ -56,11 +56,16 @@ export const flashcardsApi = {
   generate: (body: StartQuizRequest) => api<Deck>('/flashcards/generate', json('POST', body)),                    // #26
 };
 
-// 🔒 🕓 Платформы — в API.md помечены «будет позже». Фронтенд готов: как только бэкенд добавит, заработает.
+// 🔒 Платформы: сервер проверяет доступ на платформе, хранит его зашифрованным и сразу пишет ДЗ.
 export const platformsApi = {
   list: () => api<PlatformConnection[]>('/platforms'),
   connect: (platform: PlatformKey, credentials: PlatformCredentials) => api<PlatformConnection>(`/platforms/${platform}`, json('POST', credentials)),
   disconnect: (platform: PlatformKey) => api<void>(`/platforms/${platform}`, { method: 'DELETE' }),
+  teamsStart: () => api<TeamsStart>('/platforms/teams/start', json('POST')),
+  teamsPoll: (deviceCode: string) => api<TeamsPoll>('/platforms/teams/poll', json('POST', { deviceCode })),
+  itslearningUrl: (baseUrl: string) => api<{ url: string }>(`/platforms/itslearning/url?baseUrl=${encodeURIComponent(baseUrl)}`),
+  // 🕓 Google Classroom: нужна доработка бэкенда (docs/backend-changes.md)
+  classroomUrl: (redirectUri: string) => api<{ url: string }>(`/platforms/classroom/url?redirectUri=${encodeURIComponent(redirectUri)}`),
 };
 
 // 🔒 Домашка
@@ -68,6 +73,7 @@ export const homeworkApi = {
   list: (status?: AssignmentStatus) => api<Assignment[]>(status ? `/homework?status=${status}` : '/homework'),    // #30
   get: (id: number) => api<Assignment>(`/homework/${id}`),                                                        // #31
   update: (id: number, body: UpdateAssignmentRequest) => api<Assignment>(`/homework/${id}`, json('PATCH', body)), // #32
+  sync: () => api<SyncResult>('/homework/sync', json('POST')),                                                    // #43
 };
 
 // 🔒 Дашборд и история

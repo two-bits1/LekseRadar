@@ -109,10 +109,17 @@ export type UpdateChatRequest = { title?: string; topic?: string; archived?: boo
 export type StartQuizRequest = { subject: string; topic: string; level?: Level; count?: number; assignmentId?: number | null; fresh?: boolean };
 export type AnswerRequest = { position: number; answer: string };
 
-// 🕓 Платформы (ARCHITECTURE.md §5): поля — как ждёт homework-collector (README «credentials»).
-export type PlatformKey = 'canvas' | 'itslearning' | 'inschool' | 'teams' | 'ics';
+// Платформы (POST/GET/DELETE /platforms/{platform}). classroom — только на фронте, бэкенду нужна доработка (docs/backend-changes.md).
+export type PlatformKey = Platform | 'classroom';
 export type PlatformCredentials = Record<string, unknown>;
-export type PlatformConnection = { platform: PlatformKey; connected: boolean; updatedAt?: string | null };
+export type PlatformConnection = {
+  platform: PlatformKey; connected: boolean; needsReconnect: boolean;
+  lastSyncedAt: string | null; lastError: string | null;
+};
+export type TeamsStart = { userCode: string; verificationUri: string; deviceCode: string; interval: number; expiresIn: number };
+export type TeamsPoll = { status: 'pending' } | { status: 'connected'; platform: PlatformConnection };
+export type SourceStatus = { platform: PlatformKey; ok: boolean; count: number; error: string | null; needsReconnect: boolean };
+export type SyncResult = { sources: SourceStatus[]; added: number; updated: number; count: number };
 // ДЗ (GET /homework, GET/PATCH /homework/{id})
 export type Platform = 'canvas' | 'teams' | 'itslearning' | 'inschool';
 export type AssignmentStatus = 'todo' | 'overdue' | 'submitted' | 'graded';
