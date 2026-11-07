@@ -30,7 +30,7 @@ docker compose up -d
 
 ### 2. Промпты ИИ в базу (один раз и после каждого изменения промптов)
 
-Промпты лежат в `ai-content/prompts` (ветка `main-test-2.0`). Без них чат отвечает `503`.
+Промпты лежат в `ai-content/prompts` (ветка `main-test-2.0`). Без них чат, квизы и карточки от ИИ отвечают `503`.
 ```bash
 pip install -r ai-content/load/requirements.txt
 DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python -X utf8 ai-content/load/load.py
@@ -102,7 +102,36 @@ DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python
 - промпт — `chat_system_prompt` (активная версия из `ai_prompts`), переменные `{{...}}` — `chat_prompt_vars`,
   `{{materials}}` — `materials_for_prompt` по вопросу;
 - история — последние 10 реплик (вид `chat_context`);
-- ответ ИИ: метка `[[LANGUAGE=xx]]` → `set_chat_language`, метки вырезаются; в `chat_messages.prompt_id` пишется версия промпта.
+- ответ ИИ: метка `[[LANGUAGE=xx]]` → `set_chat_language`, метки вырезаются; в `chat_messages.prompt_id` пишется версия промпта;
+- чат `quiz`: сообщение ученика → ИИ составляет квиз (как `POST /quizzes`), в ответе `chat.quizSetId`.
+
+### Квизы и флеш-карты
+| Метод | URL | Тело / параметры | Ответ |
+|---|---|---|---|
+| GET | `/api/v1/subjects` | — | `[subject]` |
+| GET | `/api/v1/quizzes` | — | `[quizSummary]`, новые сверху |
+| GET | `/api/v1/quizzes/progress` | — | `[progress]` по предметам и темам |
+| POST | `/api/v1/quizzes` | `{subject, topic, level?, count?, assignmentId?, fresh?}` | `201 quiz` |
+| GET | `/api/v1/quizzes/{quizId}` | — | `quiz` (без правильных ответов) |
+| POST | `/api/v1/quizzes/{quizId}/answers` | `{position, answer}` | `{verdict, explanation, correctAnswer}` |
+| POST | `/api/v1/quizzes/{quizId}/finish` | — | `{score}` 0–100 |
+| POST | `/api/v1/quiz-sets/{setId}/start` | — | `201 quiz` |
+| POST | `/api/v1/quiz-sets/{setId}/flashcards` | — | `deck` |
+| GET | `/api/v1/flashcards` | `?due=true/false` | `[flashcard]` |
+| GET | `/api/v1/flashcards/due` | — | `[flashcard]` к повторению |
+| GET | `/api/v1/flashcards/stats` | — | `{cards, dueNow, learned, reviews}` |
+| POST | `/api/v1/flashcards/{exerciseId}/review` | `{grade: 0–5}` | `{nextReviewAt, intervalDays}` |
+| POST | `/api/v1/flashcards/generate` | как у `POST /quizzes` | `201 deck` |
+
+Как ИИ работает с квизами (промпты из `ai-content/prompts`, в базе — `ai_prompts`):
+1. `find_quiz_set` — есть готовый набор (предмет + тема + уровень + язык)? Берём его, ИИ не нужен.
+2. Нет → `start_chat(mode=quiz)` → промпт `quiz_generator` + `chat_prompt_vars` + `{{materials}}` + `{{count}}` →
+   ИИ отвечает JSON → `import_quiz_json`. Неверный JSON — один повтор с текстом ошибки, потом `502`.
+3. `start_quiz` → ответы `save_quiz_answer`: выбор проверяет база, `text` — ИИ по промпту `answer_checker`.
+4. Неверный ответ → карточка (триггер базы). `finish_quiz` → балл.
+5. Флеш-карты — те же вопросы: `add_quiz_set_to_flashcards`, `review_flashcard` (SM-2).
+
+Все адреса сайта (страницы фронтенда + API) — [`docs/URLS.md`](../docs/URLS.md).
 
 ### Служебное
 `GET /actuator/health` → `{"status": "UP" | "DOWN"}`, без токена.
@@ -117,7 +146,8 @@ DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python
 | 401 | нет токена, токен неверный или истёк, неверный логин или пароль |
 | 404 | объект не найден или принадлежит другому пользователю; неизвестный URL |
 | 409 | email уже занят |
-| 502 | OpenAI недоступен (неверный ключ, лимит, нет сети) |
+| 502 | ИИ недоступен (неверный ключ, лимит, нет сети) или дважды прислал квиз в неверном формате |
+| 503 | промпты не загружены в базу (`ai-content/load/load.py`) |
 
 ## Структура
 
@@ -134,6 +164,8 @@ src/main/java/com/lekseradar/
   repository/   *Repository: доступ к БД, вызовы функций базы (start_quiz, save_quiz_answer…)
   security/     JWT: JwtService, JwtAuthenticationFilter, @CurrentUser, ответ 401
   service/      *Service: бизнес-логика
+                PromptService (промпты из ai_prompts), QuizGeneratorService (ИИ → квиз),
+                AnswerCheckerService (ИИ проверяет текст), QuizService, FlashcardService, ChatService
     ai/         AiService (интерфейс), OpenAiService (OpenAI-совместимый API: OpenAI, Groq…)
 ```
 
