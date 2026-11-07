@@ -16,8 +16,9 @@
 | 1 | POST | 🔓 `/api/v1/auth/register` | регистрация | 201 `AuthResponse` |
 | 2 | POST | 🔓 `/api/v1/auth/login` | вход | 200 `AuthResponse` |
 | 3 | GET | 🔒 `/api/v1/users/me` | мой профиль | 200 `User` |
-| 4 | PATCH | 🔒 `/api/v1/users/me` | изменить имя / язык / часовой пояс | 200 `User` |
+| 4 | PATCH | 🔒 `/api/v1/users/me` | изменить имя / язык / часовой пояс / напоминания на почту (`emailReminders`) | 200 `User` |
 | 5 | PUT | 🔒 `/api/v1/users/me/password` | сменить пароль | 204 |
+| 45 | POST | 🔒 `/api/v1/users/me/reminders/test` | пробное письмо-напоминание о ДЗ на почту из профиля | 200 `{email, count}`, 429, 503 |
 | 6 | GET | 🔒 `/api/v1/chats?archived=` | список чатов | 200 `Chat[]` |
 | 7 | POST | 🔒 `/api/v1/chats` | создать чат | 201 `Chat` |
 | 8 | GET | 🔒 `/api/v1/chats/{chatId}` | один чат | 200 `Chat` |

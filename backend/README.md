@@ -78,8 +78,9 @@ DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python
 | Метод | URL | Тело | Ответ |
 |---|---|---|---|
 | GET | `/api/v1/users/me` | — | `user` |
-| PATCH | `/api/v1/users/me` | `{displayName?, locale?: nb/nn/en/ru, timezone?}` | `user` |
+| PATCH | `/api/v1/users/me` | `{displayName?, locale?: nb/nn/en/ru, timezone?, emailReminders?}` | `user` |
 | PUT | `/api/v1/users/me/password` | `{currentPassword, newPassword}` | `204` |
+| POST | `/api/v1/users/me/reminders/test` | — | `{email, count}`; пробное письмо о ДЗ на 7 дней вперёд, 3 раза в час, `503` без почты |
 
 `user = {id, email, displayName, locale, timezone, createdAt, lastLoginAt}`
 
@@ -187,6 +188,7 @@ src/main/java/com/lekseradar/
 | `COLLECTOR_KEY` | — | Общий ключ с collector (`X-Internal-Key`) |
 | `CANVAS_HOSTS` | — | Свои Canvas вне `*.instructure.com`, через запятую (`canvas.uio.no`) |
 | `SYNC_SCHEDULE_ENABLED` | `true` | Обновлять ДЗ раз в 30 минут |
+| `REMINDERS_ENABLED` | `true` | Раз в 15 минут письмо о несданном ДЗ со сроком в ближайшие 24 часа (нужны `MAIL_*`) |
 | `OPENAI_MODEL` | `gpt-4o-mini` | Модель |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Совместимый прокси, если нужен |
 | `JWT_TTL_HOURS` | `72` | Время жизни токена |
