@@ -3,8 +3,9 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, NavLink, Link, Navigate, useLocation } from 'react-router-dom';
 import { CalendarDays, Layers, UserRound, Settings2, ArrowUpRight, Radar, LogIn } from 'lucide-react';
 import { Dashboard } from './pages/Dashboard';
-import { Tutor, Flashcards } from './pages/Learning';
-import { Calendar, Settings, Status, Soon, ChatSoon } from './pages/Other';
+import { Flashcards } from './pages/Learning';
+import { ChatList, ChatView } from './pages/Chats';
+import { Calendar, Settings, Status, Soon } from './pages/Other';
 import { Auth, Profile } from './pages/Account';
 import { type ThemeChoice, loadThemeChoice, saveThemeChoice, resolveTheme, themeColor } from './theme';
 import { PATHS } from './paths';
@@ -54,8 +55,8 @@ function App(){
    <Route element={<RequireAuth/>}>
     <Route path={PATHS.home} element={<Dashboard completed={completed} toggle={toggle}/>}/>
     <Route path={PATHS.profile} element={<Profile completed={completed}/>}/>
-    <Route path={PATHS.chats} element={<Tutor/>}/>
-    <Route path={PATHS.chat(':chatId')} element={<ChatSoon/>}/>
+    <Route path={PATHS.chats} element={<ChatList/>}/>
+    <Route path={PATHS.chat(':chatId')} element={<ChatView/>}/>
     <Route path={PATHS.homework} element={<Calendar/>}/>
     <Route path={PATHS.quizzes} element={<Flashcards key="quiz" initialMode="Quiz"/>}/>
     <Route path={PATHS.quiz(':quizId')} element={<Flashcards key="quiz" initialMode="Quiz"/>}/>

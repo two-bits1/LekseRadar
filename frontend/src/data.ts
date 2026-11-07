@@ -15,5 +15,5 @@ export const decks = [
 ];
 // Сайт-карта для /status — те же адреса, что в API.md (см. src/paths.ts).
 export const routes = [
-  [PATHS.home,'Oversikt','Interaktiv demo'], [PATHS.homework,'Lekser og kalender','Interaktiv demo'], [PATHS.chats,'AI-veileder','Forhåndsskrevet demo'], [PATHS.chat(':chatId'),'Samtale','Kommer senere'], [PATHS.quizzes,'Quiz','Interaktiv demo'], [PATHS.flashcards,'Læringskort','Interaktiv demo'], [PATHS.progress,'Fremgang','Kommer senere'], [PATHS.history,'Historikk','Kommer senere'], [PATHS.profile,'Profil','Demodata'], [PATHS.settings,'Innstillinger','Delvis klar'], [PATHS.platforms,'Plattformer','Kommer senere'], [PATHS.login,'Logg inn','Koblet til API'], [PATHS.register,'Opprett konto','Koblet til API'],
+  [PATHS.home,'Oversikt','Interaktiv demo'], [PATHS.homework,'Lekser og kalender','Interaktiv demo'], [PATHS.chats,'AI-veileder','Koblet til API'], [PATHS.chat(':chatId'),'Samtale','Koblet til API'], [PATHS.quizzes,'Quiz','Interaktiv demo'], [PATHS.flashcards,'Læringskort','Interaktiv demo'], [PATHS.progress,'Fremgang','Kommer senere'], [PATHS.history,'Historikk','Kommer senere'], [PATHS.profile,'Profil','Koblet til API'], [PATHS.settings,'Innstillinger','Delvis klar'], [PATHS.platforms,'Plattformer','Kommer senere'], [PATHS.login,'Logg inn','Koblet til API'], [PATHS.register,'Opprett konto','Koblet til API'],
 ];
