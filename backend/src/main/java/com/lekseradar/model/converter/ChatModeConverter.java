@@ -1,12 +1,12 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.enums.ChatMode;
+import com.lekseradar.model.enums.ChatModeEnum;
 import jakarta.persistence.Converter;
 
-/** ChatMode ↔ PostgreSQL-enum chat_mode. */
+/** ChatModeEnum ↔ PostgreSQL-enum chat_mode. */
 @Converter(autoApply = true)
-public class ChatModeConverter extends DbEnumConverter<ChatMode> {
+public class ChatModeConverter extends DbEnumConverter<ChatModeEnum> {
     public ChatModeConverter() {
-        super(ChatMode.class);
+        super(ChatModeEnum.class);
     }
 }

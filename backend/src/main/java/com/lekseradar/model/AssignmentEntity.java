@@ -23,7 +23,7 @@ public class AssignmentEntity {
 
     @ColumnTransformer(write = "?::platform")
     @Column(nullable = false, updatable = false, columnDefinition = "platform")
-    private Platform source;
+    private PlatformEnum source;
 
     /** id задания в исходной платформе. */
     @Column(name = "external_id", nullable = false, updatable = false)
@@ -40,7 +40,7 @@ public class AssignmentEntity {
 
     @ColumnTransformer(write = "?::assignment_status")
     @Column(nullable = false, columnDefinition = "assignment_status")
-    private AssignmentStatus status = AssignmentStatus.TODO;
+    private AssignmentStatusEnum status = AssignmentStatusEnum.TODO;
 
     private String url;
 
@@ -61,12 +61,12 @@ public class AssignmentEntity {
 
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
-    public Platform getSource() { return source; }
+    public PlatformEnum getSource() { return source; }
     public String getExternalId() { return externalId; }
     public String getTitle() { return title; }
     public String getCourse() { return course; }
     public Instant getDueAt() { return dueAt; }
-    public AssignmentStatus getStatus() { return status; }
+    public AssignmentStatusEnum getStatus() { return status; }
     public String getUrl() { return url; }
     public String getDescription() { return description; }
     public String getKind() { return kind; }
@@ -74,7 +74,7 @@ public class AssignmentEntity {
     public Instant getUpdatedAt() { return updatedAt; }
 
     /** Ученик сам отметил задание сданным. */
-    public void setStatus(AssignmentStatus status) {
+    public void setStatus(AssignmentStatusEnum status) {
         this.status = status;
         this.updatedAt = Instant.now();
     }

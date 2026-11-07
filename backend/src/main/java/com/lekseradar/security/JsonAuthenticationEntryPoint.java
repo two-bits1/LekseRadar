@@ -1,7 +1,7 @@
 package com.lekseradar.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lekseradar.dto.common.ErrorResponse;
+import com.lekseradar.dto.common.ErrorResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -28,6 +28,6 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
         res.setContentType(MediaType.APPLICATION_JSON_VALUE);
         res.setCharacterEncoding("UTF-8");
         mapper.writeValue(res.getOutputStream(),
-                ErrorResponse.of(HttpStatus.UNAUTHORIZED.value(), "Требуется авторизация: передайте заголовок Authorization: Bearer <token>"));
+                ErrorResponseDTO.of(HttpStatus.UNAUTHORIZED.value(), "Требуется авторизация: передайте заголовок Authorization: Bearer <token>"));
     }
 }

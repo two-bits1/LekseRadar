@@ -1,12 +1,12 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.enums.MaterialSource;
+import com.lekseradar.model.enums.MaterialSourceEnum;
 import jakarta.persistence.Converter;
 
-/** MaterialSource ↔ PostgreSQL-enum material_source. */
+/** MaterialSourceEnum ↔ PostgreSQL-enum material_source. */
 @Converter(autoApply = true)
-public class MaterialSourceConverter extends DbEnumConverter<MaterialSource> {
+public class MaterialSourceConverter extends DbEnumConverter<MaterialSourceEnum> {
     public MaterialSourceConverter() {
-        super(MaterialSource.class);
+        super(MaterialSourceEnum.class);
     }
 }

@@ -2,8 +2,8 @@ package com.lekseradar.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lekseradar.dto.ai.AiMessageRequest;
-import com.lekseradar.dto.ai.AiResponse;
+import com.lekseradar.dto.ai.AiMessageRequestDTO;
+import com.lekseradar.dto.ai.AiResponseDTO;
 import com.lekseradar.dto.chat.*;
 import com.lekseradar.exception.ApiException;
 import com.lekseradar.exception.NotFoundException;
@@ -11,8 +11,8 @@ import com.lekseradar.model.ChatMessageEntity;
 import com.lekseradar.model.ChatSessionEntity;
 import com.lekseradar.model.SubjectEntity;
 import com.lekseradar.model.UserEntity;
-import com.lekseradar.model.enums.ChatMode;
-import com.lekseradar.model.enums.MessageRole;
+import com.lekseradar.model.enums.ChatModeEnum;
+import com.lekseradar.model.enums.MessageRoleEnum;
 import com.lekseradar.repository.AssignmentRepository;
 import com.lekseradar.repository.ChatMessageRepository;
 import com.lekseradar.repository.ChatSessionRepository;
@@ -69,23 +69,23 @@ public class ChatService {
     }
 
     /** @param archived null — все чаты, true/false — только архивные / только активные */
-    public List<ChatResponse> list(Long userId, Boolean archived) {
+    public List<ChatResponseDTO> list(Long userId, Boolean archived) {
         List<ChatSessionEntity> found = archived == null
                 ? sessions.findByUserIdOrderByUpdatedAtDesc(userId)
                 : sessions.findByUserIdAndArchivedOrderByUpdatedAtDesc(userId, archived);
         Map<Long, String> names = subjects.findAll().stream()
                 .collect(Collectors.toMap(SubjectEntity::getId, SubjectEntity::getName));
-        return found.stream().map(s -> ChatResponse.from(s, names.get(s.getSubjectId()))).toList();
+        return found.stream().map(s -> ChatResponseDTO.from(s, names.get(s.getSubjectId()))).toList();
     }
 
-    public ChatResponse get(Long userId, Long chatId) {
+    public ChatResponseDTO get(Long userId, Long chatId) {
         return toResponse(owned(userId, chatId));
     }
 
     /** Чат создаёт функция базы start_chat: она же находит или создаёт предмет и пишет событие chat_started. */
     @Transactional
-    public ChatResponse create(Long userId, CreateChatRequest req) {
-        if (req == null) req = new CreateChatRequest(null, null, null, null, null, null);
+    public ChatResponseDTO create(Long userId, CreateChatRequestDTO req) {
+        if (req == null) req = new CreateChatRequestDTO(null, null, null, null, null, null);
         if (req.assignmentId() != null) {
             assignments.findByIdAndUserId(req.assignmentId(), userId)
                     .orElseThrow(() -> new NotFoundException("Домашнее задание не найдено"));
@@ -100,7 +100,7 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatResponse update(Long userId, Long chatId, UpdateChatRequest req) {
+    public ChatResponseDTO update(Long userId, Long chatId, UpdateChatRequestDTO req) {
         ChatSessionEntity s = owned(userId, chatId);
         if (!isBlank(req.title())) s.setTitle(req.title().trim());
         if (req.topic() != null) s.setTopic(blankToNull(req.topic()));
@@ -115,9 +115,9 @@ public class ChatService {
         sessions.delete(owned(userId, chatId));
     }
 
-    public List<MessageResponse> messages(Long userId, Long chatId) {
+    public List<MessageResponseDTO> messages(Long userId, Long chatId) {
         owned(userId, chatId);
-        return messages.findBySessionIdOrderByCreatedAtAscIdAsc(chatId).stream().map(MessageResponse::from).toList();
+        return messages.findBySessionIdOrderByCreatedAtAscIdAsc(chatId).stream().map(MessageResponseDTO::from).toList();
     }
 
     /**
@@ -125,22 +125,22 @@ public class ChatService {
      * (язык, предмет, тема, ДЗ, слабые темы, учебные материалы). Вызов ИИ идёт вне транзакции,
      * чтобы не держать соединение с БД. Если ИИ недоступен, вопрос остаётся в истории.
      */
-    public ChatReplyResponse send(UserEntity user, Long chatId, SendMessageRequest req) {
+    public ChatReplyResponseDTO send(UserEntity user, Long chatId, SendMessageRequestDTO req) {
         String content = req.content().strip();
         ChatSessionEntity s = owned(user.getId(), chatId);
         ChatSessionRepository.SystemPrompt system = loadSystemPrompt(chatId);
 
         ChatMessageEntity question = messages.save(ChatMessageEntity.fromStudent(chatId, content));
 
-        List<AiMessageRequest> prompt = new ArrayList<>();
-        prompt.add(AiMessageRequest.system(render(system.getContent(), promptVars(s, user, content))));
+        List<AiMessageRequestDTO> prompt = new ArrayList<>();
+        prompt.add(AiMessageRequestDTO.system(render(system.getContent(), promptVars(s, user, content))));
         for (ChatMessageRepository.ContextMessage m : messages.findContext(chatId)) {
-            prompt.add(MessageRole.TUTOR.value().equals(m.getRole())
-                    ? AiMessageRequest.assistant(m.getContent())
-                    : AiMessageRequest.user(m.getContent()));
+            prompt.add(MessageRoleEnum.TUTOR.value().equals(m.getRole())
+                    ? AiMessageRequestDTO.assistant(m.getContent())
+                    : AiMessageRequestDTO.user(m.getContent()));
         }
 
-        AiResponse reply = ai.complete(prompt);
+        AiResponseDTO reply = ai.complete(prompt);
         String text = handleTags(chatId, reply.content());
 
         ChatMessageEntity answer = ChatMessageEntity.fromTutor(chatId, limit(text), reply.model(), reply.tokensUsed());
@@ -155,7 +155,7 @@ public class ChatService {
         fresh.touch();
         sessions.save(fresh);
 
-        return new ChatReplyResponse(toResponse(fresh), MessageResponse.from(question), MessageResponse.from(answer));
+        return new ChatReplyResponseDTO(toResponse(fresh), MessageResponseDTO.from(question), MessageResponseDTO.from(answer));
     }
 
     private ChatSessionRepository.SystemPrompt loadSystemPrompt(Long chatId) {
@@ -181,7 +181,7 @@ public class ChatService {
         }
         String found = materials.forPrompt(user.getId(), question, s.getSubjectId(), MATERIALS_LIMIT, s.getTopic());
         vars.put("materials", isBlank(found) ? "нет материалов" : found);
-        if (s.getMode() == ChatMode.QUIZ) {
+        if (s.getMode() == ChatModeEnum.QUIZ) {
             vars.putIfAbsent("count", String.valueOf(QUIZ_QUESTION_COUNT));
         }
         return vars;
@@ -209,10 +209,10 @@ public class ChatService {
         return cleaned.strip();
     }
 
-    private ChatResponse toResponse(ChatSessionEntity s) {
+    private ChatResponseDTO toResponse(ChatSessionEntity s) {
         String subject = s.getSubjectId() == null ? null
                 : subjects.findById(s.getSubjectId()).map(SubjectEntity::getName).orElse(null);
-        return ChatResponse.from(s, subject);
+        return ChatResponseDTO.from(s, subject);
     }
 
     /** Чат пользователя; чужой чат выглядит как несуществующий (404), чтобы не раскрывать id. */

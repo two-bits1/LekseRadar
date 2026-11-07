@@ -1,12 +1,12 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.enums.AssignmentStatus;
+import com.lekseradar.model.enums.AssignmentStatusEnum;
 import jakarta.persistence.Converter;
 
-/** AssignmentStatus ↔ PostgreSQL-enum assignment_status. */
+/** AssignmentStatusEnum ↔ PostgreSQL-enum assignment_status. */
 @Converter(autoApply = true)
-public class AssignmentStatusConverter extends DbEnumConverter<AssignmentStatus> {
+public class AssignmentStatusConverter extends DbEnumConverter<AssignmentStatusEnum> {
     public AssignmentStatusConverter() {
-        super(AssignmentStatus.class);
+        super(AssignmentStatusEnum.class);
     }
 }

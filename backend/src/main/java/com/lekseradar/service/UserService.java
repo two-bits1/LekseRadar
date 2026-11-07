@@ -1,8 +1,8 @@
 package com.lekseradar.service;
 
-import com.lekseradar.dto.user.ChangePasswordRequest;
-import com.lekseradar.dto.user.UpdateProfileRequest;
-import com.lekseradar.dto.user.UserResponse;
+import com.lekseradar.dto.user.ChangePasswordRequestDTO;
+import com.lekseradar.dto.user.UpdateProfileRequestDTO;
+import com.lekseradar.dto.user.UserResponseDTO;
 import com.lekseradar.exception.BadRequestException;
 import com.lekseradar.exception.NotFoundException;
 import com.lekseradar.model.UserEntity;
@@ -25,7 +25,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateProfile(Long userId, UpdateProfileRequest req) {
+    public UserResponseDTO updateProfile(Long userId, UpdateProfileRequestDTO req) {
         UserEntity user = load(userId);
         if (req.displayName() != null && !req.displayName().isBlank()) {
             user.setDisplayName(req.displayName().trim());
@@ -36,11 +36,11 @@ public class UserService {
         if (req.timezone() != null) {
             user.setTimezone(validZone(req.timezone().trim()));
         }
-        return UserResponse.from(user);
+        return UserResponseDTO.from(user);
     }
 
     @Transactional
-    public void changePassword(Long userId, ChangePasswordRequest req) {
+    public void changePassword(Long userId, ChangePasswordRequestDTO req) {
         UserEntity user = load(userId);
         if (!encoder.matches(req.currentPassword(), user.getPasswordHash())) {
             throw new BadRequestException("Текущий пароль указан неверно");

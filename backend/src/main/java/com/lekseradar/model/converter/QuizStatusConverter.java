@@ -1,12 +1,12 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.enums.QuizStatus;
+import com.lekseradar.model.enums.QuizStatusEnum;
 import jakarta.persistence.Converter;
 
-/** QuizStatus ↔ PostgreSQL-enum quiz_status. */
+/** QuizStatusEnum ↔ PostgreSQL-enum quiz_status. */
 @Converter(autoApply = true)
-public class QuizStatusConverter extends DbEnumConverter<QuizStatus> {
+public class QuizStatusConverter extends DbEnumConverter<QuizStatusEnum> {
     public QuizStatusConverter() {
-        super(QuizStatus.class);
+        super(QuizStatusEnum.class);
     }
 }

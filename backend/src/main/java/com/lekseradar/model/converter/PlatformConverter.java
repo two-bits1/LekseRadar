@@ -1,12 +1,12 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.enums.Platform;
+import com.lekseradar.model.enums.PlatformEnum;
 import jakarta.persistence.Converter;
 
-/** Platform ↔ PostgreSQL-enum platform. */
+/** PlatformEnum ↔ PostgreSQL-enum platform. */
 @Converter(autoApply = true)
-public class PlatformConverter extends DbEnumConverter<Platform> {
+public class PlatformConverter extends DbEnumConverter<PlatformEnum> {
     public PlatformConverter() {
-        super(Platform.class);
+        super(PlatformEnum.class);
     }
 }

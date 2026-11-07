@@ -1,12 +1,12 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.enums.AnswerType;
+import com.lekseradar.model.enums.AnswerTypeEnum;
 import jakarta.persistence.Converter;
 
-/** AnswerType ↔ PostgreSQL-enum answer_type. */
+/** AnswerTypeEnum ↔ PostgreSQL-enum answer_type. */
 @Converter(autoApply = true)
-public class AnswerTypeConverter extends DbEnumConverter<AnswerType> {
+public class AnswerTypeConverter extends DbEnumConverter<AnswerTypeEnum> {
     public AnswerTypeConverter() {
-        super(AnswerType.class);
+        super(AnswerTypeEnum.class);
     }
 }

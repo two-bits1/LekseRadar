@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 
 /**
  * Подставляет в параметр контроллера текущего пользователя ({@link com.lekseradar.model.UserEntity}):
- * {@code public UserResponse me(@CurrentUser UserEntity user)}.
+ * {@code public UserResponseDTO me(@CurrentUser UserEntity user)}.
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

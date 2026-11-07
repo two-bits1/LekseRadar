@@ -19,6 +19,6 @@ public class ChatModePromptEntity {
 
     protected ChatModePromptEntity() {}
 
-    public ChatMode getMode() { return ChatMode.fromValue(mode); }
+    public ChatModeEnum getMode() { return ChatModeEnum.fromValue(mode); }
     public String getPromptKey() { return promptKey; }
 }

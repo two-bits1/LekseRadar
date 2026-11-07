@@ -125,11 +125,11 @@ DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python
 src/main/java/com/lekseradar/
   config/       *Config: AppConfig (настройки app.*), SecurityConfig, CorsConfig, AiConfig, OpenApiConfig
   controller/   *Controller: REST-контроллеры, принимают запрос и вызывают сервис
-  dto/          *Request / *Response: запросы и ответы API по разделам (auth, user, chat, quiz, homework…)
-    ai/         AiMessageRequest, AiResponse — сообщения для модели ИИ
+  dto/          *DTO (LoginRequestDTO, ChatResponseDTO…): запросы и ответы API по разделам (auth, user, chat, quiz, homework…)
+    ai/         AiMessageRequestDTO, AiResponseDTO — сообщения для модели ИИ
   exception/    *Exception и GlobalExceptionHandler (единый формат ошибок)
   model/        *Entity: JPA-сущности, по одной на таблицу из database/migrations (20 штук)
-    enums/      Java-enum'ы для PostgreSQL-типов (chat_mode, platform, quiz_status…)
+    enums/      *Enum: Java-enum'ы для PostgreSQL-типов (chat_mode, platform, quiz_status…)
     converter/  *Converter: enum ↔ значение в базе
   repository/   *Repository: доступ к БД, вызовы функций базы (start_quiz, save_quiz_answer…)
   security/     JWT: JwtService, JwtAuthenticationFilter, @CurrentUser, ответ 401

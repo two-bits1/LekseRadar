@@ -47,7 +47,7 @@ public class MaterialEntity {
     private String storageKey;
 
     @Column(columnDefinition = "material_source")
-    private MaterialSource source;
+    private MaterialSourceEnum source;
 
     @Column(name = "source_url")
     private String sourceUrl;
@@ -79,7 +79,7 @@ public class MaterialEntity {
     public String getMimeType() { return mimeType; }
     public Long getFileSize() { return fileSize; }
     public String getStorageKey() { return storageKey; }
-    public MaterialSource getSource() { return source; }
+    public MaterialSourceEnum getSource() { return source; }
     public String getSourceUrl() { return sourceUrl; }
     public String getLanguage() { return language; }
     public String getContentHash() { return contentHash; }

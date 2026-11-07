@@ -39,10 +39,10 @@ public class ExerciseEntity {
     private String topic;
 
     @Column(columnDefinition = "exercise_level")
-    private ExerciseLevel level;
+    private ExerciseLevelEnum level;
 
     @Column(name = "question_type")
-    private QuestionType questionType;
+    private QuestionTypeEnum questionType;
 
     private String statement;
 
@@ -54,7 +54,7 @@ public class ExerciseEntity {
     private String correctAnswer;
 
     @Column(name = "answer_type", columnDefinition = "answer_type")
-    private AnswerType answerType;
+    private AnswerTypeEnum answerType;
 
     private String explanation;
 
@@ -72,12 +72,12 @@ public class ExerciseEntity {
     public Long getQuizSetId() { return quizSetId; }
     public Integer getPosition() { return position; }
     public String getTopic() { return topic; }
-    public ExerciseLevel getLevel() { return level; }
-    public QuestionType getQuestionType() { return questionType; }
+    public ExerciseLevelEnum getLevel() { return level; }
+    public QuestionTypeEnum getQuestionType() { return questionType; }
     public String getStatement() { return statement; }
     public JsonNode getOptions() { return options; }
     public String getCorrectAnswer() { return correctAnswer; }
-    public AnswerType getAnswerType() { return answerType; }
+    public AnswerTypeEnum getAnswerType() { return answerType; }
     public String getExplanation() { return explanation; }
     public boolean isGenerated() { return generated; }
     public Instant getCreatedAt() { return createdAt; }

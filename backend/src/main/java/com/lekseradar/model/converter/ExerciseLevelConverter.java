@@ -1,12 +1,12 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.enums.ExerciseLevel;
+import com.lekseradar.model.enums.ExerciseLevelEnum;
 import jakarta.persistence.Converter;
 
-/** ExerciseLevel ↔ PostgreSQL-enum exercise_level. */
+/** ExerciseLevelEnum ↔ PostgreSQL-enum exercise_level. */
 @Converter(autoApply = true)
-public class ExerciseLevelConverter extends DbEnumConverter<ExerciseLevel> {
+public class ExerciseLevelConverter extends DbEnumConverter<ExerciseLevelEnum> {
     public ExerciseLevelConverter() {
-        super(ExerciseLevel.class);
+        super(ExerciseLevelEnum.class);
     }
 }
