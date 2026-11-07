@@ -57,6 +57,7 @@ docker compose up -d        # Postgres на 127.0.0.1:5432, база/логин/
 | `V20__language_code.sql` | `{{language_code}}` в `chat_prompt_vars()`: код языка (`ru`) для JSON квиза, `language_code()` |
 | `V21__sync_assignments.sql` | `sync_assignments(user_id, jsonb)`: записать ДЗ из `collect()` одним вызовом, вернуть `(added, updated)` |
 | `V22__classroom.sql` | Google Classroom как пятая платформа: `classroom` в типе `platform` |
+| `V23__quiz_options_cleanup.sql` | сохранённые квизы: без пустых и повторяющихся вариантов; single_choice с несколькими верными → multiple_choice |
 
 ## Схема
 
