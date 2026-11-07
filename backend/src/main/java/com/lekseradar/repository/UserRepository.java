@@ -1,5 +1,6 @@
-package com.lekseradar.user;
+package com.lekseradar.repository;
 
+import com.lekseradar.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
