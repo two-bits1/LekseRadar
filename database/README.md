@@ -23,6 +23,7 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 ./migrate.sh "$DATABASE_URL" --baseline 20    # один раз для базы, созданной до учёта миграций (была V20)
 ./migrate.sh "$DATABASE_URL" --status
 ```
+Без `psql` и Docker то же самое: `python migrate.py "$DATABASE_URL" [--baseline 20 | --status]` (нужен `pip install 'psycopg[binary]'`).
 
 В Spring Boot: скопировать `migrations/*.sql` в `src/main/resources/db/migration/` и включить Flyway.
 Имена `V1__...sql` уже в его формате.
