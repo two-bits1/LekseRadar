@@ -5,7 +5,9 @@ public enum PlatformEnum implements DbEnum {
     CANVAS("canvas"),
     TEAMS("teams"),
     ITSLEARNING("itslearning"),
-    INSCHOOL("inschool");
+    INSCHOOL("inschool"),
+    /** Google Classroom (вход через Google, нужна миграция V22 с этим значением в типе platform). */
+    CLASSROOM("classroom");
 
     private final String value;
 

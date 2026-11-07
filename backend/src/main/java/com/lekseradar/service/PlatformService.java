@@ -18,6 +18,8 @@ import com.lekseradar.security.RateLimiter;
 import com.lekseradar.service.collector.CollectorClient;
 import com.lekseradar.service.collector.CollectorClient.CollectResult;
 import com.lekseradar.service.collector.CollectorClient.Source;
+import com.lekseradar.service.google.GoogleOAuthClient;
+import com.lekseradar.service.google.OAuthStates;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -66,10 +68,16 @@ public class PlatformService {
     private final ObjectMapper json;
     private final TransactionTemplate tx;
     private final Set<String> extraCanvasHosts;
+    private final GoogleOAuthClient google;
+    private final OAuthStates states;
+    /** Куда Google может вернуть ученика: каждый сайт из CORS_ORIGINS + /settings/platforms (там страница фронта). */
+    private final Set<String> classroomRedirects;
+    static final String CLASSROOM_PATH = "/settings/platforms";
 
     public PlatformService(PlatformConnectionRepository connections, CollectorClient collector, CredentialsCipher cipher,
                            HomeworkSyncService sync, RateLimiter limiter, ObjectMapper json,
-                           PlatformTransactionManager txManager, AppConfig cfg) {
+                           PlatformTransactionManager txManager, AppConfig cfg, GoogleOAuthClient google,
+                           OAuthStates states) {
         this.connections = connections;
         this.collector = collector;
         this.cipher = cipher;
@@ -77,6 +85,12 @@ public class PlatformService {
         this.limiter = limiter;
         this.json = json;
         this.tx = new TransactionTemplate(txManager);
+        this.google = google;
+        this.states = states;
+        List<String> origins = cfg.cors() == null ? null : cfg.cors().allowedOrigins();
+        this.classroomRedirects = origins == null ? Set.of() : origins.stream()
+                .map(o -> o.strip().replaceAll("/+$", "")).filter(o -> !o.isEmpty())
+                .map(o -> o + CLASSROOM_PATH).collect(Collectors.toSet());
         List<String> extra = cfg.platforms() == null ? null : cfg.platforms().extraCanvasHosts();
         this.extraCanvasHosts = extra == null ? Set.of() : extra.stream()
                 .map(h -> h.strip().toLowerCase(Locale.ROOT)).filter(h -> !h.isEmpty()).collect(Collectors.toSet());
@@ -106,6 +120,7 @@ public class PlatformService {
         if (body == null || !body.isObject()) {
             throw new BadRequestException("Тело запроса — JSON-объект с доступами платформы");
         }
+        if (platform == PlatformEnum.CLASSROOM) return connectClassroom(userId, body);
         String code = platform == PlatformEnum.ITSLEARNING ? text(body, "code_or_url", MAX_SECRET) : null;
         ObjectNode creds = switch (platform) {
             case CANVAS -> canvas(body);
@@ -116,6 +131,7 @@ public class PlatformService {
                         .put("base_url", allowedUrl(required(body, "base_url", MAX_URL), ITSLEARNING_DOMAINS, Set.of()));
                 yield code != null ? c : tokens(body, c, false);
             }
+            case CLASSROOM -> throw new IllegalStateException("выше");
         };
         limit(userId);
         // Код или ссылка после входа в itslearning → токены выдаёт collector
@@ -142,6 +158,46 @@ public class PlatformService {
     /** Ссылка для входа в itslearning (по желанию): после входа ученик вставляет code_or_url. */
     public String itslearningUrl(String baseUrl) {
         return collector.itslearningUrl(allowedUrl(baseUrl, ITSLEARNING_DOMAINS, Set.of()));
+    }
+
+    /**
+     * Google Classroom, шаг 1: ссылка на вход Google. После входа Google вернёт ученика на {@code redirectUri}
+     * ({@code <сайт>/settings/platforms}) с {@code ?code=…&state=…}, фронт отправит их в {@code POST /platforms/classroom}.
+     */
+    public String classroomUrl(Long userId, String redirectUri) {
+        String redirect = classroomRedirect(redirectUri);
+        if (!google.configured()) {
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Google Classroom не настроен на сервере (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)");
+        }
+        return google.authorizationUrl(states.issue(userId), redirect);
+    }
+
+    /**
+     * Google Classroom, шаг 2: {@code {"code", "state", "redirect_uri"}} со страницы возврата → токены → проверка → сохранить.
+     * redirect_uri — тот же адрес, что был в ссылке входа (Google это сверяет).
+     */
+    private PlatformResponseDTO connectClassroom(Long userId, JsonNode body) {
+        String code = required(body, "code", 2000);
+        String state = required(body, "state", 500);
+        String redirect = classroomRedirect(required(body, "redirect_uri", MAX_URL));
+        if (!states.valid(state, userId)) {
+            throw new BadRequestException("Ссылка для входа устарела или уже использована. Нажмите «Подключить Google Classroom» ещё раз");
+        }
+        if (!connections.platformSupported(PlatformEnum.CLASSROOM.value())) {
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Google Classroom ещё не включён в базе (нужна миграция V22)");
+        }
+        limit(userId);
+        return verifyAndSave(userId, PlatformEnum.CLASSROOM, google.exchange(code, redirect));
+    }
+
+    /** Только точное совпадение с сайтом из CORS_ORIGINS + /settings/platforms, иначе это был бы открытый редирект. */
+    private String classroomRedirect(String raw) {
+        String r = raw == null ? "" : raw.strip();
+        if (!classroomRedirects.contains(r)) {
+            throw new BadRequestException("redirect_uri не разрешён: только адрес сайта из CORS_ORIGINS + " + CLASSROOM_PATH);
+        }
+        return r;
     }
 
     /** ДЗ этой платформы остаются в базе. */
@@ -202,7 +258,12 @@ public class PlatformService {
     private PlatformResponseDTO verifyAndSave(Long userId, PlatformEnum platform, JsonNode creds) {
         CollectResult result = collector.collect(Map.of(platform, creds));
         Source s = result.source(platform);
-        if (s == null || !s.ok()) {
+        if (s == null) {
+            // collector ничего не сказал про эту платформу — значит, он её ещё не умеет (старая версия)
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Сервис сбора ДЗ пока не умеет эту платформу: обновите collector");
+        }
+        if (!s.ok()) {
             String error = s == null || s.error() == null || s.error().isBlank() ? "Платформа не приняла доступ" : s.error();
             throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, error);
         }

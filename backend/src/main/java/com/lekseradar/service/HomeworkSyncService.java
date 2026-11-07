@@ -16,6 +16,9 @@ import com.lekseradar.security.RateLimiter;
 import com.lekseradar.service.collector.CollectorClient;
 import com.lekseradar.service.collector.CollectorClient.CollectResult;
 import com.lekseradar.service.collector.CollectorClient.Source;
+import com.lekseradar.service.google.GoogleOAuthClient;
+import com.lekseradar.exception.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -45,10 +48,13 @@ public class HomeworkSyncService {
     private final RateLimiter limiter;
     private final ObjectMapper json;
     private final TransactionTemplate tx;
+    private final GoogleOAuthClient google;
 
     public HomeworkSyncService(PlatformConnectionRepository connections, AssignmentRepository assignments,
                                UserEventRepository events, CollectorClient collector, CredentialsCipher cipher,
-                               RateLimiter limiter, ObjectMapper json, PlatformTransactionManager txManager) {
+                               RateLimiter limiter, ObjectMapper json, PlatformTransactionManager txManager,
+                               GoogleOAuthClient google) {
+        this.google = google;
         this.connections = connections;
         this.assignments = assignments;
         this.events = events;
@@ -75,20 +81,39 @@ public class HomeworkSyncService {
         Map<PlatformEnum, JsonNode> creds = new EnumMap<>(PlatformEnum.class);
         Map<PlatformEnum, Long> ids = new EnumMap<>(PlatformEnum.class);
 
+        Map<PlatformEnum, JsonNode> refreshed = new EnumMap<>(PlatformEnum.class);
+
         for (PlatformConnectionEntity c : connections.findByUserIdOrderByPlatform(userId)) {
             if (c.isNeedsReconnect()) {
                 sources.add(reconnect(c.getPlatform(), c.getLastError()));
                 continue;
             }
+            JsonNode decrypted;
             try {
-                creds.put(c.getPlatform(), cipher.decrypt(c.getCredentialsEnc()));
-                ids.put(c.getPlatform(), c.getId());
+                decrypted = cipher.decrypt(c.getCredentialsEnc());
             } catch (IllegalStateException e) {
                 // Сменился CREDENTIALS_KEY или байты испорчены: доступ не восстановить, только подключить заново
                 c.markSynced(false, RECONNECT, true);
                 connections.save(c);
                 sources.add(reconnect(c.getPlatform(), RECONNECT));
+                continue;
             }
+            if (c.getPlatform() == PlatformEnum.CLASSROOM) {
+                // Ключ Google живёт час: бэкенд сам обновляет его по refresh_token, collector получает готовый
+                try {
+                    JsonNode fresh = google.fresh(decrypted);
+                    if (fresh != decrypted) refreshed.put(c.getPlatform(), fresh);
+                    decrypted = fresh;
+                } catch (ApiException e) {
+                    boolean reconnect = e.getStatus() == HttpStatus.UNPROCESSABLE_ENTITY;
+                    c.markSynced(false, e.getMessage(), reconnect);
+                    connections.save(c);
+                    sources.add(new SourceStatusResponseDTO(c.getPlatform(), false, 0, e.getMessage(), reconnect));
+                    continue;
+                }
+            }
+            creds.put(c.getPlatform(), decrypted);
+            ids.put(c.getPlatform(), c.getId());
         }
         if (creds.isEmpty()) {
             return new SyncResponseDTO(sorted(sources), 0, 0);
@@ -101,7 +126,7 @@ public class HomeworkSyncService {
                 Source s = result.source(platform);
                 if (s == null) s = new Source(false, 0, "Платформа не ответила", false);
                 c.markSynced(s.ok(), s.error(), s.needsReconnect());
-                JsonNode updated = result.updatedCredentials().get(platform.value());
+                JsonNode updated = result.updatedCredentials().getOrDefault(platform.value(), refreshed.get(platform));
                 if (updated != null) c.setCredentialsEnc(cipher.encrypt(updated));
                 connections.save(c);
                 sources.add(new SourceStatusResponseDTO(platform, s.ok(), s.count(), s.error(), c.isNeedsReconnect()));

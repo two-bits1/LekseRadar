@@ -23,4 +23,11 @@ public interface PlatformConnectionRepository extends JpaRepository<PlatformConn
             WHERE u.id = c.userId AND c.needsReconnect = false AND u.lastLoginAt > :since
             """)
     List<Long> findUserIdsToSync(@Param("since") Instant since);
+
+    /** Есть ли значение в типе {@code platform} базы (например, 'classroom' появляется миграцией V22). */
+    @Query(value = """
+            SELECT EXISTS (SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid = e.enumtypid
+                           WHERE t.typname = 'platform' AND e.enumlabel = :value)
+            """, nativeQuery = true)
+    boolean platformSupported(@Param("value") String value);
 }

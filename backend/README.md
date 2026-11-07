@@ -181,6 +181,7 @@ src/main/java/com/lekseradar/
 | `MAIL_USERNAME` / `MAIL_PASSWORD` | — | **Обязательно для регистрации.** Gmail и пароль приложения (https://myaccount.google.com/apppasswords): с него уходят коды подтверждения |
 | `MAIL_HOST` / `MAIL_PORT` / `MAIL_FROM` | `smtp.gmail.com` / `587` / `MAIL_USERNAME` | Другой SMTP, адрес отправителя |
 | `MAIL_DEV_LOG_CODES` | `false` | Без почты печатать код в лог (только разработка) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | — | Google Classroom: OAuth-клиент из Google Cloud (Google Auth Platform → Clients). Без них Classroom отвечает 503, остальное работает. Адрес возврата — каждый сайт из `CORS_ORIGINS` + `/settings/platforms`, он же в Authorized redirect URIs |
 | `CREDENTIALS_KEY` | — | **Обязательно.** Ключ шифрования доступов к платформам, `openssl rand -base64 32`. Не терять: без него все подключения делать заново |
 | `COLLECTOR_URL` | `http://localhost:8090` | Сервис сбора ДЗ (`homework-collector`), только внутренняя сеть |
 | `COLLECTOR_KEY` | — | Общий ключ с collector (`X-Internal-Key`) |

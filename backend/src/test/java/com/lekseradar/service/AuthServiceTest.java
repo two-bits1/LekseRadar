@@ -52,7 +52,7 @@ class AuthServiceTest {
         mail = mock(MailService.class);
         clock = new TestClock();
         JwtService jwt = new JwtService(new AppConfig(new AppConfig.Jwt("unit-test-secret-unit-test-secret-1234", 1),
-                null, null, null, null, null, null));
+                null, null, null, null, null, null, null));
         auth = new AuthService(users, mock(UserEventRepository.class), new BCryptPasswordEncoder(4), jwt,
                 new RateLimiter(), mail, clock);
         when(users.existsByEmailIgnoreCase(anyString())).thenReturn(false);
