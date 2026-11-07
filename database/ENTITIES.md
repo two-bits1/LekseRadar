@@ -2,7 +2,7 @@
 
 Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO)
 и во фронтенде (TypeScript-типы). База — ветка `PythonAPI`, бэкенд — ветка `JavaAPI-setup`.
-Источник правды — миграции `database/migrations/V1–V19`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
+Источник правды — миграции `database/migrations/V1–V20`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
 поэтому поля сущностей должны совпадать с колонками ниже.
 
 **Состояние бэкенда.** Сейчас в `JavaAPI-setup` есть только `User`, `ChatSession`, `ChatMessage`, `MessageRole`
@@ -492,7 +492,7 @@ erDiagram
 |---|---|---|---|---|
 | `start_chat` | `p_user` bigint, `p_mode` chat_mode, `p_subject` text, `p_topic` text, `p_title` text, `p_assignment` bigint | `bigint` id чата | создаёт чат нужного режима, предмет при необходимости, событие `chat_started` | `POST /chats` |
 | `chat_system_prompt` | `p_session` bigint | `TABLE(prompt_id, prompt_key, version, content, mode, user_id, subject_id, subject, topic, language)` | активный промпт режима чата; ошибка, если промпт не загружен | `POST /chats/{id}/messages` |
-| `chat_prompt_vars` | `p_session` bigint | `jsonb` | значения `{{language}}`, `{{subject}}`, `{{topic}}`, `{{level}}`, `{{homework_title}}`, `{{homework_due}}`, `{{homework_text}}`, `{{weak_topics}}` | `POST /chats/{id}/messages` |
+| `chat_prompt_vars` | `p_session` bigint | `jsonb` | значения `{{language}}`, `{{language_code}}` (код, V20), `{{subject}}`, `{{topic}}`, `{{level}}`, `{{homework_title}}`, `{{homework_due}}`, `{{homework_text}}`, `{{weak_topics}}` | `POST /chats/{id}/messages` |
 | `set_chat_language` | `p_session` bigint, `p_language` text | — | сохранить язык, когда ИИ вернул метку `[[LANGUAGE=xx]]` | `POST /chats/{id}/messages` |
 | `get_prompt` | `p_key` text | `text` | активная версия промпта (`answer_checker` и др.) | проверка ответа квиза |
 | `save_prompt` | `p_key`, `p_content`, `p_note` text | `int` версия | новая версия промпта, если текст изменился | `load.py` |

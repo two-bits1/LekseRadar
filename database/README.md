@@ -43,6 +43,7 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V17__language_from_site.sql` | язык ИИ берётся с сайта (`users.locale`), `language_name()` |
 | `V18__dashboard_overdue.sql` | дашборд: `todo` с прошедшим дедлайном считается просроченным |
 | `V19__quiz_answer_errors.sql` | `save_quiz_answer()`: понятная ошибка для пустого ответа и multiple_choice не массивом |
+| `V20__language_code.sql` | `{{language_code}}` в `chat_prompt_vars()`: код языка (`ru`) для JSON квиза, `language_code()` |
 
 ## Схема
 
