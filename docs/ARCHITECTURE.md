@@ -130,7 +130,8 @@ sequenceDiagram
     F->>B: POST /api/chats/{id}/messages
     B->>D: INSERT chat_messages(role='student')
     B->>D: SELECT chat_context (последние 10 реплик)
-    B->>D: get_prompt('tutor'), materials_for_prompt(вопрос)
+    B->>D: chat_system_prompt(чат): промпт режима tutor или quiz
+    B->>D: materials_for_prompt(вопрос)
     B->>L: системный промпт (+ фрагменты материалов) + история + вопрос
     L-->>B: ответ
     B->>D: INSERT chat_messages(role='tutor')
@@ -213,7 +214,7 @@ flowchart LR
 |--------------|-------|-------------------|--------|
 | ✅ `POST /api/auth/register`, `/login` | Вход | создать пользователя / выдать JWT | `users` |
 | ✅ `GET/PUT /api/users/me` | Профиль | профиль | `users` |
-| ✅ `GET/POST /api/chats`, `PATCH/DELETE /api/chats/{id}` | ИИ-чат | список и управление чатами | `chat_sessions` |
+| ✅ `GET/POST /api/chats` 🆕 `{mode: tutor/quiz, subject, topic}`, `PATCH/DELETE /api/chats/{id}` | ИИ-чат | два вида чата: репетитор и генерация квизов | `start_chat`, `user_chats` |
 | ✅ `GET/POST /api/chats/{id}/messages` | ИИ-чат | история / новое сообщение → ИИ | `chat_messages`, `chat_context` |
 | 🆕 `GET /api/platforms`, `POST/DELETE /api/platforms/{platform}` | Настройки | подключить платформу, статус, «войти заново» | `platform_connections` |
 | 🆕 `POST /api/homework/sync`, `GET /api/homework` | Домашка | вызвать `collect()`, сохранить и отдать ДЗ | `assignments` |
@@ -244,6 +245,7 @@ flowchart LR
 | Python `collect()` без своей базы | бэкенд хранит токены зашифрованными, Python только забирает ДЗ; одна упавшая платформа не ломает остальные |
 | `updated_credentials` в ответе `collect()` | токены Teams/itslearning и cookie InSchool обновляются, бэкенд сохраняет новые |
 | `user_events` для всего | из одной таблицы строятся история, активные дни, ачивки |
+| Режим чата `tutor` / `quiz` с закреплённым промптом | в каждом чате ИИ всегда работает по своему промпту, режим нельзя случайно поменять посреди разговора |
 | Промпты в базе с версиями | меняем промпт без пересборки бэкенда, можно откатиться, видно каким промптом сделан квиз |
 | Материалы режутся на фрагменты, поиск в PostgreSQL | ИИ не дообучается: перед ответом бэкенд находит 5 подходящих кусков учебника и вставляет в промпт; без отдельной векторной базы |
 | Демо-режим и `seed.sql` | демо на хакатоне работает без настоящих аккаунтов |
