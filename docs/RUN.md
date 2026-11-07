@@ -1,6 +1,6 @@
-# Как запустить и проверить весь LekseRadar (ветка main-test-1.0)
+# Как запустить и проверить весь LekseRadar (ветка main-test-2.0)
 
-В main-test-1.0 слиты три ветки: `PythonAPI` (база, сбор ДЗ, промпты), `Frontend-setup`, `JavaAPI-setup`.
+В main-test-2.0: `main-test-1.0` + свежие `JavaAPI-setup` и `Frontend-setup`.
 
 ## 1. База (PostgreSQL 16, Docker)
 ```bash
@@ -31,7 +31,8 @@ cd frontend
 pnpm install
 pnpm dev                      # http://localhost:5173
 ```
-Пока работает на демо-данных, к API бэкенда ещё не подключён.
+Вход, профиль и чат идут на бэкенд через proxy Vite (`/api` → `localhost:8080`), остальные страницы пока демо.
+Тесты: `pnpm test`.
 
 ## 5. Сбор ДЗ (Python)
 ```bash
@@ -41,11 +42,6 @@ python -m homework --demo     # демо-ДЗ со всех 4 платформ
 python -m pytest -q
 ```
 
-## Что проверено перед слиянием
-| Часть | Проверка | Результат |
-|---|---|---|
-| База | все миграции V1–V15 + seed на чистом PostgreSQL 16 | ок |
-| Python | `pytest` в homework-collector | 6 из 6 |
-| Фронтенд | `pnpm build` (tsc + vite) | ок |
-| Бэкенд | `mvn test` | 3 из 3 |
-| Бэкенд + база | запуск на базе из `database/`: health, вход демо-ученика, `/users/me`, список и создание чата, регистрация | ок |
+## Что проверено
+
+См. [README-TEST.md](../README-TEST.md).
