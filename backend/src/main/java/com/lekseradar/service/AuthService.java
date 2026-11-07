@@ -30,6 +30,8 @@ public class AuthService {
     private final PasswordEncoder encoder;
     private final JwtService jwt;
     private final RateLimiter limiter;
+    /** Хеш для проверки, когда email не найден: ответ занимает столько же времени и не выдаёт, есть ли такой ученик. */
+    private final String dummyHash;
 
     public AuthService(UserRepository users, UserEventRepository events, PasswordEncoder encoder, JwtService jwt,
                        RateLimiter limiter) {
@@ -38,6 +40,7 @@ public class AuthService {
         this.encoder = encoder;
         this.jwt = jwt;
         this.limiter = limiter;
+        this.dummyHash = encoder.encode("timing-equalizer-not-a-password");
     }
 
     @Transactional
@@ -60,9 +63,9 @@ public class AuthService {
         if (limiter.count(key, FAILED_LOGIN_WINDOW) >= MAX_FAILED_LOGINS) {
             throw new TooManyRequestsException("Слишком много неверных попыток входа. Попробуйте через 15 минут");
         }
-        UserEntity user = users.findByEmailIgnoreCase(email)
-                .filter(u -> encoder.matches(req.password(), u.getPasswordHash()))
-                .orElse(null);
+        UserEntity user = users.findByEmailIgnoreCase(email).orElse(null);
+        boolean ok = encoder.matches(req.password(), user == null ? dummyHash : user.getPasswordHash());
+        if (!ok) user = null;
         if (user == null) {
             limiter.record(key);
             throw new UnauthorizedException("Неверный email или пароль");
