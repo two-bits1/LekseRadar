@@ -123,3 +123,45 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .quick button:hover:not(:disabled){border-color:rgba(116,212,196,.45);color:var(--primary)}.quick button svg{color:var(--primary)}
 .quick+.composer{margin-top:8px}
 .katex{font-size:1.05em}.msg .katex-display{margin:8px 0;overflow-x:auto;overflow-y:hidden}
+/* ==== Квиз и карточки ==== */
+.app-page{padding-top:40px}
+.page-head{margin-bottom:24px}.page-head h1{font-size:clamp(28px,3.4vw,40px);font-weight:650;letter-spacing:-.03em;line-height:1.1;margin:0;color:var(--text)}.page-head p{font-size:15px;color:var(--muted);margin:8px 0 0}
+.section-label{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;margin:32px 0 10px}
+.section-sub{font-size:14px;color:var(--muted);margin:-4px 0 12px}
+.form-panel{padding:18px}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-row .field{margin:0 0 14px}
+.app[data-theme=dark] .field input,.app[data-theme=dark] .field select{background:rgba(255,255,255,.04);border:1px solid var(--glass-border);color:var(--text);border-radius:9px;height:44px;padding:0 13px}
+.app[data-theme=dark] .field input:focus,.app[data-theme=dark] .field select:focus{outline:none;border-color:rgba(116,212,196,.55);box-shadow:0 0 0 3px rgba(116,212,196,.16)}
+.seg{display:flex;gap:6px;border:0;padding:0;margin:0 0 14px;flex-wrap:wrap}.seg legend{font-size:12px;color:var(--text);margin-bottom:9px;padding:0}
+.seg button{height:40px;padding:0 14px;border-radius:9px;font-size:13px;font-weight:500;color:var(--muted);background:transparent;border:1px solid var(--glass-border)}
+.seg button[aria-pressed=true]{color:var(--text);background:rgba(116,212,196,.1);border-color:rgba(116,212,196,.45)}
+.feedback.hint{background:var(--blue);color:var(--secondary);align-items:center}
+.quiz-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:16px 0 12px;flex-wrap:wrap}.quiz-head .dash-date{margin:0}
+.quiz-steps{display:flex;gap:5px}.quiz-steps span{width:22px;height:4px;border-radius:4px;background:var(--soft)}.quiz-steps .on{background:var(--text)}
+.quiz-steps .correct{background:#5fd3a0}.quiz-steps .partial{background:#e0b866}.quiz-steps .incorrect{background:#e38a7e}
+.question{padding:22px}.question-text{font-size:19px;line-height:1.55;color:var(--text);margin:6px 0 18px}.question-text p{margin:0;color:inherit;font-size:inherit}
+.options{display:flex;flex-direction:column;gap:8px}
+.option{display:flex;align-items:center;gap:12px;min-height:52px;padding:12px 14px;border-radius:11px;text-align:left;font-size:15px;color:var(--text);background:rgba(255,255,255,.03);border:1px solid var(--glass-border);transition:border-color .15s,background .15s}
+.option:hover:not(:disabled){border-color:var(--border-strong)}.option.picked{border-color:rgba(116,212,196,.6);background:rgba(116,212,196,.08)}
+.option.right{border-color:rgba(95,211,160,.7);background:rgba(95,211,160,.08)}.option:disabled{cursor:default}
+.option-mark{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;border:1px solid var(--border-strong);flex-shrink:0;color:#0b0b0c}
+.option.picked .option-mark{background:var(--primary);border-color:var(--primary)}
+.verdict{margin-top:16px}.verdict strong{display:block;font-size:15px}.verdict p{margin:4px 0 0;font-size:14px;color:inherit}.explanation{margin-top:8px;color:var(--text);font-size:14px;line-height:1.6}.explanation p{color:inherit;font-size:inherit;margin:0}
+.quiz-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.score{font-size:clamp(40px,6vw,64px)!important;font-weight:650;letter-spacing:-.03em;color:var(--primary)!important;margin:12px 0 0!important}
+.mini-stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap}.mini-stats span{display:flex;align-items:baseline;gap:7px;padding:9px 14px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass);font-size:13px;color:var(--muted)}
+.mini-stats strong{font-size:18px;font-weight:600;color:var(--text)}.mini-stats .hot{border-color:rgba(116,212,196,.4)}.mini-stats .hot strong{color:var(--primary)}
+.fcard{display:block;width:100%;min-height:300px;perspective:1400px;background:none;border:0;padding:0;margin:8px 0 14px;cursor:pointer}
+.fcard-inner{position:relative;display:block;width:100%;min-height:300px;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.7,.2,1)}
+.fcard.flipped .fcard-inner{transform:rotateY(180deg)}
+.fcard-face{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:28px;border-radius:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--glass);border:1px solid var(--glass-border);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 30px 70px -40px var(--glow);text-align:center}
+.fcard-back{transform:rotateY(180deg);border-color:rgba(116,212,196,.35)}
+.fcard-text{font-size:clamp(20px,2.6vw,26px);line-height:1.45;color:var(--text);font-weight:500}.fcard-text p{margin:0;color:inherit;font-size:inherit}
+.fcard-expl{font-size:14px;line-height:1.6;color:var(--muted);max-width:520px}.fcard-expl p{margin:0;color:inherit;font-size:inherit}
+.fcard-show{width:100%}
+.grades{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.grade{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:58px;justify-content:center;border-radius:11px;font-size:14px;font-weight:500;color:var(--text);background:var(--glass);border:1px solid var(--glass-border)}
+.grade kbd{font:500 11px Inter,sans-serif;color:var(--muted);border:1px solid var(--glass-border);border-radius:5px;padding:0 5px}
+.grade-again:hover{border-color:rgba(227,138,126,.6)}.grade-hard:hover{border-color:rgba(224,184,102,.6)}.grade-good:hover{border-color:rgba(116,212,196,.6)}.grade-easy:hover{border-color:rgba(143,179,255,.6)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media(max-width:560px){.form-row{grid-template-columns:1fr}.grades{grid-template-columns:repeat(2,minmax(0,1fr))}.fcard,.fcard-inner{min-height:260px}.question{padding:16px}.question-text{font-size:17px}.quiz-actions .btn{flex:1}}
+.option .katex,.verdict .katex{font-size:1.25em}

@@ -1,18 +1,11 @@
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Link2, Sun, Moon, SunMoon, LogOut, Languages } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowUpRight, Link2, Sun, Moon, SunMoon, LogOut, Languages } from 'lucide-react';
 import { type ThemeChoice, EVENING_START, MORNING_END } from '../theme';
-import { assignments, routes } from '../data';
-import { PATHS, chatAbout } from '../paths';
+import { routes } from '../data';
+import { PATHS } from '../paths';
 import { useAuth } from '../auth';
 import { LANGS, LANG_NAMES, useLang, useT } from '../i18n';
-// Демо-неделя 46: понедельник 9 ноября 2026. Названия дней и месяцев — через Intl на языке интерфейса.
-const DEMO_MONDAY = new Date(2026, 10, 9);
-export function Calendar(){const t=useT();const c=t.calendar;const {tag}=useLang();const [params,setParams]=useSearchParams();const [offset,setOffset]=useState(0);const [weekly,setWeekly]=useState(false);const month=new Date(2026,10+offset,1);const monthDays=new Date(2026,11+offset,0).getDate();const pad=(month.getDay()+6)%7;const selected=assignments.find(a=>a.id===params.get('assignment'));
- const weekdays=Array.from({length:7},(_,i)=>new Intl.DateTimeFormat(tag,{weekday:'short'}).format(new Date(2026,10,9+i)));
- const heading=weekly?new Intl.DateTimeFormat(tag,{day:'numeric',month:'long',year:'numeric'}).formatRange(DEMO_MONDAY,new Date(2026,10,15)):new Intl.DateTimeFormat(tag,{month:'long',year:'numeric'}).format(month);
- const shortDate=(day:number)=>new Intl.DateTimeFormat(tag,{day:'numeric',month:'short'}).format(new Date(2026,10,day));
- return <section className="page"><div className="page-heading"><div><div className="eyebrow">{c.eyebrow}</div><h1>{c.title}</h1><p>{c.intro}</p></div><div className="filters"><button className={!weekly?'selected':''} onClick={()=>setWeekly(false)}>{c.month}</button><button className={weekly?'selected':''} onClick={()=>{setWeekly(true);setOffset(0)}}>{c.demoWeek}</button></div></div><section className="calendar-panel"><div className="section-title"><h2><span className="cap-first">{heading}</span></h2>{!weekly&&<div className="actions"><button aria-label={c.prevMonth} onClick={()=>setOffset(offset-1)}><ChevronLeft size={18}/></button><button aria-label={c.nextMonth} onClick={()=>setOffset(offset+1)}><ChevronRight size={18}/></button></div>}</div><div className="calendar-grid">{weekdays.map(d=><div className="weekday cap-first" key={d}>{d}</div>)}{Array.from({length:weekly?7:pad+monthDays},(_,i)=>{const day=weekly?9+i:i-pad+1;return <div key={i} className={`calendar-day ${day===9&&offset===0?'today':''}`}>{day>0&&<><span>{day}</span>{offset===0&&assignments.filter(a=>a.day===day).map(a=><button key={a.id} className={a.color} onClick={()=>setParams({assignment:a.id})} aria-label={c.open(a.subject,a.title)}>{a.subject}</button>)}</>}</div>})}</div></section>{selected&&<article className="lesson-card"><div className="section-title"><span className="eyebrow">{selected.subject} · {shortDate(selected.day)} · DEMO</span><button onClick={()=>setParams({})}>{c.close}</button></div><h2>{selected.title}</h2><p>{selected.description}</p><Link className="button dark-button" to={chatAbout(selected.id)}>{c.explore} <ArrowUpRight size={16}/></Link></article>}<p className="quiet-note">{c.demoNote}</p></section>}
 export function Settings({theme,setTheme,platformsOnly=false}:{theme:ThemeChoice,setTheme:(t:ThemeChoice)=>void,platformsOnly?:boolean}){
  const {user,logout}=useAuth();const t=useT();const s=t.settings;const {lang,setLang}=useLang();
  const [integration,setIntegration]=useState<string|null>(null);
