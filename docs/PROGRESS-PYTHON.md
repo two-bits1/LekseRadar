@@ -44,7 +44,22 @@ python ai-content/check/check_ai.py --email test@lekseradar.no --password LekseR
 ```
 Таблицу из вывода — в README-TEST.md.
 
+## Коммиты 11–15
+
+| Коммит | Шаг плана | Что сделано | Проверено |
+|---|---|---|---|
+| `52b2474` | 5 | [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md): Postgres, collector и бэкенд на Railway, переменные, проверка | — |
+| `112d1da` | 5 | `migrate.sh`: если нет `psql`, берёт его из Docker | — |
+| `043d6a0` | 5 | `database/migrate.py`: те же миграции без `psql` и Docker, только Python | чистая база V1–V21, повтор ничего не делает |
+| `004edb7` | 5 | `database/setup_cloud_db.py`: спрашивает адрес скрыто, проверяет его, миграции → `load.py` → проверка | облачная база Railway: V1–V21 ✓, 3 промпта |
+| `ccd542f` | — | itslearning: если вместо токена пришёл не JSON, понятная ошибка вместо `JSONDecodeError` (по просьбе №2) | новый тест, `pytest` 19 из 19 |
+
+**Railway (7 ноября):** collector Online без публичного адреса, Postgres Online, миграции V1–V21 и промпты загружены.
+Если `setup_cloud_db.py` падает с `ConnectionTimeout`, а в логах Postgres `could not accept SSL connection: unexpected eof`,
+виновата сеть (Wi-Fi рвёт TLS): помогла другая сеть.
+
 ## Дальше
 
-- Шаг 5: инструкция деплоя на Railway (база, collector, переменные для бэкенда).
-- Шаг 4: прогон `check_ai.py` с настоящим ключом — нужен ключ.
+- Убрать Public Access у Postgres.
+- Бэкенд на Railway (DEPLOY-RAILWAY.md, раздел 3), ключ Groq в его Variables.
+- Шаг 4: `check_ai.py` против бэкенда на Railway, таблицу в README-TEST.md.
