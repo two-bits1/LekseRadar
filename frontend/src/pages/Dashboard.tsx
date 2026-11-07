@@ -4,9 +4,11 @@ import { ArrowRight, ArrowUpRight, Check, Clock3, Sparkles, Layers, ChevronRight
 import { assignments } from '../data';
 import { Orb } from '../main';
 import { PATHS, chatAbout, homeworkItem } from '../paths';
+import { useAuth } from '../auth';
 export function Dashboard({completed,toggle}:{completed:string[],toggle:(id:string)=>void}){
  const [subject,setSubject]=useState('Alle fag');
- return <section className="page dashboard"><div className="greeting"><div><div className="eyebrow">DIN LILLE OVERSIKT · DEMOUKE 46</div><h1>Plass til å lære.<br/><span>Og til alt det andre.</span></h1><p>Hei, elev. Vi tar én ting om gangen.</p></div><div className="date-note"><CalendarDays size={18}/><span>Mandag 9. november<small>En ny uke, nye muligheter.</small></span></div></div>
+ const {user}=useAuth();
+ return <section className="page dashboard"><div className="greeting"><div><div className="eyebrow">DIN LILLE OVERSIKT · DEMOUKE 46</div><h1>Plass til å lære.<br/><span>Og til alt det andre.</span></h1><p>Hei, {user?.displayName??'elev'}. Vi tar én ting om gangen.</p></div><div className="date-note"><CalendarDays size={18}/><span>Mandag 9. november<small>En ny uke, nye muligheter.</small></span></div></div>
  <div className="dashboard-grid"><div className="primary-column"><div className="focus-card"><div><div className="eyebrow"><span className="live-dot"/>LITT FOKUS NÅ, LITT MER FRI SENERE</div><h2>En god start på uka.</h2><p>Begynn med matematikk. Vi hjelper deg<br className="desktop-break"/> å forstå, ikke bare finne svaret.</p><Link className="button dark-button" to={chatAbout('likninger')}>La oss se på det <ArrowUpRight size={16}/></Link></div><div className="focus-art"><Orb/><span>Din nysgjerrighet.<br/>En liten hjelpende hånd.</span></div></div>
  <div className="section-title"><h2>På planen din <span className="count">{assignments.length-completed.length}</span></h2><Link to={PATHS.homework}>Se kalender <ArrowUpRight size={14}/></Link></div>
  <div className="filters" aria-label="Filtrer etter fag">{['Alle fag','Matematikk','Norsk','Naturfag','Engelsk'].map(s=><button key={s} aria-pressed={s===subject} className={s===subject?'selected':''} onClick={()=>setSubject(s)}>{s}</button>)}</div>
