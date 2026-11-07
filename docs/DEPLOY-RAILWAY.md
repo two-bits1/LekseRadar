@@ -20,15 +20,15 @@ Vercel (фронт) ──https──► backend ──private──► collecto
 
 ```bash
 export DATABASE_URL='<DATABASE_PUBLIC_URL>'
-database/migrate.sh "$DATABASE_URL"                         # V1–V21, учёт в schema_migrations
-pip install -r ai-content/load/requirements.txt
+pip install -r ai-content/load/requirements.txt              # psycopg и др.; psql и Docker не нужны
+python database/migrate.py "$DATABASE_URL"                   # V1–V21, учёт в schema_migrations
 python ai-content/load/load.py                               # промпты и учебные материалы
-database/migrate.sh "$DATABASE_URL" --status                 # все ✓
+python database/migrate.py "$DATABASE_URL" --status          # все ✓
 ```
 
 **Не** загружайте `database/testdata/seed.sql`: на настоящем сайте тестового ученика быть не должно.
 
-Новые миграции потом докатываются той же командой `database/migrate.sh "$DATABASE_URL"`.
+Новые миграции потом докатываются той же командой `python database/migrate.py "$DATABASE_URL"`.
 
 ## 2. collector (№3, 15 мин)
 
@@ -96,6 +96,6 @@ python ai-content/check/check_ai.py --api $API/api/v1 --email <ученик> --p
 |---|---|
 | collector падает с `COLLECTOR_KEY не задан` | переменная не задана или короче 16 символов |
 | бэкенд: `Connection refused` к collector | у collector нет `HOST=::` или имя сервиса не `collector` |
-| бэкенд не стартует: `Schema-validation: missing …` | в базе не все миграции: `database/migrate.sh "$DATABASE_URL" --status` |
+| бэкенд не стартует: `Schema-validation: missing …` | в базе не все миграции: `python database/migrate.py "$DATABASE_URL" --status` |
 | чат: «промпт не загружен» | не запущен `load.py` на облачной базе |
 | фронт: ошибка CORS | `CORS_ORIGINS` не совпадает с адресом Vercel (без `/` в конце) |
