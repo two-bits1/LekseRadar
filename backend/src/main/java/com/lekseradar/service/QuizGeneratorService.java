@@ -210,19 +210,61 @@ public class QuizGeneratorService {
         while (list.size() > MAX_COUNT) list.remove(list.size() - 1);
         for (JsonNode q : list) {
             if (!(q instanceof ObjectNode question)) throw new InvalidQuizException("вопрос должен быть объектом");
-            String type = question.path("type").asText("");
-            if (!TYPES.contains(type)) {
+            if (!TYPES.contains(question.path("type").asText(""))) {
                 throw new InvalidQuizException("type должен быть single_choice, multiple_choice или text");
             }
-            JsonNode answer = question.path("correct_answer");
-            // single_choice с ответом-массивом из одного варианта → строка (иначе база не сравнит ответ)
-            if ("single_choice".equals(type) && answer.isArray() && answer.size() == 1) {
-                question.put("correct_answer", answer.get(0).asText());
-            }
-            if ("text".equals(type)) {
-                question.remove("options");
-            }
         }
+        // Вопрос, который не удалось починить (меньше 2 вариантов, ответа нет среди вариантов), выбрасываем,
+        // а не роняем весь квиз: ученик получит на один вопрос меньше.
+        for (int i = list.size() - 1; i >= 0; i--) {
+            if (!fixQuestion((ObjectNode) list.get(i))) list.remove(i);
+        }
+        if (list.isEmpty()) throw new InvalidQuizException("ни один вопрос не прошёл проверку");
+    }
+
+    /**
+     * Чинит типичные ошибки ИИ в вопросе:
+     * пустые и повторяющиеся варианты убираются; ответ-массив у single_choice из нескольких вариантов →
+     * multiple_choice (иначе выбрать можно только один, а верных несколько); из одного → строка;
+     * multiple_choice с ответом-строкой → массив из одного. Возвращает false, если вопрос не спасти.
+     */
+    static boolean fixQuestion(ObjectNode question) {
+        String type = question.path("type").asText("");
+        if (question.path("question").asText("").isBlank()) return false;
+        if ("text".equals(type)) {
+            question.remove("options");
+            String answer = question.path("correct_answer").asText("").strip();
+            if (answer.isEmpty()) return false;
+            question.put("correct_answer", answer);
+            return true;
+        }
+        List<String> options = cleanList(question.path("options"));
+        List<String> correct = cleanList(question.path("correct_answer"));
+        correct.retainAll(options);
+        if (options.size() < 2 || correct.isEmpty()) return false;
+
+        ArrayNode opts = question.putArray("options");
+        options.forEach(opts::add);
+        if (correct.size() == 1 && "single_choice".equals(type)) {
+            question.put("correct_answer", correct.get(0));
+        } else {
+            question.put("type", "multiple_choice");
+            ArrayNode ans = question.putArray("correct_answer");
+            correct.forEach(ans::add);
+        }
+        return true;
+    }
+
+    /** Строка или массив строк → список без пустых и повторов, с обрезанными пробелами. */
+    private static List<String> cleanList(JsonNode node) {
+        List<String> out = new ArrayList<>();
+        Iterable<JsonNode> items = node.isArray() ? node : List.of(node);
+        for (JsonNode item : items) {
+            if (item == null || item.isNull() || item.isMissingNode() || item.isContainerNode()) continue;
+            String v = item.asText("").strip();
+            if (!v.isEmpty() && !out.contains(v)) out.add(v);
+        }
+        return out;
     }
 
     /** import_quiz_json сам проверяет формат и бросает «quiz json: …». */
