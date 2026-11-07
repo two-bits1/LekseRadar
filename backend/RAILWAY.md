@@ -60,7 +60,7 @@ Settings → Networking → **Generate Domain**. Это адрес API:
 ```bash
 API=https://<домен>
 curl $API/actuator/health          # {"status":"UP"}
-open $API/swagger-ui/index.html    # Swagger
+open $API/swagger-ui.html          # Swagger
 ```
 
 Затем регистрация и вход через Swagger или фронт. Проверка ИИ (делает Илья):
