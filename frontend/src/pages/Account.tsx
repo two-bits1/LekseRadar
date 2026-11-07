@@ -6,8 +6,8 @@ import { assignments } from '../data';
 import { PATHS } from '../paths';
 import { useAuth, initialOf } from '../auth';
 import { usersApi } from '../api/endpoints';
-import type { ApiError, Locale, User } from '../api/types';
-import { Field, LOCALES, asApiError, fieldError, generalError } from '../forms';
+import type { ApiError, User } from '../api/types';
+import { Field, asApiError, fieldError, generalError } from '../forms';
 
 // POST /auth/login | /auth/register → токен → на «/».
 // Ошибки: 400 → fields под полями, 409 → message у поля email, остальное → над кнопкой.
@@ -48,7 +48,8 @@ const timezones=():string[]=>{try{return Intl.supportedValuesOf('timeZone')}catc
 
 function ProfileForm({user}:{user:User}){
  const {updateUser}=useAuth();
- const [form,setForm]=useState({displayName:user.displayName,locale:user.locale,timezone:user.timezone});
+ // Язык здесь не меняется — только в настройках (для всего сайта и ИИ).
+ const [form,setForm]=useState({displayName:user.displayName,timezone:user.timezone});
  const [error,setError]=useState<ApiError|null>(null);const [busy,setBusy]=useState(false);const [saved,setSaved]=useState(false);
  const zones=timezones();if(!zones.includes(form.timezone))zones.unshift(form.timezone);
  // PATCH: «меняются только переданные поля» — шлём только изменённые.
@@ -57,9 +58,8 @@ function ProfileForm({user}:{user:User}){
  const submit=async(e:FormEvent)=>{e.preventDefault();if(!Object.keys(changes).length)return;setBusy(true);setError(null);
   try{updateUser(await usersApi.update(changes));setSaved(true)}catch(err){setError(asApiError(err))}finally{setBusy(false)}};
  const selectError=(k:string)=>fieldError(error,k);
- return <form className="lesson-card" onSubmit={submit} noValidate><h2>Om deg</h2><p>Språket gjelder også AI-veilederen.</p>
+ return <form className="lesson-card" onSubmit={submit} noValidate><h2>Om deg</h2>
   <Field name="displayName" label="Navn" type="text" autoComplete="name" required maxLength={100} value={form.displayName} onChange={set('displayName')} error={fieldError(error,'displayName')}/>
-  <label className="field">Språk<select name="locale" value={form.locale} onChange={set('locale')} aria-invalid={!!selectError('locale')}>{(Object.keys(LOCALES) as Locale[]).map(l=><option key={l} value={l}>{LOCALES[l]}</option>)}</select>{selectError('locale')&&<span className="field-error">{selectError('locale')}</span>}</label>
   <label className="field">Tidssone<select name="timezone" value={form.timezone} onChange={set('timezone')} aria-invalid={!!selectError('timezone')}>{zones.map(z=><option key={z} value={z}>{z.replace(/_/g,' ')}</option>)}</select>{selectError('timezone')&&<span className="field-error">{selectError('timezone')}</span>}</label>
   {generalError(error)&&<p role="alert" className="feedback danger">{generalError(error)}</p>}
   {saved&&<p role="status" className="feedback success"><Check size={17}/>Lagret.</p>}
