@@ -24,6 +24,8 @@
 
 ## Кто что делает
 
+Подробные планы: **бэкенд [docs/PLAN-BACKEND.md](docs/PLAN-BACKEND.md)**, **фронт [docs/PLAN-FRONTEND.md](docs/PLAN-FRONTEND.md)**.
+
 Все трое начинают сразу: фронт и бэк работают по контрактам ниже, не дожидаясь друг друга.
 Точки встречи отмечены 🔗.
 
@@ -70,16 +72,17 @@
 // PUT /api/v1/platforms/inschool {"host": "ohg-vgs.inschool.visma.no", "cookies": {"JSESSIONID": "…"}} → 200
 // POST /api/v1/platforms/teams/start → {"userCode": "ABCD-EFGH", "verificationUri": "https://microsoft.com/devicelogin",
 //                                      "deviceCode": "…", "interval": 5}
-// POST /api/v1/platforms/teams/poll {"deviceCode": "…"} → 202 (ждём) | 200 элемент списка
+// POST /api/v1/platforms/teams/poll {"deviceCode": "…"} → {"status": "pending"} | {"status": "connected", "platform": {…}}
 // GET  /api/v1/platforms/itslearning/url?baseUrl=… → {"url": "https://…/oauth2/authorize.aspx?…"}
 // POST /api/v1/platforms/itslearning {"baseUrl": "…", "codeOrUrl": "itsl-itslearning://login?code=…"} → 200
 // DELETE /api/v1/platforms/{platform} → 204
-// Ошибки: 400 неверные данные или домен, 401 платформа не приняла доступ, 429 слишком часто.
+// Ошибки: 400 неверные данные или домен, 422 платформа не приняла доступ, 429 слишком часто, 503 collector недоступен.
+// Не 401: фронт на 401 разлогинивает ученика.
 
 // POST /api/v1/homework/sync → 200
 {"added": 3, "updated": 9,
- "sources": {"canvas": {"ok": true, "count": 12, "error": null, "needsReconnect": false},
-             "inschool": {"ok": false, "count": 0, "error": "Сессия InSchool истекла…", "needsReconnect": true}}}
+ "sources": [{"platform": "canvas", "ok": true, "count": 12, "error": null, "needsReconnect": false},
+             {"platform": "inschool", "ok": false, "count": 0, "error": "Сессия InSchool истекла…", "needsReconnect": true}]}
 ```
 
 ### Порядок по времени
@@ -146,7 +149,7 @@ Java не умеет вызывать Python-функцию напрямую. О
 | PUT | `/api/v1/platforms/canvas` | `{baseUrl, token}` → проверка одним `collect` → сохранить |
 | PUT | `/api/v1/platforms/inschool` | `{host, cookies}` → так же |
 | POST | `/api/v1/platforms/teams/start` | → `{userCode, verificationUri, deviceCode}` |
-| POST | `/api/v1/platforms/teams/poll` | `{deviceCode}` → 202 пока ждём, 200 и сохранить, когда вошёл |
+| POST | `/api/v1/platforms/teams/poll` | `{deviceCode}` → `{status: pending}` пока ждём, `{status: connected}` и сохранить, когда вошёл |
 | GET | `/api/v1/platforms/itslearning/url?baseUrl=` | ссылка для входа |
 | POST | `/api/v1/platforms/itslearning` | `{baseUrl, codeOrUrl}` → сохранить |
 | DELETE | `/api/v1/platforms/{platform}` | удалить подключение; ДЗ этой платформы остаются |
