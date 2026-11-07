@@ -1,8 +1,7 @@
 // Страницы аккаунта на настоящем API: /login, /register, /profile (API.md).
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Check, LogOut } from 'lucide-react';
-import { assignments } from '../data';
+import { Check, LogOut } from 'lucide-react';
 import { PATHS } from '../paths';
 import { useAuth, initialOf } from '../auth';
 import { usersApi } from '../api/endpoints';
@@ -41,15 +40,12 @@ export function AuthForm({register=false}:{register?:boolean}){
 }
 
 // /profile: GET/PATCH /users/me, PUT /users/me/password, «Logg ut» (= удалить токен).
-export function Profile({completed}:{completed:string[]}){
+export function Profile(){
  const {user,logout}=useAuth();const t=useT();const p=t.profile;
  return <section className="page narrow"><div className="page-intro"><span className="avatar large">{initialOf(user)}</span><div className="eyebrow">{p.eyebrow}</div><h1>{user?p.titleNamed(user.displayName):p.title}</h1><p>{user?user.email:p.loading}</p></div>
-  <div className="profile-stats"><article><strong>{completed.length}</strong><span>{p.statsDone}</span></article><article><strong>4</strong><span>{p.statsSubjects}</span></article><article><strong>{Math.round(completed.length/4*100)}%</strong><span>{p.statsWeek}</span></article></div>
-  <article className="lesson-card"><h2>{p.achievements}</h2>{completed.length?assignments.filter(a=>completed.includes(a.id)).map(a=><p key={a.id} className="text-link"><Check size={16}/>{a.title}</p>):<p>{p.achievementsEmpty}</p>}<Link className="text-link" to={PATHS.home}>{p.toTasks} <ArrowUpRight size={16}/></Link></article>
   {user&&<ProfileForm key={user.id} user={user}/>}
   <PasswordForm/>
   <article className="lesson-card"><h2>{t.settings.logout}</h2><p>{p.logoutText}</p><button className="button" onClick={logout}><LogOut size={16}/>{t.settings.logout}</button></article>
-  <p className="quiet-note">{p.demoNote}</p>
  </section>;
 }
 

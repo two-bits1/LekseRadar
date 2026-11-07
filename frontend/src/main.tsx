@@ -37,8 +37,6 @@ function Moved({to}:{to:string}){const {search}=useLocation();return <Navigate t
 function App(){
  const {choice:theme,resolved,setChoice:setTheme}=useTheme();
  const t=useT();const {token}=useAuth();const {pathname}=useLocation();
- const [completed,setCompleted]=useState<string[]>([]);
- const toggle=(id:string)=>setCompleted(items=>items.includes(id)?items.filter(i=>i!==id):[...items,id]);
  const landing=!token&&pathname===PATHS.home;  // лендинг всегда тёмный, как референс
  return <div className={landing?'app is-landing':'app'} data-theme={landing?'dark':resolved}>
   <a className="skip" href="#main">{t.header.skip}</a>
@@ -46,13 +44,13 @@ function App(){
   {token&&<div className="demo-bar"><span className="live-dot"/>{t.demoBar.text}<Link to={PATHS.status}>{t.demoBar.link} <ArrowUpRight size={13}/></Link></div>}
   <main id="main"><Routes>
    {/* «/»: гость — лендинг с регистрацией, вошедший — главная (адрес тот же, как в API.md) */}
-   <Route path={PATHS.home} element={token?<Dashboard completed={completed} toggle={toggle}/>:<Landing/>}/>
+   <Route path={PATHS.home} element={token?<Dashboard/>:<Landing/>}/>
    {/* 🔓 Страницы из API.md */}
    <Route path={PATHS.login} element={<Auth/>}/>
    <Route path={PATHS.register} element={<Auth register/>}/>
    {/* 🔒 Нет токена → /login */}
    <Route element={<RequireAuth/>}>
-    <Route path={PATHS.profile} element={<Profile completed={completed}/>}/>
+    <Route path={PATHS.profile} element={<Profile/>}/>
     <Route path={PATHS.chats} element={<ChatList/>}/>
     <Route path={PATHS.chat(':chatId')} element={<ChatView/>}/>
     <Route path={PATHS.homework} element={<Calendar/>}/>
