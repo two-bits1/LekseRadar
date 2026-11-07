@@ -133,7 +133,7 @@ export function QuizRun() {
       <div className="question-text"><Md>{question.question}</Md></div>
       {question.type === 'text'
         ? <label className="field"><span className="sr-only">{q.yourAnswer}</span><input value={answer as string} disabled={!!result} onChange={e => setAnswer(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && hasAnswer && !result) check(); }} placeholder={q.yourAnswer} /></label>
-        : <div className="options" role={question.type === 'single_choice' ? 'radiogroup' : 'group'}>{(question.options ?? []).map(opt => {
+        : <div className="options" role={question.type === 'single_choice' ? 'radiogroup' : 'group'}>{(question.options ?? []).filter(o => o.trim()).map(opt => {
             const picked = Array.isArray(answer) ? answer.includes(opt) : answer === opt;
             const right = result && correctAnswers(question.type, result.correctAnswer).includes(opt);
             return <button key={opt} type="button" role={question.type === 'single_choice' ? 'radio' : 'checkbox'} aria-checked={picked} disabled={!!result}
