@@ -63,6 +63,18 @@ export const en: Dict = {
     typing: 'The AI tutor is typing …', retry: 'Try again', inputLabel: 'Your question', placeholder: 'What are you wondering about?', send: 'Send',
     hint: (n: number, max: number) => `Enter sends · Shift+Enter for a new line · ${n}/${max}`,
   },
+  landing: {
+    title1: 'All your schoolwork.', title2: 'In one place.',
+    intro: 'Collect homework, keep track of deadlines and understand your subjects better with your own AI teacher.',
+    how: 'See how it works', haveAccount: 'Already have an account?',
+    featuresTitle: 'Built to understand, not just to hand in.',
+    features: {
+      homework: { title: 'Homework in one place', text: 'Canvas, Teams, itslearning and Visma InSchool together. Coming soon.' },
+      tutor: { title: 'AI teacher', text: 'Explains step by step — without doing your homework for you.' },
+      quiz: { title: 'Quizzes at your level', text: 'AI writes questions and checks your answers, even in your own words.' },
+      cards: { title: 'Flashcards', text: 'Mistakes from quizzes become cards you review until they stick.' },
+    },
+  },
   learning: {
     eyebrow: 'TURN KNOWLEDGE INTO SOMETHING THAT STICKS', title: 'A little practice. More mastery.',
     modes: { cards: 'Cards', quiz: 'Quiz', practice: 'Practice' },

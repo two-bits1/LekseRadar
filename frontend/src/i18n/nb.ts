@@ -62,6 +62,18 @@ export const nb = {
     typing: 'AI-veilederen skriver …', retry: 'Prøv igjen', inputLabel: 'Ditt spørsmål', placeholder: 'Hva lurer du på?', send: 'Send',
     hint: (n: number, max: number) => `Enter sender · Shift+Enter gir ny linje · ${n}/${max}`,
   },
+  landing: {
+    title1: 'Alt skolearbeidet ditt.', title2: 'På ett sted.',
+    intro: 'Samle lekser, hold oversikt over frister og forstå fagene bedre med din egen AI-lærer.',
+    how: 'Se hvordan det fungerer', haveAccount: 'Har du allerede en konto?',
+    featuresTitle: 'Bygget for å forstå, ikke bare levere.',
+    features: {
+      homework: { title: 'Lekser samlet', text: 'Canvas, Teams, itslearning og Visma InSchool på ett sted. Kommer snart.' },
+      tutor: { title: 'AI-lærer', text: 'Forklarer steg for steg — uten å gjøre leksene for deg.' },
+      quiz: { title: 'Quiz på ditt nivå', text: 'AI lager spørsmål og sjekker svarene dine, også med egne ord.' },
+      cards: { title: 'Læringskort', text: 'Feil fra quizen blir til kort du repeterer til det sitter.' },
+    },
+  },
   learning: {
     eyebrow: 'GJØR KUNNSKAP TIL NOE SOM SITTER', title: 'Litt øving. Mer mestring.',
     modes: { cards: 'Kort', quiz: 'Quiz', practice: 'Øvingsoppgaver' },

@@ -14,10 +14,16 @@ import { useT } from '../i18n';
 // POST /auth/login | /auth/register → токен → на «/».
 // Ошибки: 400 → fields под полями, 409 → message у поля email, остальное → над кнопкой.
 export function Auth({register=false}:{register?:boolean}){
+ const auth=useAuth();const t=useT();const a=t.auth;
+ if(auth.token)return <Navigate to={PATHS.home} replace/>;
+ return <section className="page auth-page"><Orb size={56}/><div className="eyebrow">{a.eyebrow}</div><h1>{register?a.titleRegister:a.titleLogin}</h1><p>{a.intro}</p><AuthForm register={register}/><Link className="text-link" to={register?PATHS.login:PATHS.register}>{register?a.toLogin:a.toRegister}</Link></section>;
+}
+
+// Сама форма — та же на /login, /register и в центре лендинга.
+export function AuthForm({register=false}:{register?:boolean}){
  const auth=useAuth();const navigate=useNavigate();const t=useT();const a=t.auth;
  const [form,setForm]=useState({email:'',password:'',displayName:''});
  const [error,setError]=useState<ApiError|null>(null);const [busy,setBusy]=useState(false);
- if(auth.token)return <Navigate to={PATHS.home} replace/>;
  const set=(k:keyof typeof form)=>(e:ChangeEvent<HTMLInputElement>)=>setForm(f=>({...f,[k]:e.target.value}));
  const errorFor=(k:string)=>fieldError(error,k)??(error?.status===409&&k==='email'?error.message:undefined);
  const general=error?.status===409?null:generalError(error);
@@ -25,13 +31,14 @@ export function Auth({register=false}:{register?:boolean}){
   try{if(register)await auth.register(form);else await auth.login({email:form.email,password:form.password});navigate(PATHS.home,{replace:true})}
   catch(err){setError(asApiError(err,t.common))}
   finally{setBusy(false)}};
- return <section className="page auth-page"><Orb size={56}/><div className="eyebrow">{a.eyebrow}</div><h1>{register?a.titleRegister:a.titleLogin}</h1><p>{a.intro}</p><form className="lesson-card" onSubmit={submit} noValidate><h2>{register?a.register:a.login}</h2>
+ return <form className="lesson-card auth-form" onSubmit={submit} noValidate><h2>{register?a.register:a.login}</h2>
   {register&&<Field name="displayName" label={a.name} type="text" autoComplete="name" required placeholder={a.namePlaceholder} value={form.displayName} onChange={set('displayName')} error={errorFor('displayName')}/>}
   <Field name="email" label={a.email} type="email" autoComplete="email" required placeholder={a.emailPlaceholder} value={form.email} onChange={set('email')} error={errorFor('email')}/>
   <Field name="password" label={a.password} type="password" autoComplete={register?'new-password':'current-password'} required minLength={register?8:undefined} placeholder={register?a.passwordHint:''} value={form.password} onChange={set('password')} error={errorFor('password')}/>
   {general&&<p role="alert" className="feedback danger">{general}</p>}
   <button className="button dark-button" disabled={busy}>{busy?(register?a.registering:a.loggingIn):(register?a.register:a.login)}</button>
- </form><Link className="text-link" to={register?PATHS.login:PATHS.register}>{register?a.toLogin:a.toRegister}</Link></section>}
+ </form>;
+}
 
 // /profile: GET/PATCH /users/me, PUT /users/me/password, «Logg ut» (= удалить токен).
 export function Profile({completed}:{completed:string[]}){
