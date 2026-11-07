@@ -11,10 +11,16 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/lekseradar}
     username: ${DB_USER:lekseradar}
     password: ${DB_PASSWORD:lekseradar}
+    hikari:
+      data-source-properties:
+        # Строковые параметры уходят в PostgreSQL без типа, и он сам приводит их к своим ENUM
+        # (platform, chat_mode…): иначе поиск вида WHERE platform = ? падает "platform = character varying"
+        stringtype: unspecified
   jpa:
     hibernate:
-      # Схему создают миграции из database/ (общие для всей команды), бэкенд таблицы не трогает
-      ddl-auto: none
+      # Схему создают миграции из database/ (общие для всей команды). validate: бэкенд таблицы не трогает,
+      # но при старте сверяет все сущности с базой и не запустится, если колонка или тип не совпадают
+      ddl-auto: validate
     open-in-view: false
     properties:
       hibernate:
