@@ -96,9 +96,10 @@ BEGIN
 END $$;
 
 -- Вопрос ученика → tsquery с ИЛИ между словами (слова короче 3 букв отбрасываются).
+-- Слова от 5 букв ищутся по префиксу: 'stigningstall' найдёт 'stigningstallet'.
 CREATE FUNCTION question_tsquery(p_query TEXT) RETURNS tsquery LANGUAGE sql IMMUTABLE AS $$
     SELECT CASE WHEN count(*) = 0 THEN NULL
-                ELSE to_tsquery('simple', string_agg(quote_literal(w), ' | ')) END
+                ELSE to_tsquery('simple', string_agg(quote_literal(w) || CASE WHEN length(w) >= 5 THEN ':*' ELSE '' END, ' | ')) END
     FROM unnest(tsvector_to_array(to_tsvector('simple', coalesce(p_query, '')))) AS w
     WHERE length(w) >= 3
 $$;
