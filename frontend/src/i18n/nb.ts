@@ -18,6 +18,37 @@ export const nb = {
     calendarUrl: 'Kalender-URL', schoolUrl: 'Skolens URL', connectLater: 'Koble til — kommer senere',
     account: 'Konto', loggedInAs: (email: string) => `Logget inn som ${email}.`, logout: 'Logg ut',
   },
+  common: { offline: 'Får ikke kontakt med serveren. Prøv igjen.', failed: 'Noe gikk galt. Prøv igjen.', loading: 'Henter …', saving: 'Lagrer …', saved: 'Lagret.' },
+  auth: {
+    eyebrow: 'VELKOMMEN TIL LEKSERADAR', titleLogin: 'Fint å ha deg her.', titleRegister: 'En litt enklere skolehverdag.',
+    intro: 'Mer oversikt. Mindre stress. Plass til å forstå.', login: 'Logg inn', register: 'Opprett konto',
+    name: 'Navn', namePlaceholder: 'Fornavn', email: 'E-post', emailPlaceholder: 'deg@skole.no',
+    password: 'Passord', passwordHint: 'Minst 8 tegn', loggingIn: 'Logger inn …', registering: 'Oppretter konto …',
+    toLogin: 'Har du allerede en konto? Logg inn', toRegister: 'Ny her? Opprett en konto',
+  },
+  profile: {
+    eyebrow: 'DIN PROFIL', title: 'Du er på vei.', titleNamed: (name: string) => `Du er på vei, ${name}.`, loading: 'Henter profilen …',
+    statsDone: 'fullførte oppgaver', statsSubjects: 'fag å utforske', statsWeek: 'av ukas oppgaver',
+    achievements: 'Det du har fått til', achievementsEmpty: 'Her dukker oppgavene opp når du markerer dem som fullført.', toTasks: 'Til oppgavene',
+    about: 'Om deg', timezone: 'Tidssone', save: 'Lagre endringer',
+    changePassword: 'Bytt passord', currentPassword: 'Nåværende passord', newPassword: 'Nytt passord', passwordChanged: 'Passordet er endret.',
+    logoutText: 'Du logges ut på denne enheten.',
+    demoNote: 'Oppgavene og fremgangen over er fortsatt demodata og nullstilles når siden lastes på nytt.',
+  },
+  dashboard: {
+    eyebrow: 'DIN LILLE OVERSIKT · DEMOUKE 46', title1: 'Plass til å lære.', title2: 'Og til alt det andre.',
+    hello: (name: string) => `Hei, ${name}. Vi tar én ting om gangen.`, student: 'elev', newWeek: 'En ny uke, nye muligheter.',
+    focusEyebrow: 'LITT FOKUS NÅ, LITT MER FRI SENERE', focusTitle: 'En god start på uka.',
+    focusText: 'Begynn med matematikk. Vi hjelper deg å forstå, ikke bare finne svaret.', focusCta: 'La oss se på det',
+    focusArt1: 'Din nysgjerrighet.', focusArt2: 'En liten hjelpende hånd.',
+    planTitle: 'På planen din', seeCalendar: 'Se kalender', filterLabel: 'Filtrer etter fag', allSubjects: 'Alle fag',
+    from: (source: string) => `Fra ${source} · demo`, soon: 'snart', learnWithAi: 'Lær med AI',
+    complete: (title: string) => `Fullfør: ${title}`, undo: (title: string) => `Angre fullføring: ${title}`,
+    progressTitle: 'Små steg teller', progressText: 'oppgaver fullført denne uka', progressDone: 'Du er i mål. Godt jobbet!', progressCalm: 'Du trenger ikke gjøre alt på én gang.',
+    recentChats: 'Siste samtaler', allChats: 'Alle samtaler', chatsFailed: 'Kunne ikke hente samtalene.', noChats: 'Ingen samtaler ennå.', askTutor: 'Spør AI-veilederen',
+    upcoming: 'Rett rundt hjørnet', deckEyebrow: 'LITT REPETISJON, STOR FORSKJELL', deckTitle: 'Det sitter snart.', deckText: 'Seks små kort. Et litt klarere hode.', deckCta: 'Prøv læringskort',
+    demoNote1: 'Dette er demonstrasjonsdata.', demoNote2: 'Ingen skolekonto er koblet til.',
+  },
 };
 
 export type Dict = typeof nb;

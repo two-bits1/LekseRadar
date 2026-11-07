@@ -1,10 +1,17 @@
 // Общие куски форм: поле с ошибкой под ним и приведение любой ошибки к ApiError (формат из API.md).
 import type { InputHTMLAttributes } from 'react';
-import { isApiError } from './api/client';
+import { FALLBACK_MESSAGE, isApiError } from './api/client';
 import type { ApiError } from './api/types';
 
-export const asApiError = (err: unknown): ApiError => isApiError(err) ? err
-  : { status: 0, message: 'Får ikke kontakt med serveren. Prøv igjen.', fields: null, timestamp: new Date().toISOString() };
+type ErrorTexts = { offline: string; failed: string };
+const NB_TEXTS: ErrorTexts = { offline: 'Får ikke kontakt med serveren. Prøv igjen.', failed: FALLBACK_MESSAGE };
+
+// Нет связи → status 0 и текст «нет связи»; ответ без JSON → «что-то пошло не так» на языке интерфейса.
+// Тексты бэкенда (message из ApiError) показываются как пришли.
+export const asApiError = (err: unknown, texts: ErrorTexts = NB_TEXTS): ApiError => {
+  if (!isApiError(err)) return { status: 0, message: texts.offline, fields: null, timestamp: new Date().toISOString() };
+  return err.message === FALLBACK_MESSAGE ? { ...err, message: texts.failed } : err;
+};
 
 // 400 → ошибка из fields; иначе undefined (общий message показывается отдельно).
 export const fieldError = (error: ApiError | null, name: string) => error?.fields?.[name];
