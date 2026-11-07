@@ -6,7 +6,7 @@
 поэтому поля сущностей должны совпадать с колонками ниже, иначе бэкенд не запустится.
 
 **Состояние бэкенда (main-test-3.0).** В бэкенде есть сущности и репозитории для всех 20 таблиц (классы `…Entity`).
-Есть эндпоинты входа, профиля, чата, квизов и карточек. Эндпоинтов ДЗ, платформ, дашборда и материалов нет,
+Есть эндпоинты входа, профиля, чата, квизов, карточек, ДЗ, дашборда и истории. Эндпоинтов платформ и материалов нет,
 подробно в разделе [«Бэкенд: сущности, репозитории и эндпоинты»](#бэкенд-сущности-репозитории-и-эндпоинты-main-test-30).
 
 **Пробных данных нет нигде.** База стартует пустой (seed.sql удалён, `assignments.is_demo` убран в V16),
@@ -134,7 +134,7 @@ erDiagram
 
 #### `assignments`
 
-ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id). Бэкенд: ✅ `AssignmentEntity`; эндпоинтов ДЗ нет 🕓.
+ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id). Бэкенд: ✅ `AssignmentEntity`, `GET/PATCH /homework` (синхронизации нет 🕓).
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -407,7 +407,7 @@ erDiagram
 
 #### `user_events`
 
-Лента всех действий: из неё строятся история, активные дни и ачивки. Бэкенд: ✅ `UserEventEntity`, `UserEventRepository.add(...)`; эндпоинта ленты (`GET /history`) нет 🕓.
+Лента всех действий: из неё строятся история, активные дни и ачивки. Бэкенд: ✅ `UserEventEntity`, `UserEventRepository.add(...)`, лента `GET /history`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -468,13 +468,13 @@ erDiagram
 |---|---|---|---|
 | `chat_context` | `session_id`, `role` chat_role, `content`, `created_at` | последние 10 сообщений чата (без `system`) для запроса к ИИ | внутри `POST /chats/{id}/messages` ✅ |
 | `user_chats` | `id`, `user_id`, `mode` chat_mode, `title`, `subject`, `topic`, `quiz_set_id`, `assignment_id`, `archived`, `updated_at`, `message_count` | список чатов с предметом и числом сообщений | `GET /chats` 🕓 (сейчас читает таблицу) |
-| `quiz_questions_public` | `quiz_id`, `position`, `exercise_id`, `question_type`, `question`, `options` jsonb | вопросы попытки **без правильных ответов** — только это отдавать фронту | `GET /quizzes/{id}` 🕓 |
-| `user_quiz_progress` | `user_id`, `subject`, `topic`, `quizzes_completed`, `quizzes_in_progress`, `best_score`, `last_score`, `last_activity` | прогресс по квизам: предмет и тема | `GET /dashboard` 🕓 |
-| `flashcards` | `user_id`, `exercise_id`, `quiz_set_id`, `subject`, `topic`, `front`, `back`, `explanation`, `next_review_at`, `interval_days`, `reviews`, `due` | карточки ученика: `front` — вопрос, `back` — ответ; `due = true` — пора повторить | `GET /flashcards/due` 🕓 |
-| `user_flashcard_stats` | `user_id`, `cards`, `due_now`, `learned`, `reviews` | сводка по колоде | `GET /dashboard` 🕓 |
-| `user_topic_progress` | `user_id`, `topic`, `attempts`, `correct`, `partial`, `mastery_pct`, `last_activity` | освоение тем в % (partial = 0,5) | `GET /dashboard`, слабые темы в промпте 🕓 |
-| `user_daily_activity` | `user_id`, `day` date, `events`, `exercises`, `quizzes` | активность по дням для графика | `GET /dashboard` 🕓 |
-| `user_dashboard` | `user_id`, `homework_todo`, `homework_overdue`, `homework_done`, `quizzes_completed`, `avg_quiz_score`, `exercises_answered`, `questions_asked`, `active_days_30` | цифры для карточек дашборда, одна строка на ученика | `GET /dashboard` 🕓 |
+| `quiz_questions_public` | `quiz_id`, `position`, `exercise_id`, `question_type`, `question`, `options` jsonb | вопросы попытки **без правильных ответов** — только это отдавать фронту | `GET /quizzes/{id}` ✅ |
+| `user_quiz_progress` | `user_id`, `subject`, `topic`, `quizzes_completed`, `quizzes_in_progress`, `best_score`, `last_score`, `last_activity` | прогресс по квизам: предмет и тема | `GET /dashboard` ✅ |
+| `flashcards` | `user_id`, `exercise_id`, `quiz_set_id`, `subject`, `topic`, `front`, `back`, `explanation`, `next_review_at`, `interval_days`, `reviews`, `due` | карточки ученика: `front` — вопрос, `back` — ответ; `due = true` — пора повторить | `GET /flashcards/due` ✅ |
+| `user_flashcard_stats` | `user_id`, `cards`, `due_now`, `learned`, `reviews` | сводка по колоде | `GET /dashboard` ✅ |
+| `user_topic_progress` | `user_id`, `topic`, `attempts`, `correct`, `partial`, `mastery_pct`, `last_activity` | освоение тем в % (partial = 0,5) | `GET /dashboard`, слабые темы в промпте ✅ |
+| `user_daily_activity` | `user_id`, `day` date, `events`, `exercises`, `quizzes` | активность по дням для графика | `GET /dashboard` ✅ |
+| `user_dashboard` | `user_id`, `homework_todo`, `homework_overdue`, `homework_done`, `quizzes_completed`, `avg_quiz_score`, `exercises_answered`, `questions_asked`, `active_days_30` | цифры для карточек дашборда, одна строка на ученика | `GET /dashboard` ✅ |
 | `user_materials` | `id`, `owner_id`, `title`, `subject`, `topic`, `file_name`, `mime_type`, `file_size`, `source` material_source, `language`, `chunk_count`, `created_at` | список учебных материалов (свои + общие, где `owner_id IS NULL`) | `GET /materials` 🕓 |
 
 Числа `bigint` из `count(*)` → `Long`, `numeric` → `BigDecimal` (или `Double` в DTO).
@@ -567,9 +567,9 @@ erDiagram
 | Чат | `GET/POST /chats`, `GET/PATCH/DELETE /chats/{id}`, `GET/POST /chats/{id}/messages` | `ChatService`, `PromptService` | ✅ промпт из базы (`chat_system_prompt` + `chat_prompt_vars`) |
 | Квиз | `GET /subjects`, `GET/POST /quizzes`, `GET /quizzes/progress`, `POST /quiz-sets/{id}/start`, `GET /quizzes/{id}`, `POST /quizzes/{id}/answers`, `/finish` | `QuizService`, `QuizGeneratorService`, `AnswerCheckerService` | ✅ готовый квиз берётся из базы по `language_code` (V20) |
 | Карточки | `GET /flashcards`, `/flashcards/due`, `/flashcards/stats`, `POST /flashcards/{id}/review`, `/flashcards/generate`, `/quiz-sets/{id}/flashcards` | `FlashcardService` | ✅ |
-| ДЗ | `GET /homework`, `POST /homework/sync` | — (`AssignmentRepository`, DTO `homework/*` есть) | 🕓 404 |
+| ДЗ | `GET /homework`, `GET/PATCH /homework/{id}` · 🕓 `POST /homework/sync` | `HomeworkService`, `AssignmentRepository` | ✅ (синхронизации с платформами нет) |
 | Платформы | `GET /platforms`, `POST/DELETE /platforms/{platform}` | — (`PlatformConnectionRepository`) | 🕓 404 |
-| Дашборд и история | `GET /dashboard`, `GET /history` | — (`UserRepository.findDashboard` и др., DTO `dashboard/*` есть) | 🕓 404 |
+| Дашборд и история | `GET /dashboard`, `GET /history` | `DashboardService`, `UserRepository.findDashboard`, `UserEventRepository` | ✅ |
 | Материалы | `GET/POST /materials` | — (`MaterialRepository`, DTO `MaterialResponseDTO`) | 🕓 404 |
 
 Виды, которые бэкенд пока не читает: `user_chats` (список чатов собирается своим запросом) и `user_materials`.

@@ -4,56 +4,50 @@
 их понять. ИИ-репетитор объясняет тему по шагам, но не делает домашку за ученика. ИИ-генератор
 делает квизы по заданию, ошибки из квизов становятся флеш-картами, прогресс виден на дашборде.
 
-Хакатон Oslo Sprint, 6–8 ноября 2026. Ветка `main-test-2.0` — тестовая сборка всех частей перед слиянием в `main`.
+Хакатон Oslo Sprint, 6–8 ноября 2026. Ветка `main-test-3.0` — тестовая сборка всех частей перед слиянием в `main`.
 
 ![Схема работы проекта](docs/project-schema.png)
 
 ## Функции
 
-✅ работает в main-test-2.0 · 🟡 часть готова · 🕓 ещё не сделано
+✅ работает в main-test-3.0 · 🟡 часть готова · 🕓 ещё не сделано
 
 | # | Функция | Статус | Где |
 |---|---|---|---|
-| 1 | Сбор ДЗ с Canvas, Teams, itslearning, Visma InSchool | 🟡 сбор и демо-режим готовы, бэкенд ещё не вызывает | `homework-collector/` |
-| 2 | Помощь с подключением платформ (токены, вход) | 🟡 функции входа готовы, страницы нет | `homework-collector/`, `/settings/platforms` |
-| 3 | Вход и профиль | ✅ фронт на API | `backend/`, `frontend/`, `/login`, `/profile` |
-| 4 | ИИ-репетитор по готовым промптам, выбор языка, материалы для обучения | 🟡 чат работает от фронта до базы; промпты и материалы в базе, бэкенд пока берёт свой промпт | `backend/`, `ai-content/`, `/chat` |
-| 5 | Квизы по ДЗ: ИИ делает JSON, квиз хранится и используется снова | 🟡 база готова, эндпоинтов нет | `database/`, `/quiz` |
-| 6 | Флеш-карты (= вопросы квиза, повторение SM-2) | 🟡 база готова, эндпоинтов нет | `database/`, `/flashcards` |
-| 7 | Прогресс, история, ачивки | 🟡 база готова, эндпоинтов нет | `database/`, `/progress` |
-| 8 | Напоминания о дедлайнах | 🟡 таблица есть, отправки нет | `database/` |
-| 9 | Дашборд | 🟡 профиль и последние чаты с API, остальное демо | `frontend/`, `/` |
+| 1 | Сбор ДЗ с Canvas, Teams, itslearning, Visma InSchool | 🟡 `collect()` готов, бэкенд его ещё не вызывает; для демо — тестовые данные | `homework-collector/`, `database/testdata/` |
+| 2 | Помощь с подключением платформ (токены, вход) | 🕓 функции входа в Python готовы, API и страницы нет | `homework-collector/`, `/settings/platforms` |
+| 3 | Вход и профиль | ✅ JWT, защита от перебора пароля | `backend/`, `/login`, `/profile` |
+| 4 | Домашка: список, срок, «сдано», помощь по заданию | ✅ | `/homework` |
+| 5 | ИИ-репетитор: промпты из базы, язык сайта, текст ДЗ и материалы в промпте | ✅ | `backend/`, `ai-content/`, `/chat` |
+| 6 | Квизы: ИИ делает JSON, квиз хранится и используется снова | ✅ | `/quiz` |
+| 7 | Флеш-карты (= вопросы квиза, ошибки сами попадают в колоду, SM-2) | ✅ | `/flashcards` |
+| 8 | Прогресс и история | ✅ | `/progress`, `/history` |
+| 9 | Дашборд | ✅ ДЗ, квизы, карточки, чаты | `/` |
+| 10 | Напоминания о дедлайнах, ачивки | 🟡 таблицы есть, отправки и API нет | `database/` |
 
 ## Из чего состоит
 
 | Папка | Кто | Что внутри | Подробнее |
 |---|---|---|---|
-| `frontend/` | №1 | React 19 + Vite + Tailwind: вход, профиль, чат на API, остальное демо; 32 теста, CI, деплой на Vercel | [frontend/README.md](frontend/README.md) |
-| `backend/` | №2 | Java 21, Spring Boot: вход по JWT, профиль, ИИ-чат (OpenAI по ключу из `.env`) | [backend/README.md](backend/README.md), [docs/API.md](docs/API.md) |
-| `database/` | №3 | PostgreSQL 16: миграции V1–V15, демо-данные, функции квизов, карточек, прогресса | [database/README.md](database/README.md) |
-| `homework-collector/` | №3 | Python: `collect()` собирает ДЗ с 4 платформ в один формат, демо-режим | [homework-collector/README.md](homework-collector/README.md) |
-| `ai-content/` | №3 | промпты ИИ, учебные файлы, загрузка в базу, обзор исследований об обучении | [ai-content/prompts/README.md](ai-content/prompts/README.md) |
+| `frontend/` | №1 | React 19 + Vite + Tailwind, все страницы на API, nb/en/ru, 93 теста, CI, деплой на Vercel | [frontend/README.md](frontend/README.md) |
+| `backend/` | №2 | Java 21, Spring Boot: JWT, сущности всех 20 таблиц, чат, квизы, карточки, ДЗ, дашборд, лимиты | [backend/README.md](backend/README.md), [docs/API.md](docs/API.md) |
+| `database/` | №3 | PostgreSQL 16: миграции V1–V20, функции квизов, карточек, прогресса; тестовые данные | [database/README.md](database/README.md), [ENTITIES.md](database/ENTITIES.md) |
+| `homework-collector/` | №3 | Python: `collect()` собирает ДЗ с 4 платформ в один формат | [homework-collector/README.md](homework-collector/README.md) |
+| `ai-content/` | №3 | промпты ИИ, учебные файлы, загрузка в базу, исследования об обучении | [ai-content/prompts/README.md](ai-content/prompts/README.md) |
 | `docs/` | все | архитектура, API, схемы, запуск | см. ниже |
 
 ## Быстрый старт
 
 ```bash
-# 1. база (Docker): миграции + демо-ученик demo@lekseradar.no / demo1234
-cd database && docker compose up -d && cd ..
+# 1. база + промпты + тестовый ученик test@lekseradar.no / LekseRadar2026 (16 ДЗ по 10 предметам)
+cd database && docker compose --profile testdata up -d && cd ..
 
-# 2. промпты и учебные файлы в базу
-pip install -r ai-content/load/requirements.txt
-DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python ai-content/load/load.py
-
-# 3. бэкенд: http://localhost:8080, Swagger /swagger-ui.html
-cd backend && cp .env.example .env   # вписать OPENAI_API_KEY и JWT_SECRET
+# 2. бэкенд: http://localhost:8080, Swagger /swagger-ui.html
+cd backend && cp .env.example .env   # вписать OPENAI_API_KEY (Groq бесплатно) и JWT_SECRET
 ./mvnw spring-boot:run
 
-# 4. фронтенд: http://localhost:5173
+# 3. фронтенд: http://localhost:5173
 cd frontend && pnpm install && pnpm dev
-
-# 5. сбор ДЗ в демо-режиме
-cd homework-collector && pip install -r requirements.txt && python -m homework --demo
 ```
 
 Подробно и с проверками: [docs/RUN.md](docs/RUN.md).
@@ -62,29 +56,24 @@ cd homework-collector && pip install -r requirements.txt && python -m homework -
 
 | Файл | Для кого | Что там |
 |---|---|---|
-| [docs/API.md](docs/API.md) | фронт | все URL бэкенда, страницы фронта, типы, ошибки |
-| [docs/api-map.png](docs/api-map.png) | фронт, бэк | схема: страница → URL → таблицы и функции базы |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | все | как всё работает: сценарии по шагам, какие API ещё нужны, почему так |
-| [docs/project-schema.png](docs/project-schema.png) | все | общая схема проекта (вверху этой страницы) |
-| [database/ENTITIES.md](database/ENTITIES.md) | бэк | все таблицы, enum, виды и функции + какие JPA-сущности и DTO нужны |
+| [docs/API.md](docs/API.md) | фронт | все URL бэкенда, страницы фронта, типы, ошибки, лимиты |
+| [docs/URLS.md](docs/URLS.md) | все | все адреса сайта и API одним списком |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | все | как всё работает: сценарии по шагам, почему так |
+| [database/ENTITIES.md](database/ENTITIES.md) | бэк | все таблицы, enum, виды и функции и как они лежат в JPA-сущностях и DTO |
 | [database/README.md](database/README.md) | бэк | миграции и SQL для каждого сценария |
-| [ai-content/prompts/README.md](ai-content/prompts/README.md) | бэк, №3 | промпты, выбор языка, файл ДЗ, как собрать запрос к ИИ |
-| [ai-content/research/metody-obucheniya.md](ai-content/research/metody-obucheniya.md) | №3 | исследования об обучении, на которых построены промпты |
-| [README-TEST.md](README-TEST.md) | все | что проверено в main-test-2.0 и 16 слабых мест |
+| [database/testdata/README.md](database/testdata/README.md) | все | тестовый ученик и его данные |
+| [ai-content/prompts/README.md](ai-content/prompts/README.md) | бэк, №3 | промпты, язык, файл ДЗ, как собрать запрос к ИИ |
+| [README-TEST.md](README-TEST.md) | все | что проверено в main-test-3.0, что исправлено и что осталось |
 
 ![Страницы, API и база](docs/api-map.png)
 
-## Проверка main-test-2.0 (7 ноября 2026)
+## Проверка main-test-3.0 (7 ноября 2026)
 
-База V1–V15 ✅ · Python 6/6 ✅ · фронтенд 32/32 + сборка ✅ · бэкенд 3/3 ✅ ·
-**в браузере: вход → дашборд → чат из базы → вопрос ИИ** ✅ (без ключа ИИ ответ 502, ошибка показана).
+База V1–V20 ✅ · Python 6/6 ✅ · фронтенд 93/93 + сборка ✅ · бэкенд 14/14 + интеграционный 5/5 ✅ ·
+`docker compose --profile testdata` ✅ · **в браузере: вход тестовым учеником → ДЗ → чат по заданию → квиз → карточки → прогресс** ✅.
+Ответы ИИ проверены на локальной заглушке, с настоящим ключом Groq не проверялись.
 
-Главное, что осталось до слияния в `main`:
-1. Бэкенд: промпты из базы (`chat_system_prompt`), режимы чата и язык — №2.
-2. Бэкенд: эндпоинты ДЗ, квизов, карточек, дашборда — №2; затем эти экраны на фронте — №1.
-3. Обёртка для `collect()` — №3.
-
-Полный список (16 пунктов): [README-TEST.md](README-TEST.md).
+Что осталось и кто делает: [README-TEST.md](README-TEST.md).
 
 ## Команда
 
