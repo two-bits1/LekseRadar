@@ -4,14 +4,15 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { Navigate, Outlet } from 'react-router-dom';
 import { authApi, usersApi } from './api/endpoints';
 import { clearToken, getToken, setToken } from './api/client';
-import type { AuthResponse, LoginRequest, RegisterRequest, User } from './api/types';
+import type { AuthResponse, LoginRequest, RegisterRequest, RegisterStarted, User, VerifyEmailRequest } from './api/types';
 import { PATHS } from './paths';
 
 type Auth = {
   token: string | null;
   user: User | null;  // null, пока GET /users/me не ответил
   login: (body: LoginRequest) => Promise<void>;
-  register: (body: RegisterRequest) => Promise<void>;
+  register: (body: RegisterRequest) => Promise<RegisterStarted>;  // шаг 1: токена ещё нет
+  verifyEmail: (body: VerifyEmailRequest) => Promise<void>;       // шаг 2: код → токен
   logout: () => void;
   updateUser: (user: User) => void;  // после PATCH /users/me
 };
@@ -36,7 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     token,
     user,
     login: async body => accept(await authApi.login(body)),
-    register: async body => accept(await authApi.register(body)),
+    register: body => authApi.register(body),
+    verifyEmail: async body => accept(await authApi.verifyEmail(body)),
     logout: () => { clearToken(); setUser(null); setTokenState(null); },
     updateUser: setUser,
   };

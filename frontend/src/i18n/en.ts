@@ -28,6 +28,8 @@ export const en: Dict = {
   },
   common: { keepServer: false, invalidField: 'Check this field.', byStatus: { 429: 'Too many attempts. Wait a few minutes and try again.', 400: 'Check the fields.', 401: 'Wrong email or password.', 404: 'We couldn’t find that.', 409: 'This email is already in use.', 502: 'The AI tutor isn’t responding right now. Try again.', 503: 'The AI isn’t set up on the server yet.', 500: 'Something went wrong on the server.' }, offline: 'Can’t reach the server. Try again.', failed: 'Something went wrong. Try again.', loading: 'Loading …', saving: 'Saving …', saved: 'Saved.' },
   auth: {
+    codeTitle: 'Confirm your email', codeSent: (email: string) => `We sent a 6-digit code to ${email}. It is valid for 15 minutes.`,
+    code: 'Code from the email', verify: 'Confirm', verifying: 'Confirming …', resend: 'Send a new code', resent: 'A new code has been sent.', back: 'Change email',
     eyebrow: 'WELCOME TO LEKSERADAR', titleLogin: 'Good to have you here.', titleRegister: 'A slightly easier school day.',
     intro: 'More overview. Less stress. Room to understand.', login: 'Log in', register: 'Create account',
     name: 'Name', namePlaceholder: 'First name', email: 'Email', emailPlaceholder: 'you@school.no',

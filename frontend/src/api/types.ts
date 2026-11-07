@@ -99,6 +99,8 @@ export type Health = { status: 'UP' | 'DOWN' };
 
 // Тела запросов
 export type RegisterRequest = { email: string; password: string; displayName: string };
+export type RegisterStarted = { email: string; expiresInSeconds: number };  // 202: код ушёл на почту, токена нет
+export type VerifyEmailRequest = { email: string; code: string };
 export type LoginRequest = { email: string; password: string };
 export type UpdateUserRequest = Partial<Pick<User, 'displayName' | 'locale' | 'timezone'>>;
 export type ChangePasswordRequest = { currentPassword: string; newPassword: string };

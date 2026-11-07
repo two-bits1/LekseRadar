@@ -27,6 +27,8 @@ export const nb = {
   },
   common: { keepServer: false, invalidField: 'Sjekk dette feltet.', byStatus: { 429: 'For mange forsøk. Vent noen minutter og prøv igjen.', 400: 'Sjekk feltene.', 401: 'Feil e-post eller passord.', 404: 'Fant ikke det du lette etter.', 409: 'Denne e-posten er allerede i bruk.', 502: 'AI-veilederen svarer ikke akkurat nå. Prøv igjen.', 503: 'AI-en er ikke satt opp på serveren ennå.', 500: 'Noe gikk galt på serveren.' }, offline: 'Får ikke kontakt med serveren. Prøv igjen.', failed: 'Noe gikk galt. Prøv igjen.', loading: 'Henter …', saving: 'Lagrer …', saved: 'Lagret.' },
   auth: {
+    codeTitle: 'Bekreft e-posten', codeSent: (email: string) => `Vi har sendt en kode på 6 sifre til ${email}. Den gjelder i 15 minutter.`,
+    code: 'Kode fra e-posten', verify: 'Bekreft', verifying: 'Bekrefter …', resend: 'Send ny kode', resent: 'Ny kode er sendt.', back: 'Endre e-post',
     eyebrow: 'VELKOMMEN TIL LEKSERADAR', titleLogin: 'Fint å ha deg her.', titleRegister: 'En litt enklere skolehverdag.',
     intro: 'Mer oversikt. Mindre stress. Plass til å forstå.', login: 'Logg inn', register: 'Opprett konto',
     name: 'Navn', namePlaceholder: 'Fornavn', email: 'E-post', emailPlaceholder: 'deg@skole.no',
