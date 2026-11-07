@@ -1,0 +1,118 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: lekseradar
+  config:
+    # Секреты (OPENAI_API_KEY, JWT_SECRET, пароль БД) — в backend/.env, он в .gitignore. Пример: .env.example
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/lekseradar}
+    username: ${DB_USER:lekseradar}
+    password: ${DB_PASSWORD:lekseradar}
+    hikari:
+      data-source-properties:
+        # Строковые параметры уходят в PostgreSQL без типа, и он сам приводит их к своим ENUM
+        # (platform, chat_mode…): иначе поиск вида WHERE platform = ? падает "platform = character varying"
+        stringtype: unspecified
+  jpa:
+    hibernate:
+      # Схему создают миграции из database/ (общие для всей команды). validate: бэкенд таблицы не трогает,
+      # но при старте сверяет все сущности с базой и не запустится, если колонка или тип не совпадают
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+  web:
+    # Стандартные сообщения валидации ("не должно быть пустым" и т.п.) на русском
+    locale: ru
+    locale-resolver: fixed
+  mail:
+    # Письма с кодом подтверждения регистрации. Gmail: MAIL_USERNAME — ваш адрес @gmail.com,
+    # MAIL_PASSWORD — пароль приложения из 16 букв (https://myaccount.google.com/apppasswords), не обычный пароль.
+    # Сами значения — только в backend/.env
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: ${MAIL_STARTTLS_REQUIRED:true}
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+
+management:
+  health:
+    # Иначе /actuator/health будет DOWN, когда почта не настроена или Gmail недоступен
+    mail:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      # Без токена видно только UP/DOWN, подробности (БД, диск) скрыты
+      show-details: never
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+    persist-authorization: true
+
+app:
+  jwt:
+    # Обязательно, минимум 32 символа
+    secret: ${JWT_SECRET}
+    ttl-hours: ${JWT_TTL_HOURS:72}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  openai:
+    # Обязательно
+    api-key: ${OPENAI_API_KEY:}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+    model: ${OPENAI_MODEL:gpt-4o-mini}
+    timeout-seconds: ${OPENAI_TIMEOUT_SECONDS:60}
+  credentials:
+    # Обязательно: ключ шифрования доступов к платформам, base64 от 32 байт (openssl rand -base64 32).
+    # Не терять: без него все подключения платформ придётся делать заново
+    key: ${CREDENTIALS_KEY:}
+  collector:
+    # Сервис сбора ДЗ (homework-collector), только во внутренней сети
+    url: ${COLLECTOR_URL:http://localhost:8090}
+    # По умолчанию тот же ключ, что у сервиса collector в database/docker-compose.yml (только для своего компьютера).
+    # В облаке задать свой: openssl rand -hex 32, одинаковый у бэкенда и collector
+    key: ${COLLECTOR_KEY:local-dev-collector-key}
+    # collect ходит на 4 платформы
+    timeout-seconds: ${COLLECTOR_TIMEOUT_SECONDS:60}
+  platforms:
+    # Свои Canvas вне *.instructure.com, через запятую (canvas.uio.no). Другие адреса платформ не принимаются (SSRF)
+    extra-canvas-hosts: ${CANVAS_HOSTS:}
+  sync:
+    # Обновлять ДЗ раз в 30 минут для учеников, заходивших за 7 дней
+    schedule-enabled: ${SYNC_SCHEDULE_ENABLED:true}
+  mail:
+    # Отправитель писем, по умолчанию тот же адрес, что MAIL_USERNAME
+    from: ${MAIL_FROM:${MAIL_USERNAME:}}
+    # true — без настроенной почты код подтверждения печатается в лог бэкенда (только для разработки)
+    dev-log-codes: ${MAIL_DEV_LOG_CODES:false}
+  google:
+    # Google Classroom. Ключи: Google Cloud → Google Auth Platform → Clients → клиент (Web application).
+    # Без них кнопка «Подключить Google Classroom» отвечает 503, остальное работает
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+    # Адрес возврата отдельно не задаётся: это каждый сайт из CORS_ORIGINS + /settings/platforms.
+    # В Google Cloud → Authorized redirect URIs должны стоять ровно такие адреса
