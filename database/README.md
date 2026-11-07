@@ -35,6 +35,7 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V10__materials.sql` | `materials`, `material_chunks` (полнотекстовый индекс): учебные файлы для ИИ-репетитора |
 | `V11__material_functions.sql` | `add_material()` (нарезка на фрагменты), `search_materials()`, `materials_for_prompt()`, вид `user_materials` |
 | `V12__ai_prompts.sql` | `ai_prompts` с версиями: `save_prompt()`, `get_prompt()`, `activate_prompt()` |
+| `V13__chat_modes.sql` | два вида чата `tutor` / `quiz`, `chat_mode_prompts`, `start_chat()`, `chat_system_prompt()`, вид `user_chats` |
 
 ## Схема
 
@@ -141,6 +142,20 @@ SELECT * FROM user_daily_activity WHERE user_id = ? ORDER BY day;
 SELECT get_prompt('tutor');                 -- текст активной версии, переменные {{...}} подставляет Java
 SELECT activate_prompt('tutor', 1);         -- откат на старую версию
 ```
+
+**Два вида чата, у каждого свой промпт.** Режим задаётся при создании и не меняется.
+```sql
+SELECT start_chat(:user_id, 'tutor', 'Matematikk', 'Lineære funksjoner');  -- чат с ИИ-репетитором
+SELECT start_chat(:user_id, 'quiz',  'Naturfag',   'Fotosyntese');         -- чат генерации квизов
+SELECT * FROM user_chats WHERE user_id = :user_id AND mode = 'tutor' ORDER BY updated_at DESC;
+-- перед КАЖДЫМ запросом к ИИ: системный промпт режима + subject, topic, language для {{...}}
+SELECT * FROM chat_system_prompt(:session_id);
+-- ответ ИИ сохраняется с версией промпта
+INSERT INTO chat_messages (session_id, role, content, prompt_id) VALUES (:session_id, 'tutor', :answer, :prompt_id);
+```
+`tutor` → промпт `tutor`, `quiz` → промпт `quiz_generator` (таблица `chat_mode_prompts`).
+Если промпт не загружен, `chat_system_prompt` выдаёт ошибку, чтобы ИИ не отвечал без промпта.
+В чате `quiz` готовый JSON квиза идёт в `import_quiz_json`, id набора пишется в `chat_sessions.quiz_set_id`.
 
 **Учебные материалы для тьютора.** Файлы из `ai-content/materials` грузит `load.py`;
 файл, загруженный пользователем на сайте, Java сохраняет сам (текст извлекает бэкенд):
