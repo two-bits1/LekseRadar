@@ -16,6 +16,8 @@ export function Progress() {
     quizzesApi.progress().then(setQuizzes).catch(() => setQuizzes([]));
   }, [t.common]);
 
+  // Только завершённые квизы: у незаконченного bestScore = null, и «Best 0 %» вводило бы в заблуждение
+  const scored = (quizzes ?? []).filter(q => q.bestScore !== null);
   const days = (data?.days ?? []).slice(-30);
   const maxEvents = Math.max(1, ...days.map(x => x.events));
   const dayLabel = (iso: string) => new Intl.DateTimeFormat(tag, { day: 'numeric', month: 'short' }).format(new Date(iso + 'T12:00:00'));
@@ -47,8 +49,8 @@ export function Progress() {
           : <p className="panel-empty">{p.noTopics}</p>}
       </section>
 
-      {quizzes && quizzes.length > 0 && <><h2 className="section-label">{d.progress}</h2>
-        <section className="panel">{quizzes.map(q => <div key={`${q.subject}|${q.topic}`} className="row row-static">
+      {scored.length > 0 && <><h2 className="section-label">{d.progress}</h2>
+        <section className="panel">{scored.map(q => <div key={`${q.subject}|${q.topic}`} className="row row-static">
           <span><strong>{q.topic}</strong><small>{q.subject}</small></span>
           <span className="meter" aria-label={d.best(Math.round(q.bestScore ?? 0))}><span style={{ width: `${q.bestScore ?? 0}%` }} /></span>
           <span className="row-meta">{d.best(Math.round(q.bestScore ?? 0))}</span></div>)}</section></>}
