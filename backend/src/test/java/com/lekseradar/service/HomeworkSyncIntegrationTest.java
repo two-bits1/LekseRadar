@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
         "app.openai.api-key=sk-not-used",
         "app.credentials.key=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
         "app.sync.schedule-enabled=false",
+        "app.reminders.enabled=false",
 })
 @EnabledIfEnvironmentVariable(named = "TEST_DB_URL", matches = ".+")
 @Transactional

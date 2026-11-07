@@ -104,6 +104,9 @@ app:
   sync:
     # Обновлять ДЗ раз в 30 минут для учеников, заходивших за 7 дней
     schedule-enabled: ${SYNC_SCHEDULE_ENABLED:true}
+  reminders:
+    # Раз в 15 минут письмо ученику о несданном ДЗ со сроком в ближайшие 24 часа (выключить: REMINDERS_ENABLED=false)
+    enabled: ${REMINDERS_ENABLED:true}
   mail:
     # Отправитель писем, по умолчанию тот же адрес, что MAIL_USERNAME
     from: ${MAIL_FROM:${MAIL_USERNAME:}}
