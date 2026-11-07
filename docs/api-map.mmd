@@ -1,0 +1,75 @@
+%%{init: {"theme":"base","flowchart":{"curve":"basis","nodeSpacing":14,"rankSpacing":70},"themeVariables":{"fontFamily":"Inter, Helvetica, Arial","fontSize":"14px","lineColor":"#94a3b8"}}}%%
+flowchart LR
+    subgraph FE["① Страницы фронтенда · localhost:5173"]
+        direction TB
+        P_LOGIN["🔓 /login · /register<br/><small>вход и регистрация</small>"]
+        P_PROF["🔒 /profile<br/><small>имя · язык · пароль · выход</small>"]
+        P_HOME["🔒 /<br/><small>дашборд</small>"]
+        P_CHATS["🔒 /chat<br/><small>список чатов · архив</small>"]
+        P_CHAT["🔒 /chat/:chatId<br/><small>переписка с тьютором</small>"]
+        P_PRG["🔒 /progress · /history<br/><small>графики · лента</small>"]
+        P_HW["🔒 /homework<br/><small>ДЗ со всех платформ</small>"]
+        P_PLT["🔒 /settings/platforms<br/><small>Canvas · Teams · itslearning · InSchool</small>"]
+        P_QZ["🔒 /quiz · /quiz/:quizId<br/><small>выбор темы · прохождение</small>"]
+        P_FC["🔒 /flashcards<br/><small>повторение 0–5</small>"]
+    end
+
+    subgraph BE["② Backend · localhost:8080/api/v1"]
+        direction TB
+        A_AUTH["✅ POST /auth/register · /auth/login<br/><small>→ token (72 ч)</small>"]
+        A_ME["✅ GET · PATCH /users/me<br/>✅ PUT /users/me/password"]
+        A_CHATS["✅ GET · POST /chats<br/>✅ GET · PATCH · DELETE /chats/{id}"]
+        A_MSG["✅ GET /chats/{id}/messages<br/>✅ POST /chats/{id}/messages<br/><small>→ модель ИИ · 201 ChatReply<br/>502 ИИ недоступен</small>"]
+        A_DASH["🕓 GET /dashboard · /history"]
+        A_HW["🕓 GET /homework<br/>🕓 POST /homework/sync"]
+        A_PLT["🕓 GET /platforms<br/>🕓 POST · DELETE /platforms/{platform}"]
+        A_QZ["🕓 GET /subjects · POST /quizzes<br/>🕓 GET /quizzes/{id}<br/>🕓 POST /quizzes/{id}/answers · /finish<br/><small>новый квиз → модель ИИ → JSON</small>"]
+        A_FC["🕓 GET /flashcards/due<br/>🕓 POST /flashcards/{id}/review"]
+    end
+
+    subgraph DB["③ PostgreSQL · готовые таблицы и функции"]
+        direction TB
+        D_USR["users<br/><small>bcrypt · locale · timezone</small>"]
+        D_CHAT["chat_sessions · chat_messages<br/><small>chat_context · start_chat<br/>chat_system_prompt · chat_prompt_vars</small>"]
+        D_AI["ai_prompts · materials<br/><small>materials_for_prompt</small>"]
+        D_DASH["user_dashboard · user_topic_progress<br/>user_daily_activity · user_events"]
+        D_HW["assignments · platform_connections<br/><small>attach_homework_file</small>"]
+        D_QZ["quiz_sets · exercises · quizzes<br/><small>find_quiz_set · import_quiz_json<br/>start_quiz · save_quiz_answer · finish_quiz</small>"]
+        D_FC["flashcards · flashcard_progress<br/><small>review_flashcard (SM-2)</small>"]
+    end
+
+    PY["④ homework-collector<br/><small>collect()</small>"]
+
+    P_LOGIN --> A_AUTH
+    P_HOME --> A_CHATS
+    P_HOME -.-> A_DASH
+    P_PROF --> A_ME
+    P_CHATS --> A_CHATS
+    P_CHAT --> A_CHATS & A_MSG
+    P_HW -.-> A_HW
+    P_QZ -.-> A_QZ
+    P_FC -.-> A_FC
+    P_PRG -.-> A_DASH
+    P_PLT -.-> A_PLT
+
+    A_AUTH & A_ME --> D_USR
+    A_CHATS --> D_CHAT
+    A_MSG --> D_CHAT
+    A_MSG -. "промпт и материалы<br/>из базы" .-> D_AI
+    A_DASH -.-> D_DASH
+    A_HW -.-> D_HW
+    A_HW -.-> PY
+    A_QZ -.-> D_QZ
+    A_FC -.-> D_FC
+    A_PLT -.-> D_HW
+
+    classDef fe fill:#fdf4ff,stroke:#c026d3,color:#701a75
+    classDef ok fill:#ecfdf5,stroke:#10b981,color:#064e3b
+    classDef later fill:#fff,stroke:#94a3b8,color:#475569,stroke-dasharray:5 4
+    classDef db fill:#f5f3ff,stroke:#7c3aed,color:#3b0764
+    classDef ext fill:#fff7ed,stroke:#f97316,color:#7c2d12
+    class P_LOGIN,P_HOME,P_PROF,P_CHATS,P_CHAT,P_HW,P_QZ,P_FC,P_PRG,P_PLT fe
+    class A_AUTH,A_ME,A_CHATS,A_MSG ok
+    class A_DASH,A_HW,A_QZ,A_FC,A_PLT later
+    class D_USR,D_CHAT,D_AI,D_DASH,D_HW,D_QZ,D_FC db
+    class PY ext
