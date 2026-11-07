@@ -14,6 +14,8 @@ import com.lekseradar.security.RateLimiter;
 import com.lekseradar.service.collector.CollectorClient;
 import com.lekseradar.service.collector.CollectorClient.CollectResult;
 import com.lekseradar.service.collector.CollectorClient.Source;
+import com.lekseradar.service.google.GoogleOAuthClient;
+import com.lekseradar.service.google.OAuthStates;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,6 +32,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /** POST /platforms/{platform}: тело — как его собирает фронт (toCredentials в Platforms.tsx), snake_case. */
@@ -42,6 +45,8 @@ class PlatformServiceTest {
     private HomeworkSyncService sync;
     private CredentialsCipher cipher;
     private PlatformService service;
+    private GoogleOAuthClient google;
+    private OAuthStates states;
 
     @BeforeEach
     void setUp() {
@@ -50,9 +55,12 @@ class PlatformServiceTest {
         sync = mock(HomeworkSyncService.class);
         cipher = new CredentialsCipher(Base64.getEncoder().encodeToString(new byte[32]), JSON);
         when(connections.findByUserIdAndPlatform(anyLong(), any())).thenReturn(Optional.empty());
-        AppConfig cfg = new AppConfig(null, null, null, null, null, new AppConfig.Platforms(List.of("canvas.uio.no")), null);
+        AppConfig cfg = new AppConfig(null, new AppConfig.Cors(List.of("http://localhost:5173", "https://lekseradar.vercel.app/")), null, null, null,
+                new AppConfig.Platforms(List.of("canvas.uio.no")), null, null);
+        google = mock(GoogleOAuthClient.class);
+        states = new OAuthStates("unit-test-secret-unit-test-secret-1234", java.time.Clock.systemUTC());
         service = new PlatformService(connections, collector, cipher, sync, new RateLimiter(), JSON,
-                mock(PlatformTransactionManager.class), cfg);
+                mock(PlatformTransactionManager.class), cfg, google, states);
     }
 
     private static JsonNode body(String json) throws Exception {
@@ -242,12 +250,95 @@ class PlatformServiceTest {
     }
 
     @Test
-    void listAlwaysHasFourPlatforms() {
+    void listAlwaysHasAllFivePlatforms() {
         when(connections.findByUserIdOrderByPlatform(USER))
                 .thenReturn(List.of(new PlatformConnectionEntity(USER, PlatformEnum.TEAMS, new byte[]{1})));
         var list = service.list(USER);
-        assertEquals(4, list.size());
+        assertEquals(5, list.size());
         assertEquals(1, list.stream().filter(p -> p.connected()).count());
         assertTrue(list.stream().filter(p -> p.platform() == PlatformEnum.TEAMS).findFirst().orElseThrow().connected());
+    }
+
+    // ---------------------------------------------------------------- Google Classroom (как шлёт фронт)
+
+    private static final String BACK = "http://localhost:5173/settings/platforms";
+
+    private String stateFromUrl(long user) {
+        when(google.configured()).thenReturn(true);
+        when(google.authorizationUrl(anyString(), anyString())).thenAnswer(inv -> "https://accounts.google.com/x?state=" + inv.getArgument(0));
+        return service.classroomUrl(user, BACK).split("state=")[1];
+    }
+
+    private static JsonNode back(String code, String state, String redirect) {
+        return JSON.createObjectNode().put("code", code).put("state", state).put("redirect_uri", redirect);
+    }
+
+    @Test
+    void classroomUrlNeedsServerConfig() {
+        when(google.configured()).thenReturn(false);
+        ApiException e = assertThrows(ApiException.class, () -> service.classroomUrl(USER, BACK));
+        assertEquals(503, e.getStatus().value());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"https://evil.com/settings/platforms", "http://localhost:5173/settings/platforms/classroom",
+            "http://localhost:5173", "http://localhost:5174/settings/platforms", ""})
+    void classroomOnlyBackToOwnSite(String redirect) {
+        when(google.configured()).thenReturn(true);
+        assertThrows(BadRequestException.class, () -> service.classroomUrl(USER, redirect));
+        verify(google, never()).authorizationUrl(any(), any());
+    }
+
+    @Test
+    void classroomProductionSiteFromCorsOrigins() {
+        when(google.configured()).thenReturn(true);
+        when(google.authorizationUrl(anyString(), anyString())).thenReturn("https://accounts.google.com/x");
+        service.classroomUrl(USER, "https://lekseradar.vercel.app/settings/platforms");   // в CORS со слешем в конце — тоже ок
+        verify(google).authorizationUrl(anyString(), eq("https://lekseradar.vercel.app/settings/platforms"));
+    }
+
+    @Test
+    void classroomConnectLikeFrontend() throws Exception {
+        String state = stateFromUrl(USER);
+        when(connections.platformSupported("classroom")).thenReturn(true);
+        JsonNode tokens = body("{\"access_token\": \"ya29.a\", \"refresh_token\": \"1//r\", \"expires_at\": 1}");
+        when(google.exchange("4/code", BACK)).thenReturn((com.fasterxml.jackson.databind.node.ObjectNode) tokens);
+        when(collector.collect(anyMap())).thenReturn(ok(PlatformEnum.CLASSROOM));
+
+        var res = service.connect(USER, PlatformEnum.CLASSROOM, back("4/code", state, BACK));
+
+        assertTrue(res.connected());
+        assertEquals(tokens, saved());
+        verify(sync).store(eq(USER), any());
+    }
+
+    @Test
+    void classroomStateOfAnotherStudentTamperedOrMissingIs400() throws Exception {
+        String othersState = stateFromUrl(99L);
+        String mine = stateFromUrl(USER);
+        for (JsonNode bad : List.of(back("4/c", othersState, BACK), back("4/c", mine + "x", BACK), back("4/c", "made-up", BACK),
+                back("4/c", mine, "https://evil.com/settings/platforms"), body("{\"state\": \"x\", \"redirect_uri\": \"" + BACK + "\"}"))) {
+            assertThrows(BadRequestException.class, () -> service.connect(USER, PlatformEnum.CLASSROOM, bad));
+        }
+        verify(google, never()).exchange(any(), any());
+        verifyNoInteractions(collector);
+    }
+
+    @Test
+    void classroomWithoutMigrationV22Is503() throws Exception {
+        String state = stateFromUrl(USER);
+        when(connections.platformSupported("classroom")).thenReturn(false);
+        ApiException e = assertThrows(ApiException.class, () -> service.connect(USER, PlatformEnum.CLASSROOM, back("4/code", state, BACK)));
+        assertEquals(503, e.getStatus().value());
+        verify(google, never()).exchange(any(), any());
+    }
+
+    @Test
+    void collectorThatDoesNotKnowPlatformIs503() throws Exception {
+        when(collector.collect(anyMap())).thenReturn(new CollectResult(JSON.createArrayNode(), Map.of(), Map.of()));
+        ApiException e = assertThrows(ApiException.class,
+                () -> service.connect(USER, PlatformEnum.CANVAS, canvas("https://uio.instructure.com", "t")));
+        assertEquals(503, e.getStatus().value());
+        verify(connections, never()).save(any());
     }
 }

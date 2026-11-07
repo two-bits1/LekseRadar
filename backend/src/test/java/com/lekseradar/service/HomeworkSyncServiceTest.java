@@ -15,6 +15,7 @@ import com.lekseradar.security.RateLimiter;
 import com.lekseradar.service.collector.CollectorClient;
 import com.lekseradar.service.collector.CollectorClient.CollectResult;
 import com.lekseradar.service.collector.CollectorClient.Source;
+import com.lekseradar.service.google.GoogleOAuthClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +41,7 @@ class HomeworkSyncServiceTest {
     private CollectorClient collector;
     private CredentialsCipher cipher;
     private HomeworkSyncService service;
+    private GoogleOAuthClient google;
 
     @BeforeEach
     void setUp() {
@@ -52,8 +54,10 @@ class HomeworkSyncServiceTest {
             public Integer getAdded() { return 2; }
             public Integer getUpdated() { return 1; }
         });
+        google = mock(GoogleOAuthClient.class);
+        when(google.fresh(any())).thenAnswer(inv -> inv.getArgument(0));
         service = new HomeworkSyncService(connections, assignments, events, collector, cipher, new RateLimiter(), JSON,
-                mock(PlatformTransactionManager.class));
+                mock(PlatformTransactionManager.class), google);
     }
 
     private PlatformConnectionEntity connection(long id, PlatformEnum p, String creds) throws Exception {
@@ -141,5 +145,38 @@ class HomeworkSyncServiceTest {
         TooManyRequestsException e = assertThrows(TooManyRequestsException.class, () -> service.sync(USER));
         assertEquals(60L, e.getRetryAfterSeconds());
         service.syncNow(USER);   // расписание лимит не трогает
+    }
+
+    @Test
+    void classroomTokenIsRefreshedBeforeCollectAndSavedEncrypted() throws Exception {
+        PlatformConnectionEntity c = connection(5, PlatformEnum.CLASSROOM, "{\"access_token\": \"old\", \"refresh_token\": \"1//r\", \"expires_at\": 1}");
+        when(connections.findByUserIdOrderByPlatform(USER)).thenReturn(List.of(c));
+        JsonNode fresh = JSON.readTree("{\"access_token\": \"new\", \"refresh_token\": \"1//r\", \"expires_at\": 9999999999}");
+        when(google.fresh(any())).thenReturn(fresh);
+        when(collector.collect(anyMap())).thenReturn(new CollectResult(JSON.createArrayNode(),
+                Map.of("classroom", new Source(true, 0, null, false)), Map.of()));
+
+        service.syncNow(USER);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<PlatformEnum, JsonNode>> sent = ArgumentCaptor.forClass(Map.class);
+        verify(collector).collect(sent.capture());
+        assertEquals("new", sent.getValue().get(PlatformEnum.CLASSROOM).path("access_token").asText());
+        assertEquals(fresh, cipher.decrypt(c.getCredentialsEnc()));
+    }
+
+    @Test
+    void revokedGoogleAccessAsksToReconnect() throws Exception {
+        PlatformConnectionEntity c = connection(5, PlatformEnum.CLASSROOM, "{\"access_token\": \"old\", \"refresh_token\": \"1//r\", \"expires_at\": 1}");
+        when(connections.findByUserIdOrderByPlatform(USER)).thenReturn(List.of(c));
+        when(google.fresh(any())).thenThrow(new com.lekseradar.exception.ApiException(
+                org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY, "Войдите в Google Classroom заново"));
+
+        SyncResponseDTO res = service.syncNow(USER);
+
+        verifyNoInteractions(collector);
+        assertTrue(c.isNeedsReconnect());
+        assertEquals(List.of(new SourceStatusResponseDTO(PlatformEnum.CLASSROOM, false, 0, "Войдите в Google Classroom заново", true)),
+                res.sources());
     }
 }

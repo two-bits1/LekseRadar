@@ -7,7 +7,7 @@ import java.util.List;
 /** Настройки приложения из секции {@code app:} в application.yml. */
 @ConfigurationProperties(prefix = "app")
 public record AppConfig(Jwt jwt, Cors cors, OpenAi openai, Credentials credentials, Collector collector,
-                        Platforms platforms, Mail mail) {
+                        Platforms platforms, Mail mail, Google google) {
 
     public record Jwt(String secret, long ttlHours) {}
 
@@ -29,4 +29,10 @@ public record AppConfig(Jwt jwt, Cors cors, OpenAi openai, Credentials credentia
      * devLogCodes — без настроенной почты печатать код в лог вместо письма (только для разработки).
      */
     public record Mail(String from, boolean devLogCodes) {}
+
+    /**
+     * Google Classroom (OAuth): клиент из Google Cloud → Google Auth Platform → Clients. Адрес возврата не настраивается:
+     * это сайт из CORS_ORIGINS + /settings/platforms, и он же должен быть в Authorized redirect URIs.
+     */
+    public record Google(String clientId, String clientSecret) {}
 }

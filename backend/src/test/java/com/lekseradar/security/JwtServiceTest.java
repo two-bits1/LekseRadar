@@ -10,7 +10,7 @@ class JwtServiceTest {
     private static final String SECRET = "test-secret-test-secret-test-secret-123";
 
     private static JwtService service(String secret, long ttlHours) {
-        return new JwtService(new AppConfig(new AppConfig.Jwt(secret, ttlHours), null, null, null, null, null, null));
+        return new JwtService(new AppConfig(new AppConfig.Jwt(secret, ttlHours), null, null, null, null, null, null, null));
     }
 
     @Test

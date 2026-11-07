@@ -21,7 +21,7 @@ import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/v1/platforms")
-@Tag(name = "8. Платформы", description = "Подключение Canvas, Teams, itslearning, InSchool. "
+@Tag(name = "8. Платформы", description = "Подключение Canvas, Teams, itslearning, InSchool, Google Classroom. "
         + "Ошибки: 400 неверные данные или адрес, 422 платформа не приняла доступ, 429 слишком часто, "
         + "502 платформа недоступна, 503 collector недоступен. 401 не бывает")
 public class PlatformController {
@@ -32,7 +32,7 @@ public class PlatformController {
     }
 
     @GetMapping
-    @Operation(summary = "Мои платформы", description = "Всегда 4 строки: canvas, teams, itslearning, inschool. Без токенов")
+    @Operation(summary = "Мои платформы", description = "Всегда 5 строк: canvas, teams, itslearning, inschool, classroom. Без токенов")
     public List<PlatformResponseDTO> list(@CurrentUser UserEntity user) {
         return platforms.list(user.getId());
     }
@@ -51,7 +51,8 @@ public class PlatformController {
                     @ExampleObject(name = "inschool", value = "{\"host\": \"ohg-vgs.inschool.visma.no\", \"cookies\": {\"JSESSIONID\": \"…\", \"Authorization\": \"…\"}}"),
                     @ExampleObject(name = "teams", value = "{\"access_token\": \"eyJ…\", \"refresh_token\": \"0.A…\"}"),
                     @ExampleObject(name = "itslearning", value = "{\"base_url\": \"https://sms.itslearning.com\", \"refresh_token\": \"…\"}"),
-                    @ExampleObject(name = "itslearning (код после входа)", value = "{\"base_url\": \"https://sms.itslearning.com\", \"code_or_url\": \"itsl-itslearning://login?code=…\"}")}))
+                    @ExampleObject(name = "itslearning (код после входа)", value = "{\"base_url\": \"https://sms.itslearning.com\", \"code_or_url\": \"itsl-itslearning://login?code=…\"}"),
+                    @ExampleObject(name = "classroom (со страницы возврата Google)", value = "{\"code\": \"4/0A…\", \"state\": \"…\", \"redirect_uri\": \"http://localhost:5173/settings/platforms\"}")}))
             @RequestBody JsonNode body) {
         return platforms.connect(user.getId(), parse(platform), body);
     }
@@ -77,6 +78,15 @@ public class PlatformController {
         return new UrlResponseDTO(platforms.itslearningUrl(baseUrl));
     }
 
+    @GetMapping("/classroom/url")
+    @Operation(summary = "Google Classroom: ссылка для входа",
+            description = "redirectUri — страница сайта <адрес из CORS_ORIGINS>/settings/platforms. Google вернёт туда "
+                    + "?code=…&state=…, их и redirect_uri отправить в POST /platforms/classroom. Ссылка действует 10 минут")
+    public UrlResponseDTO classroomUrl(@CurrentUser UserEntity user,
+                                       @RequestParam String redirectUri) {
+        return new UrlResponseDTO(platforms.classroomUrl(user.getId(), redirectUri));
+    }
+
     @DeleteMapping("/{platform}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Отключить платформу", description = "Доступ удаляется, ДЗ этой платформы остаются")
@@ -88,7 +98,7 @@ public class PlatformController {
         try {
             return PlatformEnum.fromValue(platform.strip().toLowerCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("platform: canvas | teams | itslearning | inschool");
+            throw new BadRequestException("platform: canvas | teams | itslearning | inschool | classroom");
         }
     }
 }

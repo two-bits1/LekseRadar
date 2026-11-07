@@ -59,6 +59,23 @@ Settings → Networking → **Generate Domain**. Это адрес API:
 - фронту на Vercel: `VITE_API_URL=https://<домен>/api/v1`;
 - когда фронт задеплоен, `CORS_ORIGINS=https://<адрес-на-vercel>` (без `/` в конце, несколько адресов через запятую).
 
+### Google Classroom (когда известен адрес фронта)
+
+1. Google Cloud → **Google Auth Platform → Clients → LR** (Web-клиент), добавить, не убирая `localhost`:
+   - **Authorized JavaScript origins**: `https://<адрес-фронта>`
+   - **Authorized redirect URIs**: `https://<адрес-фронта>/settings/platforms`
+2. Railway → бэкенд → Variables:
+   ```
+   GOOGLE_CLIENT_ID=…apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=GOCSPX-…
+   CORS_ORIGINS=https://<адрес-фронта>
+   ```
+   Адрес возврата бэкенд берёт сам: `CORS_ORIGINS` + `/settings/platforms`. Он должен быть в Authorized redirect URIs
+   буква в букву, иначе ученик увидит ошибку Google `redirect_uri_mismatch`.
+3. В базе на Railway должна быть миграция V22 (`classroom`): `python database/migrate.py "$DATABASE_URL"`.
+4. Пока приложение в Google в режиме **Testing**, войти могут только адреса из Audience → Test users,
+   и доступ слетает через 7 дней (ученик видит «Войдите в Google Classroom заново»).
+
 ## 4. Проверка
 
 ```bash

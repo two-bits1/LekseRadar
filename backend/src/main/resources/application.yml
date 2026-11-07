@@ -109,3 +109,10 @@ app:
     from: ${MAIL_FROM:${MAIL_USERNAME:}}
     # true — без настроенной почты код подтверждения печатается в лог бэкенда (только для разработки)
     dev-log-codes: ${MAIL_DEV_LOG_CODES:false}
+  google:
+    # Google Classroom. Ключи: Google Cloud → Google Auth Platform → Clients → клиент (Web application).
+    # Без них кнопка «Подключить Google Classroom» отвечает 503, остальное работает
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+    # Адрес возврата отдельно не задаётся: это каждый сайт из CORS_ORIGINS + /settings/platforms.
+    # В Google Cloud → Authorized redirect URIs должны стоять ровно такие адреса
