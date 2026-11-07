@@ -449,3 +449,23 @@ erDiagram
 | `user_id` | bigint | Long | нет |  | PK, FK → users.id CASCADE | ученик |
 | `achievement_code` | text | String | нет |  | PK, FK → achievements.code | какая ачивка |
 | `unlocked_at` | timestamptz | Instant | нет | `now()` |  | когда получена |
+
+## Виды (view): готовые выборки только для чтения
+
+В Java — интерфейс-проекция или record + `@Query(nativeQuery = true)`, как уже сделано для `chat_context`
+(`ChatMessageRepository.findContext`). Всегда фильтровать по `user_id` текущего ученика.
+
+| Вид | Колонки | Для чего | Эндпоинт |
+|---|---|---|---|
+| `chat_context` | `session_id`, `role` chat_role, `content`, `created_at` | последние 10 сообщений чата (без `system`) для запроса к ИИ | внутри `POST /chats/{id}/messages` ✅ |
+| `user_chats` | `id`, `user_id`, `mode` chat_mode, `title`, `subject`, `topic`, `quiz_set_id`, `assignment_id`, `archived`, `updated_at`, `message_count` | список чатов с предметом и числом сообщений | `GET /chats` 🕓 (сейчас читает таблицу) |
+| `quiz_questions_public` | `quiz_id`, `position`, `exercise_id`, `question_type`, `question`, `options` jsonb | вопросы попытки **без правильных ответов** — только это отдавать фронту | `GET /quizzes/{id}` 🕓 |
+| `user_quiz_progress` | `user_id`, `subject`, `topic`, `quizzes_completed`, `quizzes_in_progress`, `best_score`, `last_score`, `last_activity` | прогресс по квизам: предмет и тема | `GET /dashboard` 🕓 |
+| `flashcards` | `user_id`, `exercise_id`, `quiz_set_id`, `subject`, `topic`, `front`, `back`, `explanation`, `next_review_at`, `interval_days`, `reviews`, `due` | карточки ученика: `front` — вопрос, `back` — ответ; `due = true` — пора повторить | `GET /flashcards/due` 🕓 |
+| `user_flashcard_stats` | `user_id`, `cards`, `due_now`, `learned`, `reviews` | сводка по колоде | `GET /dashboard` 🕓 |
+| `user_topic_progress` | `user_id`, `topic`, `attempts`, `correct`, `partial`, `mastery_pct`, `last_activity` | освоение тем в % (partial = 0,5) | `GET /dashboard`, слабые темы в промпте 🕓 |
+| `user_daily_activity` | `user_id`, `day` date, `events`, `exercises`, `quizzes` | активность по дням для графика | `GET /dashboard` 🕓 |
+| `user_dashboard` | `user_id`, `homework_todo`, `homework_overdue`, `homework_done`, `quizzes_completed`, `avg_quiz_score`, `exercises_answered`, `questions_asked`, `active_days_30` | цифры для карточек дашборда, одна строка на ученика | `GET /dashboard` 🕓 |
+| `user_materials` | `id`, `owner_id`, `title`, `subject`, `topic`, `file_name`, `mime_type`, `file_size`, `source` material_source, `language`, `chunk_count`, `created_at` | список учебных материалов (свои + общие, где `owner_id IS NULL`) | `GET /materials` 🕓 |
+
+Числа `bigint` из `count(*)` → `Long`, `numeric` → `BigDecimal` (или `Double` в DTO).
