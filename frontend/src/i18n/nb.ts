@@ -49,6 +49,19 @@ export const nb = {
     upcoming: 'Rett rundt hjørnet', deckEyebrow: 'LITT REPETISJON, STOR FORSKJELL', deckTitle: 'Det sitter snart.', deckText: 'Seks små kort. Et litt klarere hode.', deckCta: 'Prøv læringskort',
     demoNote1: 'Dette er demonstrasjonsdata.', demoNote2: 'Ingen skolekonto er koblet til.',
   },
+  chat: {
+    eyebrow: 'DIN AI-VEILEDER', title: 'Forstå det. På din måte.', intro: 'Ingen ferdige lekser. Bare litt hjelp til å tenke selv.',
+    active: 'Aktive', archive: 'Arkiv', newChat: 'Ny samtale', starting: 'Starter …', startingAbout: (title: string) => `Starter en samtale om «${title}» …`,
+    loadingList: 'Henter samtaler …', emptyArchive: 'Ingen arkiverte samtaler.',
+    empty: 'Ingen samtaler ennå. Start en ny, eller trykk «Lær med AI» på en oppgave.',
+    notFound: 'Fant ikke samtalen.', failed: 'Noe gikk galt.', allChats: 'Alle samtaler', loading: 'Henter samtalen …',
+    tutorEyebrow: 'AI-VEILEDER', archived: 'ARKIVERT', newName: 'Nytt navn', save: 'Lagre', cancel: 'Avbryt',
+    rename: 'Gi nytt navn', unarchive: 'Hent fra arkiv', archiveAction: 'Arkiver', remove: 'Slett',
+    confirmDelete: (title: string) => `Slette «${title}» med alle meldinger? Dette kan ikke angres.`,
+    emptyThread: 'Still et spørsmål om leksene. Veilederen hjelper deg å tenke selv — ikke med ferdige svar.',
+    typing: 'AI-veilederen skriver …', retry: 'Prøv igjen', inputLabel: 'Ditt spørsmål', placeholder: 'Hva lurer du på?', send: 'Send',
+    hint: (n: number, max: number) => `Enter sender · Shift+Enter gir ny linje · ${n}/${max}`,
+  },
 };
 
 export type Dict = typeof nb;
