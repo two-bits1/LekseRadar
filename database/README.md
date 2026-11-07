@@ -40,6 +40,7 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V14__chat_language_homework.sql` | язык чата и уровень, файл ДЗ (`attach_homework_file()`), `set_chat_language()`, `chat_prompt_vars()` |
 | `V15__prompt_limits.sql` | `clip_text()`: текст ДЗ в промпте не длиннее 12 000 символов |
 | `V16__no_demo_data.sql` | убран `assignments.is_demo`: пробных данных в базе нет |
+| `V17__language_from_site.sql` | язык ИИ берётся с сайта (`users.locale`), `language_name()` |
 
 ## Схема
 
