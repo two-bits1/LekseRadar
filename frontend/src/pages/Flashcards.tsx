@@ -34,6 +34,8 @@ export function Flashcards() {
     setBusy(true); setError(null);
     try {
       await flashcardsApi.review(card.exerciseId, GRADES[g]);
+      // «Не помню» — карточка вернётся в конце этого же занятия (в базе она тоже снова к повторению через 10 минут)
+      if (g === 'again') setDue(d => d ? [...d, card] : d);
       setIndex(i => i + 1); setFlipped(false);
       flashcardsApi.stats().then(setStats).catch(() => {});
     } catch (e) { setError(asApiError(e, t.common)); } finally { setBusy(false); }
@@ -54,6 +56,7 @@ export function Flashcards() {
       <span><strong>{stats?.cards ?? '—'}</strong>{c.statsCards}</span>
       <span className={stats?.dueNow ? 'hot' : ''}><strong>{stats?.dueNow ?? '—'}</strong>{c.statsDue}</span>
       <span><strong>{stats?.learned ?? '—'}</strong>{c.statsLearned}</span>
+      <span><strong>{stats?.reviews ?? '—'}</strong>{c.statsReviews}</span>
     </div>
     {error && <p role="alert" className="feedback danger">{error.message}</p>}
 

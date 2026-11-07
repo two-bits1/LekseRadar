@@ -113,7 +113,7 @@ export const en: Dict = {
   },
   cards: {
     title: 'Flashcards', intro: 'Review a little every day — cards come back just as you are about to forget them.',
-    statsCards: 'cards', statsDue: 'due now', statsLearned: 'learned',
+    statsCards: 'cards', statsDue: 'due now', statsLearned: 'learned', statsReviews: 'reviews',
     none: 'Nothing to review right now. Well done!', empty: 'Your deck is empty. Make cards with AI below, or take a quiz.',
     showAnswer: 'Show answer', flipHint: 'Tap the card or press space to flip', grades: { again: 'Forgot', hard: 'Hard', good: 'Remembered', easy: 'Easy' },
     progress: (i: number, n: number) => `${i} of ${n}`, done: 'Done for now!', front: 'Question', back: 'Answer', explanation: 'Explanation',
