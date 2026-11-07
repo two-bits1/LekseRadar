@@ -1,7 +1,7 @@
 // Квиз на настоящем API (API.md, «Квизы»): /quiz — новый квиз и мои квизы, /quiz/:quizId — прохождение.
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, ChevronRight, CircleAlert, CircleCheck, CircleX, Layers, RotateCcw, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check, ChevronRight, CircleAlert, CircleCheck, CircleX, Layers, RotateCcw, Sparkles, X } from 'lucide-react';
 import { PATHS } from '../paths';
 import { quizzesApi, subjectsApi } from '../api/endpoints';
 import type { AnswerResult, ApiError, Level, Quiz, QuizSummary, Subject } from '../api/types';
@@ -9,7 +9,7 @@ import { Field, asApiError, fieldError, generalError } from '../forms';
 import { Md } from '../components/Md';
 import { ResultCard, tier } from '../components/ResultCard';
 import { useT } from '../i18n';
-import { correctAnswers, encodeAnswer } from './quizLogic';
+import { correctAnswers, encodeAnswer, optionState } from './quizLogic';
 
 const LEVELS: Level[] = ['beginner', 'intermediate', 'advanced'];
 
@@ -159,8 +159,8 @@ export function QuizRun() {
             const picked = Array.isArray(answer) ? answer.includes(opt) : answer === opt;
             const right = result && correctAnswers(question.type, result.correctAnswer).includes(opt);
             return <button key={opt} type="button" role={question.type === 'single_choice' ? 'radio' : 'checkbox'} aria-checked={picked} disabled={!!result}
-              className={`option${picked ? ' picked' : ''}${right ? ' right' : ''}`} onClick={() => question.type === 'single_choice' ? setAnswer(opt) : toggle(opt)}>
-              <span className="option-mark" aria-hidden="true">{picked && <Check size={13} />}</span><Md inline>{opt}</Md></button>;
+              className={`option${optionState(!!result, picked, !!right)}`} onClick={() => question.type === 'single_choice' ? setAnswer(opt) : toggle(opt)}>
+              <span className="option-mark" aria-hidden="true">{result ? (right ? <Check size={13} /> : picked && <X size={13} />) : picked && <Check size={13} />}</span><Md inline>{opt}</Md></button>;
           })}</div>}
       {result && <div role="status" className={`feedback ${tone} verdict`}><VerdictIcon size={18} /><div>
         <strong>{q.verdict[result.verdict]}</strong>
