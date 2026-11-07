@@ -16,16 +16,16 @@
 - [ ] **№2**: переменные бэкенда:
   - `MAIL_USERNAME`, `MAIL_PASSWORD`: без них регистрация отвечает 503;
   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: без них Classroom отвечает 503. В Google Cloud Console добавить
-    redirect URI `https://<адрес Vercel>/settings/platforms`;
-  - `CORS_ORIGINS` = адрес Vercel (без `/` в конце) после деплоя фронта.
+    redirect URI `https://lekseradar-eight.vercel.app/settings/platforms`;
+  - `CORS_ORIGINS=https://lekseradar-eight.vercel.app,http://localhost:5173`;
 - [ ] Ветки сервисов: collector ← `PythonAPI`, backend ← `JavaAPI-setup` (или `main-test-4.0`, если показывать эту сборку).
 - [ ] По желанию: `TEAMS_CLIENT_ID` у collector (вход в Teams по коду).
 
 ## Vercel (фронт), №1
 
-- [ ] Проект из `two-bits1/LekseRadar`, Root Directory `frontend`, Production Branch `Frontend-setup` (или `main-test-4.0`).
+- [x] Сайт: https://lekseradar-eight.vercel.app (7 ноября, 20:23). Проект из `two-bits1/LekseRadar`, Root Directory `frontend`, Production Branch `Frontend-setup` (или `main-test-4.0`).
 - [ ] `VITE_API_URL=https://backend-production-22b1.up.railway.app/api/v1`, Redeploy.
-- [ ] Адрес Vercel передать №2 для `CORS_ORIGINS` и redirect URI Google.
+- [ ] Адрес Vercel передать №2 для redirect URI Google.
 
 ## Проверка после деплоя
 
