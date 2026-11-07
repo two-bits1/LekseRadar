@@ -24,7 +24,7 @@
 
 ## Кто что делает
 
-Подробные планы: **бэкенд [docs/PLAN-BACKEND.md](docs/PLAN-BACKEND.md)**, **фронт [docs/PLAN-FRONTEND.md](docs/PLAN-FRONTEND.md)**.
+Подробные планы: **бэкенд [docs/PLAN-BACKEND.md](docs/PLAN-BACKEND.md)**, **фронт [docs/PLAN-FRONTEND.md](docs/PLAN-FRONTEND.md)**, **Python и база [docs/PLAN-PYTHON.md](docs/PLAN-PYTHON.md)**.
 
 Все трое начинают сразу: фронт и бэк работают по контрактам ниже, не дожидаясь друг друга.
 Точки встречи отмечены 🔗.
