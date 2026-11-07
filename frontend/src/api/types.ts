@@ -106,3 +106,8 @@ export type CreateChatRequest = { title?: string; topic?: string; subject?: stri
 export type UpdateChatRequest = { title?: string; topic?: string; archived?: boolean };
 export type StartQuizRequest = { subject: string; topic: string; level?: Level; count?: number; assignmentId?: number | null; fresh?: boolean };
 export type AnswerRequest = { position: number; answer: string };
+
+// 🕓 Платформы (ARCHITECTURE.md §5): поля — как ждёт homework-collector (README «credentials»).
+export type PlatformKey = 'canvas' | 'itslearning' | 'inschool' | 'teams' | 'ics';
+export type PlatformCredentials = Record<string, unknown>;
+export type PlatformConnection = { platform: PlatformKey; connected: boolean; updatedAt?: string | null };

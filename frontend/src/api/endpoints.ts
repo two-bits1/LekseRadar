@@ -3,7 +3,7 @@ import { api, API_BASE } from './client';
 import type {
   AnswerRequest, AnswerResult, AuthResponse, ChangePasswordRequest, Chat, ChatReply, CreateChatRequest, Deck, Flashcard,
   FlashcardStats, Health, LoginRequest, Message, Quiz, QuizProgress, QuizSummary, RegisterRequest, ReviewResult,
-  StartQuizRequest, Subject, UpdateChatRequest, UpdateUserRequest, User,
+  StartQuizRequest, Subject, UpdateChatRequest, UpdateUserRequest, User, PlatformConnection, PlatformCredentials, PlatformKey,
 } from './types';
 
 const json = (method: string, body?: unknown): RequestInit => body === undefined ? { method } : { method, body: JSON.stringify(body) };
@@ -53,6 +53,13 @@ export const flashcardsApi = {
   stats: () => api<FlashcardStats>('/flashcards/stats'),                                                          // #24
   review: (exerciseId: number, grade: number) => api<ReviewResult>(`/flashcards/${exerciseId}/review`, json('POST', { grade })), // #25
   generate: (body: StartQuizRequest) => api<Deck>('/flashcards/generate', json('POST', body)),                    // #26
+};
+
+// 🔒 🕓 Платформы — в API.md помечены «будет позже». Фронтенд готов: как только бэкенд добавит, заработает.
+export const platformsApi = {
+  list: () => api<PlatformConnection[]>('/platforms'),
+  connect: (platform: PlatformKey, credentials: PlatformCredentials) => api<PlatformConnection>(`/platforms/${platform}`, json('POST', credentials)),
+  disconnect: (platform: PlatformKey) => api<void>(`/platforms/${platform}`, { method: 'DELETE' }),
 };
 
 // 🔓 Служебное: /actuator/health лежит вне /api/v1 (#27)
