@@ -3,7 +3,7 @@
 Базовый адрес: **`http://localhost:8080/api/v1`**
 Живая документация (можно вызывать запросы прямо в браузере): **http://localhost:8080/swagger-ui.html**
 
-Пробных пользователей нет: аккаунт создаётся через `POST /auth/register`, вход через `POST /auth/login`.
+Демо-вход: `demo@lekseradar.no` / `demo1234`
 
 ---
 
@@ -165,7 +165,7 @@ type ApiError = {
 
 ### `POST /auth/login` — вход
 ```json
-{ "email": "ola@example.com", "password": "hemmelig123" }
+{ "email": "demo@lekseradar.no", "password": "demo1234" }
 ```
 - **200** → `AuthResponse`
 - **401** → неверный email или пароль

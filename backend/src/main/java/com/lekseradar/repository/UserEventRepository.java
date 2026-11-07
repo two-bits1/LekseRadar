@@ -1,28 +1,22 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.UserEvent;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 /**
- * Таблица {@code user_events} (V5): лента действий пользователя. Запись через {@link #add},
- * payload остаётся значением по умолчанию '{}'.
+ * Таблица {@code user_events} (database/migrations/V5__history_progress.sql): лента действий пользователя.
+ * Только запись, поэтому без JPA-сущности; payload остаётся значением по умолчанию '{}'.
  */
-public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
+@Repository
+public class UserEventRepository {
+    private final JdbcTemplate jdbc;
 
-    /** Лента: новые сверху, например PageRequest.of(0, 50). */
-    List<UserEvent> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable page);
+    public UserEventRepository(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+    }
 
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO user_events (user_id, type, ref_table, ref_id) VALUES (:userId, :type, :refTable, :refId)",
-            nativeQuery = true)
-    void add(@Param("userId") Long userId, @Param("type") String type, @Param("refTable") String refTable,
-             @Param("refId") Long refId);
+    public void add(Long userId, String type, String refTable, Long refId) {
+        jdbc.update("INSERT INTO user_events (user_id, type, ref_table, ref_id) VALUES (?, ?, ?, ?)",
+                userId, type, refTable, refId);
+    }
 }

@@ -22,7 +22,7 @@ public class ChatMessage {
 
     @Convert(converter = MessageRoleConverter.class)
     @ColumnTransformer(write = "?::chat_role")
-    @Column(nullable = false, columnDefinition = "chat_role")
+    @Column(nullable = false)
     private MessageRole role;
 
     @Column(nullable = false)
@@ -34,10 +34,6 @@ public class ChatMessage {
 
     /** Какая модель ответила. */
     private String model;
-
-    /** Версия промпта (ai_prompts.id), с которой ответил ИИ. */
-    @Column(name = "prompt_id")
-    private Long promptId;
 
     @Column(name = "tokens_used")
     private Integer tokensUsed;
@@ -72,7 +68,5 @@ public class ChatMessage {
     public Boolean getOnTopic() { return onTopic; }
     public String getModel() { return model; }
     public Integer getTokensUsed() { return tokensUsed; }
-    public Long getPromptId() { return promptId; }
-    public void setPromptId(Long promptId) { this.promptId = promptId; }
     public Instant getCreatedAt() { return createdAt; }
 }
