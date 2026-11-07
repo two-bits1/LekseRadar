@@ -41,7 +41,15 @@ def exchange_code(client: httpx.Client, base_url: str, code_or_url: str) -> dict
 
 def _token(client: httpx.Client, base_url: str, form: dict) -> dict:
     r = client.post(f"{base_url.rstrip('/')}/restapi/oauth2/token", data={"client_id": CLIENT_ID, **form})
-    data = r.json() if r.content else {}
+    try:
+        data = r.json() if r.content else {}
+    except ValueError:  # HTML-страница ошибки, обрезанный ответ и т.п.
+        data = None
+    if not isinstance(data, dict):
+        if r.status_code >= 500:
+            raise SourceError(f"itslearning не отвечает (HTTP {r.status_code}), попробуйте позже")
+        raise SourceError("itslearning не выдал токен: проверьте адрес школы и войдите заново",
+                          needs_reconnect=True)
     if "access_token" not in data:
         raise SourceError("itslearning не выдал токен, нужно войти заново", needs_reconnect=True)
     return {"base_url": base_url, "access_token": data["access_token"],
