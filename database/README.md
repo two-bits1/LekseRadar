@@ -5,6 +5,7 @@
 Работает с ней Java API (Spring Boot).
 
 Как база встроена в проект: [схема работы](../docs/schema.png), подробно в [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md).
+Все таблицы, enum'ы, виды и функции и как они смаппены в Java (сущности, репозитории, Spring Security): [ENTITIES.md](ENTITIES.md).
 
 ## Запуск
 
