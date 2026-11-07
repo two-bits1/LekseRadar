@@ -99,7 +99,8 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
       ...options.headers,
     },
   });
-  if (res.status === 401) { localStorage.removeItem("token"); location.href = "/login"; }
+  // 401 на /auth/login = неверный пароль: показываем ошибку, а не перекидываем на /login
+  if (res.status === 401 && !path.startsWith("/auth/")) { localStorage.removeItem("token"); location.href = "/login"; }
   if (!res.ok) throw await res.json();          // ApiError, см. «Ошибки»
   return res.status === 204 ? (undefined as T) : res.json();
 }
@@ -128,7 +129,7 @@ type Chat = {
   topic: string | null;
   archived: boolean;
   createdAt: string;
-  updatedAt: string;      // время последнего сообщения
+  updatedAt: string;      // последнее сообщение или изменение чата (по нему сортируется список)
 };
 
 type Message = {
