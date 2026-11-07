@@ -2,13 +2,12 @@
 
 Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO)
 и во фронтенде (TypeScript-типы). База — ветка `PythonAPI`, бэкенд — ветка `JavaAPI-setup`.
-Источник правды — миграции `database/migrations/V1–V20`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
-поэтому поля сущностей должны совпадать с колонками ниже.
+Источник правды — миграции `database/migrations/V1–V20`. Бэкенд таблицы не создаёт (`ddl-auto: validate`),
+поэтому поля сущностей должны совпадать с колонками ниже, иначе бэкенд не запустится.
 
-**Состояние бэкенда.** Сейчас в `JavaAPI-setup` есть только `User`, `ChatSession`, `ChatMessage`, `MessageRole`
-и их репозитории. Остальные сущности и репозитории описаны в плане
-[`backend/ENTITIES-PLAN.md`](https://github.com/two-bits1/LekseRadar/blob/JavaAPI-setup/backend/ENTITIES-PLAN.md):
-их один раз написали и проверили, потом откатили (коммит `2b943e1`, вернуть: `git revert 2b943e1`).
+**Состояние бэкенда (main-test-3.0).** В бэкенде есть сущности и репозитории для всех 20 таблиц (классы `…Entity`).
+Есть эндпоинты входа, профиля, чата, квизов и карточек. Эндпоинтов ДЗ, платформ, дашборда и материалов нет,
+подробно в разделе [«Бэкенд: сущности, репозитории и эндпоинты»](#бэкенд-сущности-репозитории-и-эндпоинты-main-test-30).
 
 **Пробных данных нет нигде.** База стартует пустой (seed.sql удалён, `assignments.is_demo` убран в V16),
 `collect()` не выдумывает задания. Всё появляется только через API: регистрация и вход (Spring Security + JWT),
@@ -24,7 +23,7 @@ SQL для каждого сценария — [README.md](README.md).
 - **NULL** — «да», если колонка может быть пустой (в Java — обёртка `Long`, `Integer`, а не `long`).
 - **Ключи:** PK — первичный ключ, FK → таблица.колонка и что происходит при удалении
   (CASCADE — удаляется вместе, SET NULL — ссылка обнуляется).
-- **Бэкенд:** ✅ уже есть в `backend/.../model` и `.../repository`; 📝 описано в `ENTITIES-PLAN.md`, в коде пока нет.
+- **Бэкенд** (состояние на `main-test-3.0`): ✅ класс `…Entity` есть в `backend/.../model`, репозиторий в `.../repository`.
   «Только чтение» — сущность `@Immutable`, а пишет функция базы через метод репозитория. 🕓 — эндпоинта ещё нет.
 - Время везде `timestamptz` → `Instant` (UTC), в JSON — ISO-8601.
 
@@ -36,15 +35,15 @@ SQL для каждого сценария — [README.md](README.md).
 
 | PostgreSQL | Значения | Java enum | Где используется | Бэкенд |
 |---|---|---|---|---|
-| `chat_role` | `student`, `tutor`, `system` | `MessageRole` | `chat_messages.role` | ✅ |
-| `chat_mode` | `tutor`, `quiz` | `ChatMode` | `chat_sessions.mode`, `chat_mode_prompts.mode` | 📝 |
-| `platform` | `canvas`, `teams`, `itslearning`, `inschool` | `Platform` | `platform_connections.platform`, `assignments.source` | 📝 |
-| `assignment_status` | `todo`, `overdue`, `submitted`, `graded` | `AssignmentStatus` | `assignments.status` | 📝 |
-| `exercise_level` | `beginner`, `intermediate`, `advanced` | `ExerciseLevel` | `exercises`, `quizzes`, `quiz_sets`, `chat_sessions.level` | 📝 |
-| `answer_type` | `exact`, `free` | `AnswerType` | `exercises.answer_type` | 📝 |
-| `verdict` | `correct`, `incorrect`, `partial` | `Verdict` | `exercise_attempts.verdict`, `save_quiz_answer()` | 📝 |
-| `quiz_status` | `in_progress`, `completed`, `abandoned` | `QuizStatus` | `quizzes.status` | 📝 |
-| `material_source` | `upload`, `url`, `platform`, `teacher`, `seed` (не используется) | `MaterialSource` | `materials.source` | 📝 |
+| `chat_role` | `student`, `tutor`, `system` | `MessageRoleEnum` | `chat_messages.role` | ✅ |
+| `chat_mode` | `tutor`, `quiz` | `ChatModeEnum` | `chat_sessions.mode`, `chat_mode_prompts.mode` | ✅ |
+| `platform` | `canvas`, `teams`, `itslearning`, `inschool` | `PlatformEnum` | `platform_connections.platform`, `assignments.source` | ✅ |
+| `assignment_status` | `todo`, `overdue`, `submitted`, `graded` | `AssignmentStatusEnum` | `assignments.status` | ✅ |
+| `exercise_level` | `beginner`, `intermediate`, `advanced` | `ExerciseLevelEnum` | `exercises`, `quizzes`, `quiz_sets`, `chat_sessions.level` | ✅ |
+| `answer_type` | `exact`, `free` | `AnswerTypeEnum` | `exercises.answer_type` | ✅ |
+| `verdict` | `correct`, `incorrect`, `partial` | `VerdictEnum` | `exercise_attempts.verdict`, `save_quiz_answer()` | ✅ |
+| `quiz_status` | `in_progress`, `completed`, `abandoned` | `QuizStatusEnum` | `quizzes.status` | ✅ |
+| `material_source` | `upload`, `url`, `platform`, `teacher`, `seed` (не используется) | `MaterialSourceEnum` | `materials.source` | ✅ |
 
 Типы вопросов квиза — не enum, а текст с CHECK: `exercises.question_type` = `single_choice` | `multiple_choice` | `text`
 (Java: `QuestionType`).
@@ -99,7 +98,7 @@ erDiagram
 
 #### `users`
 
-Ученик: вход, язык, часовой пояс. Бэкенд: ✅ `User`.
+Ученик: вход, язык, часовой пояс. Бэкенд: ✅ `UserEntity`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -118,7 +117,7 @@ erDiagram
 
 #### `platform_connections`
 
-Подключённая платформа ученика и зашифрованный доступ к ней. Одна строка на (ученик, платформа). Бэкенд: 📝 `PlatformConnection`.
+Подключённая платформа ученика и зашифрованный доступ к ней. Одна строка на (ученик, платформа). Бэкенд: ✅ `PlatformConnectionEntity`; эндпоинтов платформ нет 🕓.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -135,7 +134,7 @@ erDiagram
 
 #### `assignments`
 
-ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id). Бэкенд: 📝 `Assignment`.
+ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id). Бэкенд: ✅ `AssignmentEntity`; эндпоинтов ДЗ нет 🕓.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -159,7 +158,7 @@ erDiagram
 
 #### `chat_sessions`
 
-Чат: репетитор (`tutor`) или генерация квизов (`quiz`). Создавать через `start_chat()`. Бэкенд: ✅ `ChatSession`, но без полей V13–V14 (`assignment_id`, `mode`, `subject_id`, `quiz_set_id`, `language`, `level`); 📝 они и `startChat()`, `systemPrompt()`, `promptVars()`, `setLanguage()` — в плане.
+Чат: репетитор (`tutor`) или генерация квизов (`quiz`). Создавать через `start_chat()`. Бэкенд: ✅ `ChatSessionEntity` со всеми полями V13–V14; `ChatSessionRepository`: `startChat()`, `systemPrompt()`, `promptVars()`, `setLanguage()`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -181,7 +180,7 @@ erDiagram
 
 #### `chat_messages`
 
-Сообщения чата. История для ИИ — вид `chat_context`. Бэкенд: ✅ `ChatMessage`, `findContext()` читает вид; 📝 нет поля `prompt_id` (V13).
+Сообщения чата. История для ИИ — вид `chat_context`. Бэкенд: ✅ `ChatMessageEntity` (с `promptId`), `findContext()` читает вид.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -199,7 +198,7 @@ erDiagram
 
 #### `chat_mode_prompts`
 
-Какой промпт подключён к режиму чата. Бэкенд: 📝 `ChatModePrompt` (только чтение; id — текст режима).
+Какой промпт подключён к режиму чата. Бэкенд: ✅ `ChatModePromptEntity` (только чтение; id — текст режима).
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -210,7 +209,7 @@ erDiagram
 
 #### `ai_prompts`
 
-Промпты ИИ с версиями, одна активная версия на ключ. Бэкенд: 📝 `AiPrompt` (только чтение), `AiPromptRepository.getActiveContent()` = `get_prompt()`; грузит `ai-content/load/load.py`.
+Промпты ИИ с версиями, одна активная версия на ключ. Бэкенд: ✅ `AiPromptEntity` (только чтение), `AiPromptRepository.getActiveContent()` = `get_prompt()`; грузит `ai-content/load/load.py`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -227,7 +226,7 @@ erDiagram
 
 #### `materials`
 
-Учебные файлы для ИИ-репетитора и файлы ДЗ (как текст). Бэкенд: 📝 `Material` (только чтение); добавлять через `add_material()` / `attach_homework_file()`.
+Учебные файлы для ИИ-репетитора и файлы ДЗ (как текст). Бэкенд: ✅ `MaterialEntity` (только чтение); добавлять через `add_material()` / `attach_homework_file()`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -254,7 +253,7 @@ erDiagram
 
 #### `material_chunks`
 
-Фрагменты материалов с полнотекстовым индексом. Бэкенд: 📝 `MaterialChunk` (только чтение, без `tsv`); поиск `MaterialRepository.search()` / `forPrompt()`.
+Фрагменты материалов с полнотекстовым индексом. Бэкенд: ✅ `MaterialChunkEntity` (только чтение, без `tsv`); поиск `MaterialRepository.search()` / `forPrompt()`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -270,7 +269,7 @@ erDiagram
 
 #### `subjects`
 
-Предметы для выбора в квизе. Создаются сами при импорте квиза или создании чата. Бэкенд: 📝 `Subject`.
+Предметы для выбора в квизе. Создаются сами при импорте квиза или создании чата. Бэкенд: ✅ `SubjectEntity`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -283,7 +282,7 @@ erDiagram
 
 #### `quiz_sets`
 
-Сохранённый квиз от ИИ: один JSON на (предмет, тема, уровень, язык), используется снова. Бэкенд: 📝 `QuizSet` (только чтение); создавать через `import_quiz_json()`.
+Сохранённый квиз от ИИ: один JSON на (предмет, тема, уровень, язык), используется снова. Бэкенд: ✅ `QuizSetEntity` (только чтение); создавать через `import_quiz_json()`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -308,7 +307,7 @@ erDiagram
 
 #### `exercises`
 
-Вопросы квиза. Они же — флеш-карты. Бэкенд: 📝 `Exercise` (только чтение); вопросы без ответов — вид `quiz_questions_public`.
+Вопросы квиза. Они же — флеш-карты. Бэкенд: ✅ `ExerciseEntity` (только чтение); вопросы без ответов — вид `quiz_questions_public`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -333,7 +332,7 @@ erDiagram
 
 #### `quizzes`
 
-Попытка ученика пройти квиз, с местом, где он остановился. Бэкенд: 📝 `Quiz`; старт `start_quiz()`, конец `finish_quiz()`.
+Попытка ученика пройти квиз, с местом, где он остановился. Бэкенд: ✅ `QuizEntity`; старт `start_quiz()`, конец `finish_quiz()`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -356,7 +355,7 @@ erDiagram
 
 #### `quiz_questions`
 
-Порядок вопросов в попытке. Бэкенд: 📝 `QuizQuestion` (только чтение); заполняет `start_quiz()`.
+Порядок вопросов в попытке. Бэкенд: ✅ `QuizQuestionEntity` (только чтение); заполняет `start_quiz()`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -368,7 +367,7 @@ erDiagram
 
 #### `exercise_attempts`
 
-Ответы ученика с вердиктом. Бэкенд: 📝 `ExerciseAttempt` (только чтение); писать через `save_quiz_answer()`.
+Ответы ученика с вердиктом. Бэкенд: ✅ `ExerciseAttemptEntity` (только чтение); писать через `save_quiz_answer()`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -387,7 +386,7 @@ erDiagram
 
 #### `flashcard_progress`
 
-Колода ученика и расписание повторов SM-2. Карточка = вопрос из `exercises`. Бэкенд: 📝 `FlashcardProgress` (только чтение), `FlashcardRepository`: `findDueCards()`, `addQuizSet()`, `review()`, `findStats()`.
+Колода ученика и расписание повторов SM-2. Карточка = вопрос из `exercises`. Бэкенд: ✅ `FlashcardProgressEntity` (только чтение), `FlashcardRepository`: `findDueCards()`, `addQuizSet()`, `review()`, `findStats()`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -408,7 +407,7 @@ erDiagram
 
 #### `user_events`
 
-Лента всех действий: из неё строятся история, активные дни и ачивки. Бэкенд: ✅ `UserEventRepository.add(...)` через JDBC; 📝 сущность `UserEvent` и лента — в плане.
+Лента всех действий: из неё строятся история, активные дни и ачивки. Бэкенд: ✅ `UserEventEntity`, `UserEventRepository.add(...)`; эндпоинта ленты (`GET /history`) нет 🕓.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -424,7 +423,7 @@ erDiagram
 
 #### `reminders`
 
-Напоминания о дедлайнах. Бэкенд: 📝 `Reminder`.
+Напоминания о дедлайнах. Бэкенд: ✅ `ReminderEntity`; отправки напоминаний нет 🕓.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -441,7 +440,7 @@ erDiagram
 
 #### `achievements`
 
-Список ачивок, заполнен миграцией. Бэкенд: 📝 `Achievement` (справочник).
+Список ачивок, заполнен миграцией. Бэкенд: ✅ `AchievementEntity` (справочник).
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -452,7 +451,7 @@ erDiagram
 
 #### `user_achievements`
 
-Какие ачивки получил ученик. Бэкенд: 📝 `UserAchievement`.
+Какие ачивки получил ученик. Бэкенд: ✅ `UserAchievementEntity`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|
@@ -548,105 +547,32 @@ erDiagram
 | Настройка | `SecurityConfig` | без сессий (`STATELESS`), CSRF выключен (JWT), открыты только `/api/v1/auth/**`, health и Swagger |
 | Чужие данные | репозитории `findByIdAndUserId` | чужой чат, квиз, ДЗ или напоминание → 404 |
 
-Проверено на пустой базе (V1–V16, до отката Java-кода): без токена 401, демо-вход 401 (такого пользователя нет), регистрация 201,
+Проверено на пустой базе V1–V20 (main-test-3.0): без токена 401, регистрация 201,
 повтор email в другом регистре 409, неверный пароль 401, `GET /users/me` 200, создание чата и отправка сообщения
-(ИИ без ключа → 502, вопрос ученика сохранён).
+(ИИ недоступен → 502, вопрос ученика сохранён; повтор сохраняет его второй раз).
 
-## Бэкенд: сущности и репозитории (план)
+## Бэкенд: сущности, репозитории и эндпоинты (main-test-3.0)
 
-Сейчас в коде есть только `User`, `ChatSession`, `ChatMessage`. Ниже — как смаппить все 20 таблиц,
-подробно с кодом в `backend/ENTITIES-PLAN.md` (ветка `JavaAPI-setup`).
+Все 20 таблиц смаппены: класс `<Имя>Entity` в `backend/.../model`, enum `<Имя>Enum` в `model/enums` с конвертером
+в `model/converter` (`DbEnumConverter`, `autoApply`). `ddl-auto: validate`: бэкенд при старте сверяет сущности с базой.
+У пула `stringtype: unspecified`, без этого `WHERE platform = ?` падает. DTO называются `<Имя>RequestDTO` / `<Имя>ResponseDTO`.
 
-Перечисления: `DbEnum` (значение в базе и JSON) + общий `converter/DbEnumConverter`, у каждого enum свой
-конвертер с `autoApply`. Колонки PostgreSQL-ENUM помечены `columnDefinition` (для `validate`) и при записи
-`@ColumnTransformer(write = "?::тип")`. В `application.yml` у пула `stringtype: unspecified`: без этого поиск
-вида `WHERE platform = ?` падает с `operator does not exist: platform = character varying`.
+Проверено 7 ноября 2026 на чистой базе V1–V20: `RepositoriesIntegrationTest` с `TEST_DB_URL` проходит 5 из 5,
+бэкенд стартует (validate без ошибок).
 
-| Сущность | Таблица | Пишет | Репозиторий и главные методы |
+| Часть | Эндпоинты | Сервис / репозиторий | Состояние |
 |---|---|---|---|
-| `User` | `users` | Java | `UserRepository`: `findByEmailIgnoreCase`, `findDashboard`, `findTopicProgress`, `findDailyActivity` (виды) |
-| `PlatformConnection` | `platform_connections` | Java (`credentialsEnc` шифровать AES-GCM) | `PlatformConnectionRepository`: `findByUserIdAndPlatform`, `markSynced()` |
-| `Assignment` | `assignments` | Java, upsert | `AssignmentRepository`: `findForUser`, `upsert(...)` из `collect()`, `attachHomeworkFile` |
-| `ChatSession` | `chat_sessions` | Java / `start_chat()` | `ChatSessionRepository`: `startChat`, `systemPrompt`, `promptVars`, `setLanguage` |
-| `ChatMessage` | `chat_messages` | Java | `ChatMessageRepository`: `findContext` (вид `chat_context`) |
-| `ChatModePrompt` | `chat_mode_prompts` | миграция V13 | `ChatModePromptRepository` |
-| `AiPrompt` | `ai_prompts` | `save_prompt()` (load.py) | `AiPromptRepository`: `findByKeyAndActiveTrue`, `getActiveContent` |
-| `Subject` | `subjects` | функции базы | `SubjectRepository`: `findByName` (как `norm_key`) |
-| `QuizSet` | `quiz_sets` | `import_quiz_json()` | `QuizSetRepository`: `find`, `importJson` |
-| `Exercise` | `exercises` | `import_quiz_json()` | `ExerciseRepository`: `findByQuizSetIdOrderByPosition` |
-| `Quiz` | `quizzes` | `start_quiz()`, `finish_quiz()` | `QuizRepository`: `start`, `findPublicQuestions`, `saveAnswer`, `finish`, `findProgress` |
-| `QuizQuestion` | `quiz_questions` | `start_quiz()` | `QuizQuestionRepository` |
-| `ExerciseAttempt` | `exercise_attempts` | `save_quiz_answer()` | `ExerciseAttemptRepository` |
-| `FlashcardProgress` | `flashcard_progress` | функции V9, триггер | `FlashcardRepository`: `findDueCards`, `addQuizSet`, `review`, `findStats` |
-| `Material` | `materials` | `add_material()`, `attach_homework_file()` | `MaterialRepository`: `findVisible`, `add`, `search`, `forPrompt` |
-| `MaterialChunk` | `material_chunks` | `add_material()` | `MaterialChunkRepository` |
-| `Reminder` | `reminders` | Java | `ReminderRepository`: `findDue` |
-| `Achievement` | `achievements` | миграция V6 (справочник) | `AchievementRepository` |
-| `UserAchievement` | `user_achievements` | Java | `UserAchievementRepository`: `unlock` (повтор ничего не делает) |
-| `UserEvent` | `user_events` | Java и функции базы | `UserEventRepository`: `add`, лента |
+| Вход | `POST /auth/register`, `/auth/login` | `AuthService`, `UserRepository` | ✅ |
+| Профиль | `GET/PATCH /users/me`, `PUT /users/me/password` | `UserService` | ✅ `locale` принимает `uk` |
+| Чат | `GET/POST /chats`, `GET/PATCH/DELETE /chats/{id}`, `GET/POST /chats/{id}/messages` | `ChatService`, `PromptService` | ✅ промпт из базы (`chat_system_prompt` + `chat_prompt_vars`) |
+| Квиз | `GET /subjects`, `GET/POST /quizzes`, `GET /quizzes/progress`, `POST /quiz-sets/{id}/start`, `GET /quizzes/{id}`, `POST /quizzes/{id}/answers`, `/finish` | `QuizService`, `QuizGeneratorService`, `AnswerCheckerService` | ✅ готовый квиз берётся из базы по `language_code` (V20) |
+| Карточки | `GET /flashcards`, `/flashcards/due`, `/flashcards/stats`, `POST /flashcards/{id}/review`, `/flashcards/generate`, `/quiz-sets/{id}/flashcards` | `FlashcardService` | ✅ |
+| ДЗ | `GET /homework`, `POST /homework/sync` | — (`AssignmentRepository`, DTO `homework/*` есть) | 🕓 404 |
+| Платформы | `GET /platforms`, `POST/DELETE /platforms/{platform}` | — (`PlatformConnectionRepository`) | 🕓 404 |
+| Дашборд и история | `GET /dashboard`, `GET /history` | — (`UserRepository.findDashboard` и др., DTO `dashboard/*` есть) | 🕓 404 |
+| Материалы | `GET/POST /materials` | — (`MaterialRepository`, DTO `MaterialResponseDTO`) | 🕓 404 |
 
-Проверка (была в откатанном коде): `backend/src/test/.../RepositoriesIntegrationTest` проходил все репозитории на настоящей базе
-(регистрация и вход, ДЗ и платформы, чат с промптом, квиз → карточки → прогресс, материалы и поиск) в транзакции
-с откатом. Запуск: `TEST_DB_URL=jdbc:postgresql://localhost:5432/lekseradar ./mvnw test`, без переменной тест пропускается.
-
-## Бэкенд: что ещё добавить
-
-Кроме сущностей и репозиториев из плана, нет сервисов и контроллеров для ДЗ, платформ, квизов, карточек, дашборда,
-материалов и напоминаний (в списке видов выше они помечены 🕓). `ChatService` пока создаёт чат сам и берёт
-промпт из `Prompts.java`, а не из `chatSessions.systemPrompt()`.
-
-DTO: в `CreateChatRequest` добавить `mode` (`tutor` | `quiz`), `subject`, `assignmentId`, `level`;
-в `ChatResponse` — `mode`, `subject`, `language`, `assignmentId`, `quizSetId`.
-`UpdateProfileRequest.locale` разрешает `nb|nn|en|ru`, а репетитор предлагает ещё `uk` — стоит добавить `uk`.
-
-### DTO, которые ещё нужны для API
-
-```java
-// ДЗ                                         GET /homework, POST /homework/sync
-record AssignmentResponse(Long id, Platform source, String title, String course, Instant dueAt,
-                          AssignmentStatus status, String url, String kind) {}
-record SyncResponse(List<SourceStatus> sources, int count) {}
-record SourceStatus(Platform platform, boolean ok, int count, String error, boolean needsReconnect) {}
-
-// Платформы                                  GET /platforms, POST/DELETE /platforms/{platform}
-record PlatformResponse(Platform platform, boolean connected, boolean needsReconnect,
-                        Instant lastSyncedAt, String lastError) {}
-
-// Квизы                                      GET /subjects, POST /quizzes, GET /quizzes/{id}
-record SubjectResponse(Long id, String name) {}
-record StartQuizRequest(@NotBlank String subject, @NotBlank String topic, ExerciseLevel level,
-                        Long assignmentId) {}
-record QuizResponse(Long id, Long quizSetId, String title, String subject, String topic,
-                    ExerciseLevel level, QuizStatus status, int currentPosition,
-                    List<QuestionResponse> questions) {}
-record QuestionResponse(int position, Long exerciseId, QuestionType type, String question,
-                        List<String> options) {}          // без правильного ответа!
-// POST /quizzes/{id}/answers, POST /quizzes/{id}/finish
-record AnswerRequest(@Min(1) int position, @NotBlank String answer) {}     // multiple_choice: JSON-массив строкой
-record AnswerResponse(Verdict verdict, String explanation, String correctAnswer) {}
-record FinishResponse(BigDecimal score) {}
-
-// Флеш-карты                                 GET /flashcards/due, POST /flashcards/{exerciseId}/review
-record FlashcardResponse(Long exerciseId, String subject, String topic, String front, String back,
-                         String explanation, Instant nextReviewAt) {}
-record ReviewRequest(@Min(0) @Max(5) int grade) {}
-record ReviewResponse(Instant nextReviewAt, int intervalDays) {}
-
-// Дашборд и история                          GET /dashboard, GET /history
-record DashboardResponse(long homeworkTodo, long homeworkOverdue, long homeworkDone,
-                         long quizzesCompleted, BigDecimal avgQuizScore, long exercisesAnswered,
-                         long questionsAsked, long activeDays30, FlashcardStats flashcards,
-                         List<TopicProgress> topics, List<DayActivity> days) {}
-record FlashcardStats(long cards, long dueNow, long learned, long reviews) {}
-record TopicProgress(String topic, long attempts, BigDecimal masteryPct) {}
-record DayActivity(LocalDate day, long events, long exercises, long quizzes) {}
-record EventResponse(Long id, String type, String refTable, Long refId, JsonNode payload, Instant createdAt) {}
-
-// Материалы                                  GET /materials, POST /materials (multipart)
-record MaterialResponse(Long id, String title, String subject, String topic, String fileName,
-                        String mimeType, Long fileSize, MaterialSource source, int chunkCount,
-                        boolean shared, Instant createdAt) {}
-```
+Виды, которые бэкенд пока не читает: `user_chats` (список чатов собирается своим запросом) и `user_materials`.
 
 ## Фронтенд: TypeScript-типы (`frontend/src/api/types.ts`)
 
@@ -654,9 +580,9 @@ record MaterialResponse(Long id, String title, String subject, String topic, Str
 
 | TypeScript | DTO бэкенда | Таблица / вид | Расхождения |
 |---|---|---|---|
-| `User` | `UserResponse` | `users` | `Locale = nb\|nn\|en\|ru` — нет `uk`, который предлагает репетитор |
+| `User` | `UserResponseDTO` | `users` | — (`Locale` с `uk`) |
 | `AuthResponse` | `AuthResponse` | — | — |
-| `Chat` | `ChatResponse` | `chat_sessions` | нет `mode`, `subject`, `language`, `assignmentId`, `quizSetId` (появятся с V13–V14 в DTO) |
+| `Chat` | `ChatResponseDTO` | `chat_sessions` | — (`mode`, `subject`, `language`, `assignmentId`, `quizSetId` есть) |
 | `Message` | `MessageResponse` | `chat_messages` | `role` только `student \| tutor` (`system` фронту не отдаётся — так и нужно) |
 | `ChatReply` | `ChatReplyResponse` | — | — |
 | `ApiError` | `ErrorResponse` | — | `message` приходит по-русски, интерфейс по-норвежски |
@@ -664,8 +590,8 @@ record MaterialResponse(Long id, String title, String subject, String topic, Str
 | `RegisterRequest`, `LoginRequest` | те же | `users` | — |
 | `UpdateUserRequest` | `UpdateProfileRequest` | `users` | — |
 | `ChangePasswordRequest` | тот же | `users.password_hash` | — |
-| `CreateChatRequest`, `UpdateChatRequest` | те же | `chat_sessions` | нет `mode`, `subject`, `assignmentId` |
+| `CreateChatRequest`, `UpdateChatRequest` | `…RequestDTO` | `chat_sessions` | — |
 
-Когда бэкенд добавит DTO из раздела [«DTO, которые ещё нужны для API»](#dto-которые-ещё-нужны-для-api), во фронт добавляются такие же типы:
-`Assignment`, `Platform`, `Subject`, `Quiz`, `Question`, `AnswerResult`, `Flashcard`, `Dashboard`, `Material`.
+Типы квиза, карточек и предметов во фронте уже есть (`Subject`, `Quiz`, `Question`, `AnswerResult`, `Flashcard`…).
+Когда появятся эндпоинты ДЗ, платформ, дашборда и материалов, добавляются `Assignment`, `Platform`, `Dashboard`, `Material`.
 Тест контракта во фронте (`pnpm test`) сверяет URL с `docs/API.md`, поэтому новые эндпоинты сначала вносятся в API.md.
