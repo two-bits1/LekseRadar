@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { cardState, missingFields, oauthReturn, toCredentials } from './platformLogic';
+import { cardState, classroomMissing, missingFields, oauthReturn, toCredentials } from './platformLogic';
 
 const conn = (over: object = {}) => ({ platform: 'canvas' as const, connected: false, needsReconnect: false, lastSyncedAt: null, lastError: null, ...over });
 
@@ -37,4 +37,12 @@ it('возврат из Google: code и state из адреса, иначе null
   expect(oauthReturn('?code=4%2Fabc&state=s1&scope=x')).toEqual({ code: '4/abc', state: 's1' });
   expect(oauthReturn('?error=access_denied&state=s1')).toEqual({ error: 'access_denied' });
   expect(oauthReturn('')).toBeNull();
+});
+
+it('Classroom «ещё не поддерживается» только на 404/405/501; 400 — настоящая ошибка', () => {
+  expect(classroomMissing(404)).toBe(true);
+  expect(classroomMissing(405)).toBe(true);
+  expect(classroomMissing(501)).toBe(true);
+  expect(classroomMissing(400)).toBe(false);
+  expect(classroomMissing(422)).toBe(false);
 });

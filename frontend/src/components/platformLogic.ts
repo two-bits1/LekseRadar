@@ -42,6 +42,9 @@ export function cardState(c: PlatformConnection | undefined): CardState {
   return c.lastError ? 'error' : 'on';
 }
 
+// Бэкенд без Classroom: 404 / 405 / 501. 400 — уже настоящая ошибка (устаревшая ссылка, чужой state…), её текст показываем.
+export const classroomMissing = (status: number) => [404, 405, 501].includes(status);
+
 // Google возвращает ученика на /settings/platforms?code=…&state=… (или ?error=…).
 export type OAuthReturn = { code: string; state: string } | { error: string } | null;
 export function oauthReturn(search: string): OAuthReturn {

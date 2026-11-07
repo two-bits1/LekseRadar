@@ -34,6 +34,7 @@ export const nb = {
     itsLogin: 'Logg inn', itsHelp: 'Etter innlogging prøver nettleseren å åpne itsl-itslearning://… Kopier den adressen og lim den inn her.',
     itsPaste: 'Adresse eller kode etter innlogging', itsFinish: 'Fullfør',
     inschoolHelp: 'Cookies finner du i DevTools → Application → Cookies. Økten er kort, så den må fornyes av og til.',
+    classroomConnecting: 'Kobler til Google Classroom … henter lekser.', seeHomework: 'Se lekser',
     classroomStart: 'Logg inn med Google', classroomHelp: 'Du sendes til Google og tilbake hit. Vi ber bare om å lese oppgavene dine.',
     classroomNotReady: 'Google Classroom er klart her, men serveren støtter det ikke ennå.', classroomDenied: 'Innloggingen hos Google ble avbrutt.',
     fields: { base_url: 'Adresse', token: 'Tilgangstoken', refresh_token: 'Refresh-token', access_token: 'Access-token (valgfritt)', host: 'Skolens adresse', JSESSIONID: 'Cookie JSESSIONID', Authorization: 'Cookie Authorization (valgfritt)' },

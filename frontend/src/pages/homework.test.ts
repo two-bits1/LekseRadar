@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { matchesFilter, sortHomework, syncSummary } from './Homework';
+import { matchesFilter, quizSubject, sortHomework, syncSummary } from './Homework';
 import type { Assignment } from '../api/types';
 
 const hw = (status: Assignment['status'], id = 1, dueAt: string | null = null): Assignment =>
@@ -30,4 +30,10 @@ it('итог «Oppdater»: без платформ — none, иначе числ
   const bad = { platform: 'teams' as const, ok: false, count: 0, error: 'expired', needsReconnect: true };
   expect(syncSummary({ sources: [{ platform: 'canvas', ok: true, count: 3, error: null, needsReconnect: false }, bad], added: 2, updated: 1, count: 3 }))
     .toEqual({ none: false, added: 2, updated: 1, failed: [bad] });
+});
+
+it('квиз по заданию Classroom без курса: предмет — «Google Classroom»', () => {
+  const a: Assignment = { ...hw('todo'), source: 'classroom', course: '' };
+  expect(quizSubject(a)).toBe('Google Classroom');
+  expect(quizSubject({ ...a, course: 'Matte 1T' })).toBe('Matte 1T');
 });

@@ -35,6 +35,7 @@ export const en: Dict = {
     itsLogin: 'Sign in', itsHelp: 'After signing in the browser tries to open itsl-itslearning://… Copy that address and paste it here.',
     itsPaste: 'Address or code after signing in', itsFinish: 'Finish',
     inschoolHelp: 'Find the cookies in DevTools → Application → Cookies. The session is short, so it needs renewing now and then.',
+    classroomConnecting: 'Connecting Google Classroom … fetching homework.', seeHomework: 'See homework',
     classroomStart: 'Sign in with Google', classroomHelp: 'You are sent to Google and back here. We only ask to read your assignments.',
     classroomNotReady: 'Google Classroom is ready here, but the server does not support it yet.', classroomDenied: 'Signing in with Google was cancelled.',
     fields: { base_url: 'Address', token: 'Access token', refresh_token: 'Refresh token', access_token: 'Access token (optional)', host: 'School address', JSESSIONID: 'Cookie JSESSIONID', Authorization: 'Cookie Authorization (optional)' },
