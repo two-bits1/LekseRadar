@@ -85,4 +85,8 @@ INSERT INTO user_achievements (user_id, achievement_code) VALUES (1, 'first_chat
 INSERT INTO reminders (user_id, assignment_id, message, remind_at)
 SELECT 1, id, 'Frist i morgen: ' || title, due_at - interval '1 day' FROM assignments WHERE due_at > now();
 
+-- Флеш-карты: весь квиз в колоду (ошибки из квиза уже попали туда сами) и одно повторение
+SELECT add_quiz_set_to_flashcards(1, find_quiz_set('Matematikk', 'Lineære funksjoner', 'beginner'));
+SELECT interval_days FROM review_flashcard(1, 1, 5);
+
 COMMIT;
