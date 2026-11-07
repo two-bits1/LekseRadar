@@ -36,8 +36,8 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V11__material_functions.sql` | `add_material()` (нарезка на фрагменты), `search_materials()`, `materials_for_prompt()`, вид `user_materials` |
 | `V12__ai_prompts.sql` | `ai_prompts` с версиями: `save_prompt()`, `get_prompt()`, `activate_prompt()` |
 | `V13__chat_modes.sql` | два вида чата `tutor` / `quiz`, `chat_mode_prompts`, `start_chat()`, `chat_system_prompt()`, вид `user_chats` |
-
 | `V14__chat_language_homework.sql` | язык чата и уровень, файл ДЗ (`attach_homework_file()`), `set_chat_language()`, `chat_prompt_vars()` |
+
 ## Схема
 
 ```mermaid
