@@ -17,6 +17,13 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 При первом старте применяются все миграции. База стартует пустой, без демо-данных: ученика создаёт регистрация.
 Сбросить: `docker compose down -v && docker compose up -d`.
 
+Докатить новые миграции на существующую базу (свой том, общая база команды, облако):
+```
+./migrate.sh "$DATABASE_URL"                  # применит то, чего нет в schema_migrations
+./migrate.sh "$DATABASE_URL" --baseline 20    # один раз для базы, созданной до учёта миграций (была V20)
+./migrate.sh "$DATABASE_URL" --status
+```
+
 В Spring Boot: скопировать `migrations/*.sql` в `src/main/resources/db/migration/` и включить Flyway.
 Имена `V1__...sql` уже в его формате.
 
@@ -44,6 +51,7 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V18__dashboard_overdue.sql` | дашборд: `todo` с прошедшим дедлайном считается просроченным |
 | `V19__quiz_answer_errors.sql` | `save_quiz_answer()`: понятная ошибка для пустого ответа и multiple_choice не массивом |
 | `V20__language_code.sql` | `{{language_code}}` в `chat_prompt_vars()`: код языка (`ru`) для JSON квиза, `language_code()` |
+| `V21__sync_assignments.sql` | `sync_assignments(user_id, jsonb)`: записать ДЗ из `collect()` одним вызовом, вернуть `(added, updated)` |
 
 ## Схема
 
