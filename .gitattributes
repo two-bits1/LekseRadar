@@ -1,0 +1,5 @@
+# Скрипты для Linux-контейнеров всегда с LF.
+# С CRLF на Windows `docker compose up` создаёт пустую базу: init.sh «cannot execute: required file not found».
+*.sh   text eol=lf
+mvnw   text eol=lf
+*.cmd  text eol=crlf
