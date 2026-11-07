@@ -60,8 +60,8 @@ BEGIN
         END IF;
         IF q->>'type' <> 'text' AND NOT (
             CASE jsonb_typeof(q->'correct_answer')
-                WHEN 'array' THEN q->'options' @> q->'correct_answer'
-                ELSE q->'options' @> jsonb_build_array(q->>'correct_answer') END) THEN
+                WHEN 'array' THEN (q->'options') @> (q->'correct_answer')
+                ELSE (q->'options') @> jsonb_build_array(q->>'correct_answer') END) THEN
             RAISE EXCEPTION 'quiz json: вопрос %: correct_answer должен быть среди options', i;
         END IF;
     END LOOP;
@@ -86,13 +86,13 @@ BEGIN
 
     INSERT INTO exercises (user_id, subject_id, quiz_set_id, position, topic, level, statement,
                            correct_answer, answer_type, question_type, options, explanation, generated)
-    SELECT NULL, v_subject_id, v_set_id, ord, btrim(p_json->>'topic'), v_level, q->>'question',
-           CASE jsonb_typeof(q->'correct_answer') WHEN 'array' THEN (q->'correct_answer')::TEXT
-                ELSE q->>'correct_answer' END,
-           CASE q->>'type' WHEN 'text' THEN 'free' ELSE 'exact' END::answer_type,
-           q->>'type', CASE WHEN q->>'type' = 'text' THEN NULL ELSE q->'options' END,
-           q->>'explanation', true
-    FROM jsonb_array_elements(p_json->'questions') WITH ORDINALITY AS t(q, ord);
+    SELECT NULL, v_subject_id, v_set_id, ord, btrim(p_json->>'topic'), v_level, t.qj->>'question',
+           CASE jsonb_typeof(t.qj->'correct_answer') WHEN 'array' THEN (t.qj->'correct_answer')::TEXT
+                ELSE t.qj->>'correct_answer' END,
+           CASE t.qj->>'type' WHEN 'text' THEN 'free' ELSE 'exact' END::answer_type,
+           t.qj->>'type', CASE WHEN t.qj->>'type' = 'text' THEN NULL ELSE t.qj->'options' END,
+           t.qj->>'explanation', true
+    FROM jsonb_array_elements(p_json->'questions') WITH ORDINALITY AS t(qj, ord);
 
     RETURN v_set_id;
 END $$;
