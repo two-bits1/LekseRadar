@@ -1,4 +1,6 @@
 httpx>=0.27
 pydantic>=2.7
+fastapi>=0.115          # homework.server (collector)
+uvicorn[standard]>=0.30 # homework.server (collector)
+psycopg[binary]>=3.2    # только для python -m homework.to_db
 pytest>=8
-psycopg[binary]>=3.2   # только для python -m homework.to_db
