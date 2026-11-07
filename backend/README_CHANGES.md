@@ -141,3 +141,50 @@ foreign chat → 404, validation errors, `user_events` rows. AI returns 502 unti
 8/8 tests (5 integration, 3 JWT), 0 users left after tests; `ddl-auto: validate` — all 20 entities match the schema;
 `demo@…` login → 401; register → chat with subject → tutor asked for language → "Русский" →
 chat language `ru`, answer in Russian on topic, tags stripped, `prompt_id` stored.
+
+---
+
+## Часть 6 / Part 6 — коммиты / commits 27–31
+
+### RU
+27. **Имена классов:** все DTO заканчиваются на `DTO`, все enum'ы — на `Enum`.
+28. **ИИ делает квизы и флеш-карты.** Промпты берутся из базы (`ai_prompts`), туда их грузит `load.py` из
+    `ai-content/prompts` на GitHub:
+    - `PromptService` — активный промпт, переменные `{{...}}`, 503 если промпт не загружен;
+    - `QuizGeneratorService` — промпт `quiz_generator` → JSON → `import_quiz_json`; при неверном JSON один повтор;
+      сначала ищется готовый набор (`find_quiz_set`), чтобы не тратить ИИ; пишутся `prompt_id` и модель;
+    - `AnswerCheckerService` — промпт `answer_checker` проверяет текстовые ответы;
+    - квизы: `/subjects`, `/quizzes`, `/quizzes/{id}/answers`, `/finish`, `/progress`, `/quiz-sets/{id}/start`;
+    - флеш-карты: `/flashcards`, `/due`, `/stats`, `/{id}/review`, `/generate`, `/quiz-sets/{id}/flashcards`;
+    - чат `quiz`: сообщение ученика → ИИ составляет квиз, в ответе `chat.quizSetId`;
+    - unit-тесты разбора JSON квиза.
+29. **`docs/URLS.md`** — все адреса сайта: страницы фронтенда, API, адреса для разработки, готовые TS-константы.
+30. **Документация:** квизы, флеш-карты, квиз-чат и откуда берутся промпты — в `docs/API.md` и `backend/README.md`.
+31. Этот отчёт.
+
+**Проверено** на базе V1–V16 и настоящем ИИ (Groq `openai/gpt-oss-120b`): 13 из 13 тестов; квиз от ИИ за ~4 с,
+тот же квиз второй раз из базы за 0,05 с без ИИ; выбор проверяет база (`correct` / `partial` / `incorrect`),
+текст — ИИ («2/3» → `correct`, «vet ikke» → `incorrect` с подсказкой); балл 50 %; ошибки стали карточками;
+карточки от ИИ по новой теме; квиз-чат; чужой квиз → 404; тестовые данные удалены, база снова пустая.
+
+### EN
+27. **Class names:** every DTO ends with `DTO`, every enum with `Enum`.
+28. **AI builds quizzes and flashcards.** Prompts come from the database (`ai_prompts`), loaded by `load.py`
+    from `ai-content/prompts` on GitHub:
+    - `PromptService` — active prompt, `{{...}}` variables, 503 if the prompt is not loaded;
+    - `QuizGeneratorService` — `quiz_generator` prompt → JSON → `import_quiz_json`; one retry on bad JSON;
+      ready sets are reused first (`find_quiz_set`) to save AI calls; `prompt_id` and model are stored;
+    - `AnswerCheckerService` — `answer_checker` prompt grades text answers;
+    - quizzes: `/subjects`, `/quizzes`, `/quizzes/{id}/answers`, `/finish`, `/progress`, `/quiz-sets/{id}/start`;
+    - flashcards: `/flashcards`, `/due`, `/stats`, `/{id}/review`, `/generate`, `/quiz-sets/{id}/flashcards`;
+    - `quiz` chat: a student message → AI builds a quiz, the reply carries `chat.quizSetId`;
+    - unit tests for quiz JSON parsing.
+29. **`docs/URLS.md`** — every site address: frontend pages, API, dev addresses, ready TS constants.
+30. **Docs:** quizzes, flashcards, quiz chat and where prompts come from — in `docs/API.md` and `backend/README.md`.
+31. This report.
+
+**Verified** on a V1–V16 database with a real AI (Groq `openai/gpt-oss-120b`): 13/13 tests; AI quiz in ~4 s,
+the same quiz again from the database in 0.05 s with no AI call; choices graded by the database
+(`correct` / `partial` / `incorrect`), text by the AI ("2/3" → `correct`, "vet ikke" → `incorrect` with a hint);
+score 50%; wrong answers became flashcards; AI flashcards for a new topic; quiz chat; foreign quiz → 404;
+test data removed, the database is empty again.
