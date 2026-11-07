@@ -35,6 +35,7 @@ export const ru: Dict = {
     itsLogin: 'Войти', itsHelp: 'После входа браузер попробует открыть itsl-itslearning://… Скопируй этот адрес и вставь сюда.',
     itsPaste: 'Адрес или код после входа', itsFinish: 'Завершить',
     inschoolHelp: 'Cookies — в DevTools → Application → Cookies. Сессия короткая, её придётся обновлять.',
+    classroomConnecting: 'Подключаю Google Classroom … загружаю ДЗ.', seeHomework: 'Открыть ДЗ',
     classroomStart: 'Войти через Google', classroomHelp: 'Откроется Google, потом вернёшься сюда. Просим только чтение заданий.',
     classroomNotReady: 'Google Classroom на сайте готов, но сервер его пока не поддерживает.', classroomDenied: 'Вход через Google отменён.',
     fields: { base_url: 'Адрес', token: 'Токен доступа', refresh_token: 'Refresh-токен', access_token: 'Access-токен (необязательно)', host: 'Адрес школы', JSESSIONID: 'Cookie JSESSIONID', Authorization: 'Cookie Authorization (необязательно)' },

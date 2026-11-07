@@ -3,7 +3,7 @@
 // школы и вставка адреса (или токен вручную); Google Classroom — вход через Google (бэкенду нужна доработка).
 // Секреты не сохраняются в браузере и не пишутся в консоль: только уходят на сервер, где их шифрует бэкенд.
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Check, Copy, ExternalLink, Link2, RefreshCw } from 'lucide-react';
 import { homeworkApi, platformsApi } from '../api/endpoints';
 import { isApiError } from '../api/client';
@@ -12,7 +12,7 @@ import { Field, asApiError } from '../forms';
 import { useAuth } from '../auth';
 import { useLang, useT, type Dict } from '../i18n';
 import { PATHS } from '../paths';
-import { FIELDS, cardState, missingFields, oauthReturn, toCredentials, type FieldKey, type Values } from './platformLogic';
+import { FIELDS, cardState, classroomMissing, missingFields, oauthReturn, toCredentials, type FieldKey, type Values } from './platformLogic';
 
 type Manual = Exclude<PlatformKey, 'classroom'>;
 const PLATFORMS: { key: PlatformKey; name: string }[] = [
@@ -165,12 +165,16 @@ function ClassroomLogin({ error }: { error: string | null }) {
     <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={begin}><Busy busy={busy} idle={p.classroomStart} active={p.connecting} /></button>
   </div>;
 }
-// Бэкенд без Classroom ответит 400 «platform: canvas | …» или 404 — это «ещё не поддерживается», а не ошибка ученика.
+// Бэкенд без Classroom (404 / 405 / 501) — «ещё не поддерживается»; остальное, включая 400, — текст ошибки.
 const classroomError = (err: unknown, t: Dict) =>
-  isApiError(err) && [400, 404, 405, 501].includes(err.status) ? t.platforms.classroomNotReady : platformError(err, t);
+  isApiError(err) && classroomMissing(err.status) ? t.platforms.classroomNotReady
+  : isApiError(err) && err.status === 400 && err.message ? err.message  // «Ссылка для входа устарела…» и т.п.
+  : platformError(err, t);
 
-function PlatformCard({ pl, conn, classroomError: cErr, onChange }: {
-  pl: typeof PLATFORMS[number]; conn: PlatformConnection | undefined; classroomError: string | null; onChange: (c: PlatformConnection) => void;
+function PlatformCard({ pl, conn, classroomError: cErr, pending = false, justConnected = false, onChange }: {
+  pl: typeof PLATFORMS[number]; conn: PlatformConnection | undefined; classroomError: string | null;
+  pending?: boolean; justConnected?: boolean;  // Classroom после возврата от Google: обмен кода и сбор ДЗ идут ~6 с
+  onChange: (c: PlatformConnection) => void;
 }) {
   const t = useT(); const p = t.platforms; const { tag } = useLang(); const { user } = useAuth();
   const state = cardState(conn);
@@ -208,17 +212,18 @@ function PlatformCard({ pl, conn, classroomError: cErr, onChange }: {
       <div className="plat-title"><strong>{pl.name}</strong>{pl.key === 'itslearning' && <span className="pill">{p.unofficial}</span>}{pill}
         <small>{state === 'off' ? p.about[pl.key] : conn?.lastSyncedAt ? p.lastSynced(fmt(conn.lastSyncedAt)) : p.never}</small></div>
       <div className="plat-actions">
-        {(state === 'on' || state === 'error') && (confirm
+        {!pending && (state === 'on' || state === 'error') && (confirm
           ? <><button className="btn btn-sm btn-danger" disabled={busy} onClick={disconnect}>{p.confirmDisconnect}</button><button className="btn btn-sm" disabled={busy} onClick={() => setConfirm(false)}>{p.cancel}</button></>
           : <button className="btn btn-sm" onClick={() => setConfirm(true)}>{p.disconnect}</button>)}
-        {(state === 'off' || state === 'reconnect') && <button className="btn btn-sm" aria-expanded={open} onClick={() => setOpen(o => !o)}>{open ? p.cancel : p.connect}</button>}
+        {!pending && (state === 'off' || state === 'reconnect') && <button className="btn btn-sm" aria-expanded={open} onClick={() => setOpen(o => !o)}>{open ? p.cancel : p.connect}</button>}
       </div>
     </div>
-    {saved && state === 'on' && <p role="status" className="feedback success"><Check size={16} />{p.saved}</p>}
+    {pending && <p role="status" className="feedback plat-wait"><RefreshCw size={14} className="spin" />{p.classroomConnecting}</p>}
+    {(saved || justConnected) && state === 'on' && <p role="status" className="feedback success"><Check size={16} />{p.saved} <Link to={PATHS.homework}>{p.seeHomework}</Link></p>}
     {(state === 'reconnect' || state === 'error') && conn?.lastError && <p role="alert" className="feedback danger">{conn.lastError}</p>}
     {state === 'error' && <button className="btn btn-sm" disabled={busy} onClick={retry}><RefreshCw size={14} />{busy ? p.syncing : p.retry}</button>}
     {error && <p role="alert" className="feedback danger">{error}</p>}
-    {open && (state === 'off' || state === 'reconnect') && form}
+    {open && !pending && (state === 'off' || state === 'reconnect') && form}
   </div>;
 }
 
@@ -227,6 +232,7 @@ export function PlatformsCard() {
   const location = useLocation(); const navigate = useNavigate();
   const [list, setList] = useState<PlatformConnection[]>([]);
   const [cErr, setCErr] = useState<string | null>(null);
+  const [cBusy, setCBusy] = useState(false); const [cDone, setCDone] = useState(false);
   const handled = useRef(false);
   useEffect(() => { platformsApi.list().then(setList).catch(() => {}); }, []);
 
@@ -237,16 +243,19 @@ export function PlatformsCard() {
     handled.current = true;
     navigate(PATHS.platforms, { replace: true });
     if ('error' in ret) { setCErr(p.classroomDenied); return; }
+    setCBusy(true);
     platformsApi.connect('classroom', { code: ret.code, state: ret.state, redirect_uri: redirectUri() })
-      .then(c => setList(l => [...l.filter(x => x.platform !== 'classroom'), c]))
-      .catch(err => setCErr(classroomError(err, t)));
+      .then(c => { setList(l => [...l.filter(x => x.platform !== 'classroom'), c]); setCDone(true); })
+      .catch(err => setCErr(classroomError(err, t)))
+      .finally(() => setCBusy(false));
   }, [location.search, navigate, p.classroomDenied, t]);
 
   const update = (c: PlatformConnection) => setList(l => [...l.filter(x => x.platform !== c.platform), c]);
   return <article className="lesson-card"><h2>{s.platformsTitle}</h2><p>{s.platformsIntro}</p>
     <div className="plat-list">
       {PLATFORMS.map(pl => <PlatformCard key={pl.key + (pl.key === 'classroom' ? cErr ?? '' : '')} pl={pl} conn={list.find(c => c.platform === pl.key)}
-        classroomError={pl.key === 'classroom' ? cErr : null} onChange={update} />)}
+        classroomError={pl.key === 'classroom' ? cErr : null} pending={pl.key === 'classroom' && cBusy}
+        justConnected={pl.key === 'classroom' && cDone} onChange={update} />)}
     </div>
   </article>;
 }

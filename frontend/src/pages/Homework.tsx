@@ -15,7 +15,11 @@ import { useLang, useT } from '../i18n';
 
 type Filter = 'all' | 'todo' | 'overdue' | 'submitted';
 const FILTERS: Filter[] = ['all', 'todo', 'overdue', 'submitted'];
-const PLATFORM: Record<Assignment['source'], string> = { canvas: 'Canvas', teams: 'Teams', itslearning: 'itslearning', inschool: 'Visma InSchool' };
+const PLATFORM: Record<Assignment['source'], string> = {
+  canvas: 'Canvas', teams: 'Teams', itslearning: 'itslearning', inschool: 'Visma InSchool', classroom: 'Google Classroom',
+};
+// Предмет для «Lag quiz»: курс, а если его нет (бывает у Classroom) — название платформы.
+export const quizSubject = (a: Assignment) => (a.course || PLATFORM[a.source] || a.source).slice(0, 100);
 
 export const matchesFilter = (a: Assignment, f: Filter) =>
   f === 'all' || a.status === f || (f === 'submitted' && a.status === 'graded');
@@ -30,7 +34,6 @@ export const sortHomework = (list: Assignment[]) => [...list].sort((a, b) =>
 export type SyncSummary = { none: true } | { none: false; added: number; updated: number; failed: SourceStatus[] };
 export const syncSummary = (r: SyncResult): SyncSummary =>
   r.sources.length ? { none: false, added: r.added, updated: r.updated, failed: r.sources.filter(s => !s.ok) } : { none: true };
-const NAME: Record<string, string> = { canvas: 'Canvas', teams: 'Teams', itslearning: 'itslearning', inschool: 'Visma InSchool', classroom: 'Google Classroom' };
 
 export function Homework() {
   const t = useT(); const h = t.hw; const { tag } = useLang(); const { user } = useAuth(); const navigate = useNavigate();
@@ -66,7 +69,7 @@ export function Homework() {
     navigate(PATHS.chat(chat.id));
   });
   const makeQuiz = (a: Assignment) => run(`q${a.id}`, async () => {
-    const quiz = await quizzesApi.start({ subject: (a.course || PLATFORM[a.source]).slice(0, 100), topic: a.title.slice(0, 100), assignmentId: a.id, count: 8 });
+    const quiz = await quizzesApi.start({ subject: quizSubject(a), topic: a.title.slice(0, 100), assignmentId: a.id, count: 8 });
     navigate(PATHS.quiz(quiz.id));
   });
 
@@ -91,7 +94,7 @@ export function Homework() {
       {sync?.none && <p className="feedback warning">{p.noPlatforms} <Link to={PATHS.platforms}>{p.toPlatforms}</Link></p>}
       {sync && !sync.none && <p className="feedback success"><Check size={16} />{p.syncDone(sync.added, sync.updated)}</p>}
       {sync && !sync.none && sync.failed.map(s => <p key={s.platform} role="alert" className="feedback danger">
-        <strong>{NAME[s.platform] ?? s.platform}:</strong> {s.error ?? p.failing}{s.needsReconnect && <> <Link to={PATHS.platforms}>{p.reconnectLink}</Link></>}</p>)}
+        <strong>{PLATFORM[s.platform] ?? s.platform}:</strong> {s.error ?? p.failing}{s.needsReconnect && <> <Link to={PATHS.platforms}>{p.reconnectLink}</Link></>}</p>)}
       {syncError && <p role="alert" className="feedback danger">{syncError}</p>}
     </div>
     <div className="seg" role="group" aria-label={h.title}>

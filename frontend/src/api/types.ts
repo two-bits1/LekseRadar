@@ -125,7 +125,7 @@ export type Platform = 'canvas' | 'teams' | 'itslearning' | 'inschool';
 export type AssignmentStatus = 'todo' | 'overdue' | 'submitted' | 'graded';
 export type Assignment = {
   id: number;
-  source: Platform;
+  source: PlatformKey;            // и 'classroom'
   title: string;
   course: string;
   dueAt: string | null;
