@@ -28,7 +28,8 @@ public class OpenAiService implements AiService {
     /** Groq/OpenAI при лимите в минуту пишут «Please try again in 3.9075s». */
     private static final Pattern TRY_AGAIN = Pattern.compile("try again in (\\d+(?:\\.\\d+)?)(ms|s)\\b");
     private static final int MAX_RETRIES = 2;
-    private static final long MAX_RETRY_WAIT_MS = 10_000;
+    /** Лимит Groq в минуту (TPM) часто просит подождать 10–20 с; дневной лимит пишет минуты и сюда не попадает. */
+    private static final long MAX_RETRY_WAIT_MS = 20_000;
 
     private final RestClient http;
     private final String model;

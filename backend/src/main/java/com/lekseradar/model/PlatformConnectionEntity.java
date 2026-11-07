@@ -59,10 +59,16 @@ public class PlatformConnectionEntity {
 
     public void setCredentialsEnc(byte[] credentialsEnc) { this.credentialsEnc = credentialsEnc; }
 
-    /** Итог синхронизации одной платформы из ответа collect() (sources[platform]). */
+    /** Итог синхронизации одной платформы из ответа collect() (sources[platform]). Время — только при успехе. */
     public void markSynced(boolean ok, String error, boolean needsReconnect) {
-        this.lastSyncedAt = Instant.now();
+        if (ok) this.lastSyncedAt = Instant.now();
         this.lastError = ok ? null : error;
-        this.needsReconnect = needsReconnect;
+        this.needsReconnect = !ok && needsReconnect;
+    }
+
+    /** Новое или повторное подключение: доступ проверен и ДЗ уже собраны. */
+    public void connected(byte[] credentialsEnc) {
+        this.credentialsEnc = credentialsEnc;
+        markSynced(true, null, false);
     }
 }

@@ -26,6 +26,14 @@ class OpenAiServiceTest {
     }
 
     @Test
+    void waitJustOverTenSecondsIsStillRetried() {
+        // настоящий ответ Groq при лимите в минуту (раньше было -1 и ученик сразу получал 502)
+        String body = "{\"error\":{\"message\":\"... on tokens per minute (TPM): Limit 8000, Used 6887, Requested 2450. Please try again in 10.0275s. Need more tokens?\"}}";
+        assertEquals(10328, OpenAiService.retryAfterMs(tooMany(body, null)));
+        assertEquals(-1, OpenAiService.retryAfterMs(tooMany("Please try again in 25s.", null)));
+    }
+
+    @Test
     void waitInMilliseconds() {
         assertEquals(1103, OpenAiService.retryAfterMs(tooMany("Please try again in 802.5ms. Need more", null)));
     }

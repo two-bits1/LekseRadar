@@ -188,3 +188,53 @@ the same quiz again from the database in 0.05 s with no AI call; choices graded 
 (`correct` / `partial` / `incorrect`), text by the AI ("2/3" → `correct`, "vet ikke" → `incorrect` with a hint);
 score 50%; wrong answers became flashcards; AI flashcards for a new topic; quiz chat; foreign quiz → 404;
 test data removed, the database is empty again.
+
+---
+
+## Часть 7 / Part 7 — коммиты / commits 32–36
+
+### RU
+32. **ИИ:** при лимите Groq (429) запрос повторяется, если ждать нужно недолго.
+33. **Язык квиза** берётся из `language_code` (V20); ошибки ответа в квизе (V19) — 400, а не 500.
+34. **Деплой:** `Dockerfile` и `railway.json` для Railway.
+35. **`RAILWAY.md`** — деплой по шагам.
+36. **Платформы, сбор ДЗ и регистрация по почте** (по `docs/PLAN-BACKEND.md`) и этот отчёт:
+    - в бэкенд перенесены ДЗ, дашборд, история и лимиты из `main-test-3.0`;
+    - `CredentialsCipher` — доступы к платформам шифруются AES-256-GCM (`CREDENTIALS_KEY`, обязателен);
+    - `CollectorClient` — клиент к `collector` (`COLLECTOR-API.md`): 400 → 422, 502 → 502, остальное → 503, 401 наружу нет;
+      при старте пишет в лог, есть ли связь и подходит ли ключ; ключ по умолчанию как в `docker-compose`;
+    - `GET/POST/DELETE /platforms/{platform}` (тело как у фронта, snake_case), вход в Teams по коду,
+      ссылка для itslearning; проверка адреса против SSRF, лимит 10 подключений за 10 минут;
+      при подключении задания сразу пишутся в базу (`sync_assignments`, V21);
+    - `POST /homework/sync` (раз в минуту, `Retry-After: 60`) и обновление раз в 30 минут по расписанию;
+    - регистрация в два шага: код из 6 цифр на email (Gmail SMTP), `POST /auth/register/verify`;
+      лимиты писем, 5 попыток кода, 15 минут;
+    - пароль длиннее 72 байт — 400 с понятным текстом (раньше 500); ожидание после 429 от Groq — до 20 с;
+    - `docs/FIX-frontend-auth-platforms.md` — что поменять во фронте.
+
+**Проверено:** 73 из 73 тестов (с базой V1–V21); через сайт с настоящими Gmail, Groq и collector — 105 проверок;
+код из письма, успешное подключение платформы, расписание и длинные пароли — 21 из 21; `check_ai.py` — 6 из 6;
+Docker-образ собирается и запускается.
+
+### EN
+32. **AI:** on a Groq rate limit (429) the request is retried when the wait is short.
+33. **Quiz language** comes from `language_code` (V20); quiz answer errors (V19) are 400, not 500.
+34. **Deploy:** `Dockerfile` and `railway.json` for Railway.
+35. **`RAILWAY.md`** — step-by-step deploy.
+36. **Platforms, homework sync and email sign-up** (per `docs/PLAN-BACKEND.md`) and this report:
+    - homework, dashboard, history and rate limits moved in from `main-test-3.0`;
+    - `CredentialsCipher` — platform credentials encrypted with AES-256-GCM (`CREDENTIALS_KEY`, required);
+    - `CollectorClient` — client for `collector` (`COLLECTOR-API.md`): 400 → 422, 502 → 502, the rest → 503, never 401;
+      logs on startup whether the collector is reachable and the key fits; default key matches `docker-compose`;
+    - `GET/POST/DELETE /platforms/{platform}` (body as the frontend sends it, snake_case), Teams device-code login,
+      itslearning login link; SSRF address check, 10 connects per 10 minutes;
+      homework is saved right on connect (`sync_assignments`, V21);
+    - `POST /homework/sync` (once a minute, `Retry-After: 60`) and a scheduled sync every 30 minutes;
+    - two-step sign-up: a 6-digit code by email (Gmail SMTP), `POST /auth/register/verify`;
+      mail limits, 5 code attempts, 15 minutes;
+    - passwords over 72 bytes get a clear 400 (was 500); waiting after a Groq 429 — up to 20 s;
+    - `docs/FIX-frontend-auth-platforms.md` — what to change in the frontend.
+
+**Verified:** 73/73 tests (on a V1–V21 database); through the site with real Gmail, Groq and collector — 105 checks;
+email code, successful platform connect, scheduled sync and long passwords — 21/21; `check_ai.py` — 6/6;
+the Docker image builds and runs.

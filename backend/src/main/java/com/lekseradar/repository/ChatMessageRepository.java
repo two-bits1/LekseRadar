@@ -11,6 +11,9 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, 
 
     List<ChatMessageEntity> findBySessionIdOrderByCreatedAtAscIdAsc(Long sessionId);
 
+    /** Последнее сообщение чата: чтобы «Prøv igjen» после 502 не сохранял вопрос второй раз. */
+    java.util.Optional<ChatMessageEntity> findFirstBySessionIdOrderByCreatedAtDescIdDesc(Long sessionId);
+
     /** Реплика из вида chat_context. */
     interface ContextMessage {
         String getRole();

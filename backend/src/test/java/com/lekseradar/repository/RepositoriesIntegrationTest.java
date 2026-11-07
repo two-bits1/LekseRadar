@@ -2,10 +2,12 @@ package com.lekseradar.repository;
 
 import com.lekseradar.dto.auth.AuthResponseDTO;
 import com.lekseradar.dto.auth.LoginRequestDTO;
-import com.lekseradar.dto.auth.RegisterRequestDTO;
 import com.lekseradar.model.*;
 import com.lekseradar.model.enums.*;
 import com.lekseradar.service.AuthService;
+import com.lekseradar.TestUsers;
+import com.lekseradar.service.MailService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.datasource.password=${TEST_DB_PASSWORD:lekseradar}",
         "app.jwt.secret=integration-test-secret-integration-test",
         "app.openai.api-key=sk-not-used",
+        "app.credentials.key=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "app.sync.schedule-enabled=false",
 })
 @EnabledIfEnvironmentVariable(named = "TEST_DB_URL", matches = ".+")
 @Transactional
@@ -49,6 +53,7 @@ class RepositoriesIntegrationTest {
             """;
 
     @Autowired AuthService auth;
+    @MockitoBean MailService mail;
     @Autowired JdbcTemplate jdbc;
     @Autowired UserRepository users;
     @Autowired UserEventRepository events;
@@ -73,7 +78,7 @@ class RepositoriesIntegrationTest {
 
     private Long newUser() {
         String email = "it-" + System.nanoTime() + "@example.com";
-        AuthResponseDTO r = auth.register(new RegisterRequestDTO(email, "password123", "Test Elev"));
+        AuthResponseDTO r = TestUsers.register(auth, mail, email, "password123", "Test Elev");
         assertThat(r.token()).isNotBlank();
         assertThat(auth.login(new LoginRequestDTO(email.toUpperCase(), "password123")).user().id())
                 .isEqualTo(r.user().id());

@@ -115,7 +115,10 @@ public class ChatService {
         ChatSessionEntity s = owned(user.getId(), chatId);
         ChatSessionRepository.SystemPrompt system = prompts.forChat(chatId);   // нет промпта → 503 до сохранения
 
-        ChatMessageEntity question = messages.save(ChatMessageEntity.fromStudent(chatId, content));
+        // Повтор после 502: последний вопрос тот же и ответа на него нет — берём его, а не сохраняем ещё раз
+        ChatMessageEntity question = messages.findFirstBySessionIdOrderByCreatedAtDescIdDesc(chatId)
+                .filter(last -> last.getRole() == MessageRoleEnum.STUDENT && content.equals(last.getContent()))
+                .orElseGet(() -> messages.save(ChatMessageEntity.fromStudent(chatId, content)));
         ChatMessageEntity answer = s.getMode() == ChatModeEnum.QUIZ
                 ? quizGenerator.generate(user, s, content, null).message()
                 : tutorReply(user, s, system, content);

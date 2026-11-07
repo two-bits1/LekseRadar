@@ -26,7 +26,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ErrorResponseDTO> handleApi(ApiException e) {
-        return build(e.getStatus(), e.getMessage(), null);
+        ResponseEntity<ErrorResponseDTO> res = build(e.getStatus(), e.getMessage(), null);
+        if (e instanceof TooManyRequestsException t && t.getRetryAfterSeconds() != null) {
+            return ResponseEntity.status(res.getStatusCode())
+                    .header("Retry-After", String.valueOf(t.getRetryAfterSeconds())).body(res.getBody());
+        }
+        return res;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

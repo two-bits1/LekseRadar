@@ -39,6 +39,19 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
                @Param("status") String status, @Param("url") String url, @Param("description") String description,
                @Param("kind") String kind);
 
+    /** Сколько заданий добавлено и обновлено одним {@link #syncAssignments}. */
+    interface SyncCounts {
+        Integer getAdded();
+        Integer getUpdated();
+    }
+
+    /**
+     * Все задания из ответа collect() одним вызовом (функция базы V21): UPSERT, «сдано» на сайте не откатывается.
+     * @param items JSON-массив {@code CollectResult.assignments} как есть
+     */
+    @Query(value = "SELECT added, updated FROM sync_assignments(:userId, CAST(:items AS jsonb))", nativeQuery = true)
+    SyncCounts syncAssignments(@Param("userId") Long userId, @Param("items") String items);
+
     /** Прикрепить текст файла ДЗ (для промпта тьютора): id материала. */
     @Query(value = "SELECT attach_homework_file(:assignmentId, :text, :fileName, :mimeType, :storageKey)",
             nativeQuery = true)

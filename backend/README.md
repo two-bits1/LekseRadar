@@ -38,7 +38,7 @@ DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python
 
 ### 3. Секреты
 
-Скопируйте `backend/.env.example` в `backend/.env` и впишите `OPENAI_API_KEY` и `JWT_SECRET`.
+Скопируйте `backend/.env.example` в `backend/.env` и впишите `OPENAI_API_KEY`, `JWT_SECRET` и `CREDENTIALS_KEY` (`openssl rand -base64 32`).
 `.env` в git не попадает.
 
 ### 4. Бэкенд
@@ -178,6 +178,14 @@ src/main/java/com/lekseradar/
 |---|---|---|
 | `OPENAI_API_KEY` | — | **Обязательно.** Ключ OpenAI |
 | `JWT_SECRET` | — | **Обязательно.** Секрет подписи JWT, ≥ 32 символов |
+| `MAIL_USERNAME` / `MAIL_PASSWORD` | — | **Обязательно для регистрации.** Gmail и пароль приложения (https://myaccount.google.com/apppasswords): с него уходят коды подтверждения |
+| `MAIL_HOST` / `MAIL_PORT` / `MAIL_FROM` | `smtp.gmail.com` / `587` / `MAIL_USERNAME` | Другой SMTP, адрес отправителя |
+| `MAIL_DEV_LOG_CODES` | `false` | Без почты печатать код в лог (только разработка) |
+| `CREDENTIALS_KEY` | — | **Обязательно.** Ключ шифрования доступов к платформам, `openssl rand -base64 32`. Не терять: без него все подключения делать заново |
+| `COLLECTOR_URL` | `http://localhost:8090` | Сервис сбора ДЗ (`homework-collector`), только внутренняя сеть |
+| `COLLECTOR_KEY` | — | Общий ключ с collector (`X-Internal-Key`) |
+| `CANVAS_HOSTS` | — | Свои Canvas вне `*.instructure.com`, через запятую (`canvas.uio.no`) |
+| `SYNC_SCHEDULE_ENABLED` | `true` | Обновлять ДЗ раз в 30 минут |
 | `OPENAI_MODEL` | `gpt-4o-mini` | Модель |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Совместимый прокси, если нужен |
 | `JWT_TTL_HOURS` | `72` | Время жизни токена |
