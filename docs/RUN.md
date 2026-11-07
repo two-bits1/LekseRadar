@@ -12,7 +12,7 @@ docker compose --profile testdata up -d   # миграции V1–V21 → про
   и материалами: [database/testdata/README.md](../database/testdata/README.md).
 - База открыта только на `127.0.0.1:5432`.
 - Сервис `collector` (сбор ДЗ для бэкенда) на `127.0.0.1:8090`: [homework-collector/COLLECTOR-API.md](../homework-collector/COLLECTOR-API.md).
-- Том базы уже был создан раньше? Новые миграции сами не применятся: `psql "postgresql://lekseradar:lekseradar@localhost:5432/lekseradar" -f database/migrations/V21__sync_assignments.sql`.
+- Том базы создан раньше? Новые миграции сами не применятся: `database/migrate.sh "postgresql://lekseradar:lekseradar@localhost:5432/lekseradar" --baseline 20` (один раз, дальше без `--baseline`).
 
 Без Docker: примените `database/migrations/*.sql` по порядку, затем
 ```bash
