@@ -118,6 +118,8 @@ export const nb = {
     correctAnswer: 'Riktig svar', next: 'Neste spørsmål', prev: 'Forrige', finish: 'Fullfør quizen', finishing: 'Regner ut …',
     resultTitle: 'Quizen er ferdig', result: (n: number) => `Du fikk ${n} %`, toCards: 'Lær med kort', toCardsDone: (n: number) => `${n} nye kort i kortstokken.`,
     again: 'Ny quiz', back: 'Alle quizer', notFound: 'Fant ikke quizen.',
+    resultEyebrow: 'Resultat', resultCorrect: 'riktig', resultPartial: 'delvis', resultWrong: 'feil', resultReview: 'Gjennomgang',
+    tiers: { great: ['Strålende!', 'Du kan dette temaet. Prøv et høyere nivå neste gang.'], good: ['Godt jobbet!', 'Det meste sitter. Gjør feilene om til kort, så sitter resten også.'], keep: ['Godt i gang', 'Dette er bare starten. Lær med kort og ta quizen igjen om et par dager.'] },
   },
   cards: {
     title: 'Læringskort', intro: 'Repeter litt hver dag — kortene kommer tilbake akkurat når du er i ferd med å glemme dem.',
@@ -127,6 +129,9 @@ export const nb = {
     progress: (i: number, n: number) => `${i} av ${n}`, done: 'Ferdig for nå!', front: 'Spørsmål', back: 'Svar', explanation: 'Forklaring',
     generateTitle: 'Kort fra AI', generateIntro: 'Velg fag og tema, så lager AI kort til deg.', generate: 'Lag kort', generating: 'AI lager kort …',
     generated: (n: number) => `${n} nye kort lagt til.`,
+    sessionEyebrow: 'Økta er ferdig', sessionTitle: (n: number) => `Du repeterte ${n} kort`, remembered: 'husket',
+    sessionText: (learned: number) => `${learned} kort er lært totalt. Kortene du strevde med, kommer tilbake snart.`,
+    more: 'Sjekk om flere kort venter', toHome: 'Til oversikten',
   },
   hw: {
     title: 'Lekser', intro: 'Alle lekser fra skoleplattformene dine, med nærmeste frist først.',

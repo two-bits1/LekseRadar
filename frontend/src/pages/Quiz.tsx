@@ -1,12 +1,13 @@
 // Квиз на настоящем API (API.md, «Квизы»): /quiz — новый квиз и мои квизы, /quiz/:quizId — прохождение.
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, ChevronRight, CircleAlert, CircleCheck, CircleX, Layers, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check, ChevronRight, CircleAlert, CircleCheck, CircleX, Layers, RotateCcw, Sparkles } from 'lucide-react';
 import { PATHS } from '../paths';
 import { quizzesApi, subjectsApi } from '../api/endpoints';
 import type { AnswerResult, ApiError, Level, Quiz, QuizSummary, Subject } from '../api/types';
 import { Field, asApiError, fieldError, generalError } from '../forms';
 import { Md } from '../components/Md';
+import { ResultCard, tier } from '../components/ResultCard';
 import { useT } from '../i18n';
 import { correctAnswers, encodeAnswer } from './quizLogic';
 
@@ -75,12 +76,16 @@ export function QuizRun() {
   const [results, setResults] = useState<Record<number, AnswerResult>>({});
   const [busy, setBusy] = useState(false); const [error, setError] = useState<ApiError | null>(null);
   const [score, setScore] = useState<number | null>(null); const [added, setAdded] = useState<number | null>(null);
+  const [savedScore, setSavedScore] = useState<number | null>(null);  // уже пройденный квиз: балл из GET /quizzes
 
   useEffect(() => {
     // Переход с одного квиза на другой (назад/вперёд в браузере) — начинаем с чистого состояния.
-    setQuiz(null); setLoadError(null); setAnswers({}); setResults({}); setError(null); setScore(null); setAdded(null);
+    setQuiz(null); setLoadError(null); setAnswers({}); setResults({}); setError(null); setScore(null); setAdded(null); setSavedScore(null);
     let off = false;
-    quizzesApi.get(id).then(qz => { if (off) return; setQuiz(qz); setPos(Math.min(Math.max(qz.currentPosition, 1), qz.questions.length)); })
+    quizzesApi.get(id).then(qz => {
+      if (off) return; setQuiz(qz); setPos(Math.min(Math.max(qz.currentPosition, 1), qz.questions.length));
+      if (qz.status === 'completed') quizzesApi.list().then(all => { const mine = all.find(x => x.id === qz.id); if (!off && mine) setSavedScore(mine.score); }).catch(() => {});
+    })
       .catch(e => { if (!off) setLoadError(asApiError(e, t.common)); });
     return () => { off = true; };
   }, [id]);
@@ -110,16 +115,33 @@ export function QuizRun() {
     try { setAdded((await quizzesApi.setToFlashcards(quiz.quizSetId)).added); } catch (e) { setError(asApiError(e, t.common)); } finally { setBusy(false); }
   };
 
-  if (score !== null || quiz.status === 'completed') return <section className="page narrow app-page">
-    <header className="page-head"><p className="dash-date">{quiz.title}</p><h1>{q.resultTitle}</h1>{score !== null && <p className="score">{q.result(Math.round(score))}</p>}</header>
-    {error && <p role="alert" className="feedback danger">{error.message}</p>}
-    {added !== null && <p role="status" className="feedback success"><Check size={17} />{q.toCardsDone(added)}</p>}
-    <div className="dash-actions">
-      {added === null ? <button className="btn btn-primary" onClick={toCards} disabled={busy}><Layers size={16} />{q.toCards}</button>
-        : <Link className="btn btn-primary" to={PATHS.flashcards}><Layers size={16} />{t.nav.flashcards}</Link>}
-      <Link className="btn" to={PATHS.quizzes}>{q.again}</Link>
-    </div>
-  </section>;
+  if (score !== null || quiz.status === 'completed') {
+    const answered = quiz.questions.filter(x => results[x.position]);
+    const count = (v: AnswerResult['verdict']) => answered.filter(x => results[x.position].verdict === v).length;
+    const pct = score ?? savedScore;
+    const [title, text] = q.tiers[tier(pct ?? 0)];
+    return <section className="page narrow app-page">
+      <Link className="text-link" to={PATHS.quizzes}><ArrowLeft size={16} />{q.back}</Link>
+      <ResultCard eyebrow={`${q.resultEyebrow} · ${quiz.title}`} title={pct === null ? q.resultTitle : title} text={pct === null ? '' : text}
+        pct={pct} ringLabel={q.resultCorrect}
+        tallies={answered.length ? [
+          { label: q.resultCorrect, value: count('correct'), tone: 'success' },
+          { label: q.resultPartial, value: count('partial'), tone: 'warning' },
+          { label: q.resultWrong, value: count('incorrect'), tone: 'danger' },
+        ] : undefined}
+        footer={<>
+          {added === null ? <button className="btn btn-primary" onClick={toCards} disabled={busy}><Layers size={16} />{q.toCards}</button>
+            : <Link className="btn btn-primary" to={PATHS.flashcards}><Layers size={16} />{t.nav.flashcards}</Link>}
+          <Link className="btn" to={PATHS.quizzes}><RotateCcw size={16} />{q.again}</Link>
+        </>}>
+        {error && <p role="alert" className="feedback danger">{error.message}</p>}
+        {added !== null && <p role="status" className="feedback success"><Check size={17} />{q.toCardsDone(added)}</p>}
+        {answered.length > 0 && <div className="result-review"><h2 className="section-label">{q.resultReview}</h2>
+          <ol>{answered.map(x => { const v = results[x.position].verdict; const Icon = v === 'correct' ? CircleCheck : v === 'partial' ? CircleAlert : CircleX;
+            return <li key={x.position} className={`review-${v}`}><Icon size={17} aria-label={q.verdict[v]} /><span><Md inline>{x.question}</Md></span></li>; })}</ol></div>}
+      </ResultCard>
+    </section>;
+  }
 
   const VerdictIcon = result?.verdict === 'correct' ? CircleCheck : result?.verdict === 'partial' ? CircleAlert : CircleX;
   const tone = result?.verdict === 'correct' ? 'success' : result?.verdict === 'partial' ? 'warning' : 'danger';
