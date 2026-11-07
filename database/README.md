@@ -41,6 +41,10 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V14__chat_language_homework.sql` | язык чата и уровень, файл ДЗ (`attach_homework_file()`), `set_chat_language()`, `chat_prompt_vars()` |
 | `V15__prompt_limits.sql` | `clip_text()`: текст ДЗ в промпте не длиннее 12 000 символов |
 | `V16__no_demo_data.sql` | убран `assignments.is_demo`: пробных данных в базе нет |
+| `V17__language_from_site.sql` | язык ИИ берётся с сайта (`users.locale`), `language_name()` |
+| `V18__dashboard_overdue.sql` | дашборд: `todo` с прошедшим дедлайном считается просроченным |
+| `V19__quiz_answer_errors.sql` | `save_quiz_answer()`: понятная ошибка для пустого ответа и multiple_choice не массивом |
+| `V20__language_code.sql` | `{{language_code}}` в `chat_prompt_vars()`: код языка (`ru`) для JSON квиза, `language_code()` |
 
 ## Схема
 

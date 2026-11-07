@@ -6,7 +6,7 @@
 
 | Файл | Чат | Что возвращает ИИ |
 |---|---|---|
-| `tutor.md` | режим `tutor`: помогает понять тему ДЗ, не делает ДЗ за ученика | текст; служебные метки `[[LANGUAGE_QUESTION]]`, `[[LANGUAGE=xx]]` |
+| `tutor.md` | режим `tutor`: помогает понять тему ДЗ, не делает ДЗ за ученика | текст на языке сайта |
 | `quiz_generator.md` | режим `quiz`: квиз по ДЗ | JSON по `database/quiz/quiz.schema.json` |
 | `answer_checker.md` | ответ на вопрос `text` в квизе | `{"verdict","explanation"}` |
 
@@ -14,22 +14,22 @@
 
 ```sql
 SELECT content, prompt_id FROM chat_system_prompt(:chat_id);  -- промпт режима чата
-SELECT chat_prompt_vars(:chat_id);                            -- JSON: language, subject, topic, level,
+SELECT chat_prompt_vars(:chat_id);                            -- JSON: language, language_code, subject, topic, level,
                                                               -- homework_title, homework_due, homework_text, weak_topics
 SELECT materials_for_prompt(:user_id, :вопрос_или_тема, :subject_id, 5);  -- {{materials}}
 ```
 Бэкенд заменяет каждое `{{ключ}}` значением. Для квиза ещё `{{count}}` (по умолчанию 8).
 Для `answer_checker`: `{{question}}`, `{{correct_answer}}`, `{{explanation}}` из `exercises`, `{{answer}}`, `{{language}}`.
 
-## Чат-репетитор: выбор языка
+## Чат-репетитор: язык и первый ответ
 
-1. Новый чат: `start_chat(user, 'tutor', предмет, тема, p_assignment => id ДЗ)`. Язык чата пустой.
-2. Бэкенд сразу вызывает ИИ (без сообщения ученика). `{{language}}` = «не выбран», и ИИ спрашивает язык.
-   В конце ответа будет `[[LANGUAGE_QUESTION]]`: бэкенд убирает метку, фронт может показать кнопки
-   Norsk / English / Русский / Українська.
-3. Ученик выбрал язык. В ответе ИИ будет `[[LANGUAGE=ru]]`: бэкенд вызывает
-   `set_chat_language(chat_id, 'ru')` и убирает метку перед показом и сохранением.
-   Если фронт показал кнопки, можно сразу вызвать `set_chat_language` по нажатию.
+1. Новый чат: `start_chat(user, 'tutor', предмет, тема, p_assignment => id ДЗ)`.
+2. Язык не спрашивается. `{{language}}` — язык, выбранный на сайте (`users.locale`), в виде названия:
+   `norsk bokmål (nb)`, `русский (ru)`… (функция `language_name()`, миграция V17).
+   Если у чата задан свой язык (`set_chat_language`), берётся он.
+   Код языка (`ru`) — в `{{language_code}}` (V20): его квиз пишет в поле `"language"` JSON.
+3. Задание, срок, текст ДЗ и слабые темы ИИ получает из базы через `chat_prompt_vars`, поэтому в первом
+   ответе он не спрашивает, что задано: коротко называет суть задания и спрашивает, где ученик застрял.
 
 ## Файл ДЗ
 
