@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: lekseradar
       POSTGRES_PASSWORD: lekseradar   # только для локальной разработки
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"   # только с этого компьютера: пароль простой, наружу базу не открываем
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
