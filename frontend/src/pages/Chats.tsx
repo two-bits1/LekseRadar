@@ -14,8 +14,6 @@ import { useLang, useT } from '../i18n';
 
 const MAX_MESSAGE = 8000;  // как @Size в SendMessageRequest
 const MAX_TITLE = 200;
-// Пока у чата нет языка, тьютор сначала спрашивает его (API.md) — ученик отвечает названием языка.
-const TUTOR_LANGS = ['Norsk', 'English', 'Русский', 'Українська'];
 
 // Даты на языке интерфейса и в часовом поясе из профиля.
 function useDateFormat() {
@@ -166,10 +164,6 @@ export function ChatView() {
       </div>)}
       {sending && <><div className="msg student pending"><p>{sending}</p></div><div className="msg tutor typing" role="status"><span className="dots" aria-hidden="true"><i /><i /><i /></span>{c.typing}</div></>}
       {sendError && <div role="alert" className="feedback danger"><span>{sendError.error.message}</span>{sendError.error.status === 502 && <button onClick={() => send(sendError.content)}><RotateCcw size={14} />{c.retry}</button>}</div>}
-      {chat.mode === 'tutor' && !chat.language && !sending && <div className="chat-lang">
-        <p><strong>{c.langTitle}</strong><small>{c.langHint}</small></p>
-        <div className="actions wrap">{TUTOR_LANGS.map(name => <button key={name} onClick={() => send(name)}>{name}</button>)}</div>
-      </div>}
       {chat.mode === 'quiz' && chat.quizSetId && !sending && <div className="chat-lang">
         <p><strong>{c.quizReady}</strong></p>
         <button className="btn btn-primary btn-sm" onClick={startQuiz} disabled={startingQuiz}><Play size={15} />{c.startQuiz}</button>

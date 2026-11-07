@@ -56,7 +56,6 @@ export const nb = {
     confirmDelete: (title: string) => `Slette «${title}» med alle meldinger? Dette kan ikke angres.`,
     emptyThread: 'Still et spørsmål om leksene. Veilederen hjelper deg å tenke selv — ikke med ferdige svar.',
     typing: 'AI-veilederen skriver …', retry: 'Prøv igjen', inputLabel: 'Ditt spørsmål', placeholder: 'Hva lurer du på?', send: 'Send',
-    langTitle: 'Hvilket språk vil du lære på?', langHint: 'Veilederen svarer på språket du velger.',
     quizReady: 'Quizen er klar.', startQuiz: 'Start quizen', quickLabel: 'Hurtigvalg',
     quickButtons: { simpler: 'Forklar enklere', example: 'Et annet eksempel', practice: 'Lag øvingsoppgaver' },
     quick: { simpler: 'Kan du forklare dette enklere?', example: 'Kan du gi meg et annet eksempel?', practice: 'Lag noen øvingsoppgaver til meg om dette, uten fasit først.' },

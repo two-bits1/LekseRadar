@@ -57,7 +57,6 @@ export const en: Dict = {
     confirmDelete: (title: string) => `Delete “${title}” and all its messages? This can’t be undone.`,
     emptyThread: 'Ask a question about your homework. The tutor helps you think for yourself — not with finished answers.',
     typing: 'The AI tutor is typing …', retry: 'Try again', inputLabel: 'Your question', placeholder: 'What are you wondering about?', send: 'Send',
-    langTitle: 'Which language do you want to learn in?', langHint: 'The tutor answers in the language you choose.',
     quizReady: 'Your quiz is ready.', startQuiz: 'Start the quiz', quickLabel: 'Quick actions',
     quickButtons: { simpler: 'Explain more simply', example: 'Another example', practice: 'Make practice tasks' },
     quick: { simpler: 'Can you explain this more simply?', example: 'Can you give me another example?', practice: 'Make a few practice tasks for me on this, without the answers first.' },
