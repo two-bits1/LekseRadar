@@ -1,5 +1,6 @@
 # Локальный PostgreSQL для LekseRadar: docker compose up -d (из папки database/)
-# Миграции применяются при первом запуске пустого тома (база пустая, без демо-данных).
+# Миграции применяются при первом запуске пустого тома (база пустая, без демо-данных),
+# потом сервис content загружает промпты и учебные файлы из ai-content/.
 # Сбросить базу: docker compose down -v && docker compose up -d
 services:
   db:
@@ -14,5 +15,25 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
       - ./init.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lekseradar -d lekseradar"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # Промпты ИИ и учебные файлы из ai-content/ → в базу (load.py). Без них чат и квиз отвечают «промпт не загружен».
+  # Запускается сам после db и завершается; повторный запуск ничего не дублирует.
+  content:
+    image: python:3.12-slim
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://lekseradar:lekseradar@db:5432/lekseradar
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    volumes:
+      - ../ai-content:/ai-content:ro
+    command: sh -c "pip install -q -r /ai-content/load/requirements.txt && python -X utf8 /ai-content/load/load.py"
+    restart: "no"
 volumes:
   pgdata:
