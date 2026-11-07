@@ -5,7 +5,7 @@
     python load/load.py --owner-id 5         # материалы видит только пользователь 5 (по умолчанию общие)
 
 Подключение: переменная DATABASE_URL, например
-    postgresql://lekseradar:lekseradar@localhost:5432/lekseradar
+    postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar
 
 Промпты:   prompts/<key>.md|.txt          → save_prompt('<key>', текст)   (README.md пропускается)
 Материалы: materials/<Предмет>/<Тема>/файл → add_material(owner, Предмет, Тема, название, текст)
