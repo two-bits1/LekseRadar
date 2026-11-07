@@ -1,5 +1,5 @@
 # Локальный PostgreSQL для LekseRadar: docker compose up -d (из папки database/)
-# Миграции и демо-данные применяются при первом запуске пустого тома.
+# Миграции применяются при первом запуске пустого тома (база пустая, без демо-данных).
 # Сбросить базу: docker compose down -v && docker compose up -d
 services:
   db:
@@ -13,7 +13,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
-      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
       - ./init.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
 volumes:
   pgdata:

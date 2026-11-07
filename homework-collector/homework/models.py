@@ -20,7 +20,6 @@ class Assignment(BaseModel):
     url: Optional[str] = None
     description: str = ""
     kind: str = "assignment"  # assignment | quiz | exam | discussion | task
-    demo: bool = False
 
 
 # ---------- учётные данные, которые бэкенд хранит у себя и передаёт в collect() ----------
@@ -54,13 +53,11 @@ class Credentials(BaseModel):
     teams: Optional[TeamsCreds] = None
     itslearning: Optional[ItslearningCreds] = None
     inschool: Optional[InschoolCreds] = None
-    demo: bool = Field(False, description="вернуть демо-задания для источников без учётных данных")
 
 
 class SourceResult(BaseModel):
     ok: bool
     count: int = 0
-    demo: bool = False
     error: Optional[str] = None
     needs_reconnect: bool = False
 

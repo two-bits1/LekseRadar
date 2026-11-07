@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 
 import httpx
 
-from . import demo as demo_data
 from .models import Assignment, CollectResult, Credentials, SourceError, SourceResult, utcnow
 from .sources import canvas, inschool, itslearning, teams
 
@@ -31,13 +30,11 @@ def sort_key(a: Assignment):
     return (STATUS_ORDER[a.status], a.due or FAR)
 
 
-def collect(credentials: Credentials | dict | None = None, *, demo: bool | None = None,
+def collect(credentials: Credentials | dict | None = None, *,
             client: httpx.Client | None = None) -> CollectResult:
-    """credentials — учётные данные платформ (что есть). demo=True — для платформ без данных
-    подставить демо-задания. Возвращает общий список (сначала просроченные, потом по дедлайну),
-    статус каждого источника и обновлённые токены, которые бэкенд должен сохранить."""
+    """credentials — учётные данные платформ (что есть). Возвращает общий список
+    (сначала просроченные, потом по дедлайну), статус каждого источника и обновлённые токены, которые бэкенд должен сохранить."""
     creds = Credentials.model_validate(credentials or {})
-    use_demo = creds.demo if demo is None else demo
     own = client is None
     client = client or httpx.Client(timeout=30, follow_redirects=False)
     assignments, sources, updated = [], {}, {}
@@ -52,12 +49,6 @@ def collect(credentials: Credentials | dict | None = None, *, demo: bool | None 
     finally:
         if own:
             client.close()
-    if use_demo:
-        for name in SOURCES:
-            if name not in sources:
-                items = demo_data.demo(name)
-                assignments += items
-                sources[name] = SourceResult(ok=True, count=len(items), demo=True)
     assignments.sort(key=sort_key)
     return CollectResult(generated_at=utcnow(), assignments=assignments, sources=sources,
                          updated_credentials=updated)
