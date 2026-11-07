@@ -106,3 +106,37 @@ export type CreateChatRequest = { title?: string; topic?: string; subject?: stri
 export type UpdateChatRequest = { title?: string; topic?: string; archived?: boolean };
 export type StartQuizRequest = { subject: string; topic: string; level?: Level; count?: number; assignmentId?: number | null; fresh?: boolean };
 export type AnswerRequest = { position: number; answer: string };
+
+// ДЗ (GET /homework, GET/PATCH /homework/{id})
+export type Platform = 'canvas' | 'teams' | 'itslearning' | 'inschool';
+export type AssignmentStatus = 'todo' | 'overdue' | 'submitted' | 'graded';
+export type Assignment = {
+  id: number;
+  source: Platform;
+  title: string;
+  course: string;
+  dueAt: string | null;
+  status: AssignmentStatus;       // todo с прошедшим дедлайном приходит как overdue
+  url: string | null;
+  kind: string;                   // assignment | exam | quiz | task …
+  description: string;            // в списке обрезан до 300 символов, полный — в GET /homework/{id}
+};
+export type UpdateAssignmentRequest = { status: 'todo' | 'submitted' };
+
+// Дашборд и история (GET /dashboard, GET /history)
+export type TopicProgress = { topic: string; attempts: number; masteryPct: number | null };
+export type DayActivity = { day: string; events: number; exercises: number; quizzes: number };
+export type Dashboard = {
+  homeworkTodo: number; homeworkOverdue: number; homeworkDone: number;
+  quizzesCompleted: number; avgQuizScore: number | null; exercisesAnswered: number;
+  questionsAsked: number; activeDays30: number;
+  flashcards: FlashcardStats; topics: TopicProgress[]; days: DayActivity[];
+};
+export type HistoryEvent = {
+  id: number;
+  type: string;                   // login | chat_started | quiz_started | exercise_answered | homework_done …
+  refTable: string | null;
+  refId: number | null;
+  payload: Record<string, unknown>;
+  createdAt: string;
+};

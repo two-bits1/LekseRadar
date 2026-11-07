@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { authApi, chatsApi, flashcardsApi, health, quizzesApi, subjectsApi, usersApi } from './endpoints';
+import { authApi, chatsApi, dashboardApi, flashcardsApi, health, homeworkApi, quizzesApi, subjectsApi, usersApi } from './endpoints';
 import { api, getToken, setToken } from './client';
 
 // Тесты идут в node: подменяем localStorage, window.location и fetch.
@@ -56,6 +56,13 @@ describe('URL бэкенда из API.md', () => {
     ['#24 статистика', () => flashcardsApi.stats(), 'GET', '/api/v1/flashcards/stats'],
     ['#25 оценка', () => flashcardsApi.review(11, 4), 'POST', '/api/v1/flashcards/11/review', { grade: 4 }],
     ['#26 карточки от ИИ', () => flashcardsApi.generate({ subject: 'Matematikk', topic: 'Brøk' }), 'POST', '/api/v1/flashcards/generate', { subject: 'Matematikk', topic: 'Brøk' }],
+    ['#30 мои ДЗ', () => homeworkApi.list(), 'GET', '/api/v1/homework'],
+    ['#30 просроченные ДЗ', () => homeworkApi.list('overdue'), 'GET', '/api/v1/homework?status=overdue'],
+    ['#31 одно ДЗ', () => homeworkApi.get(3), 'GET', '/api/v1/homework/3'],
+    ['#32 ДЗ сдано', () => homeworkApi.update(3, { status: 'submitted' }), 'PATCH', '/api/v1/homework/3', { status: 'submitted' }],
+    ['#33 дашборд', () => dashboardApi.get(), 'GET', '/api/v1/dashboard'],
+    ['#34 история', () => dashboardApi.history(), 'GET', '/api/v1/history'],
+    ['#34 история limit', () => dashboardApi.history(20), 'GET', '/api/v1/history?limit=20'],
   ];
   it.each(cases)('%s', async (_name, call, method, url, body) => {
     const fetch = mockFetch(200, {});
