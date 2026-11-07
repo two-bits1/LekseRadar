@@ -10,6 +10,7 @@ import java.time.Instant;
 @Table(name = "reminders")
 public class ReminderEntity {
     public static final String CHANNEL_IN_APP = "in_app";
+    public static final String CHANNEL_EMAIL = "email";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,6 +44,14 @@ public class ReminderEntity {
         this.assignmentId = assignmentId;
         this.message = message;
         this.remindAt = remindAt;
+    }
+
+    /** Уже отправленное напоминание (например, письмо): sent_at = remind_at = сейчас. */
+    public static ReminderEntity sent(Long userId, Long assignmentId, String message, String channel) {
+        ReminderEntity r = new ReminderEntity(userId, assignmentId, message, Instant.now());
+        r.channel = channel;
+        r.sentAt = r.remindAt;
+        return r;
     }
 
     public Long getId() { return id; }

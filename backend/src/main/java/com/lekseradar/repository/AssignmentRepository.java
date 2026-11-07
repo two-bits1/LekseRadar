@@ -52,6 +52,18 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
     @Query(value = "SELECT added, updated FROM sync_assignments(:userId, CAST(:items AS jsonb))", nativeQuery = true)
     SyncCounts syncAssignments(@Param("userId") Long userId, @Param("items") String items);
 
+    /** Несданные задания со сроком в ближайшие {@code within} (например "24 hours"), о которых ещё не было письма (V25). */
+    @Query(value = "SELECT * FROM assignments_to_remind(CAST(:within AS interval))", nativeQuery = true)
+    List<AssignmentEntity> findToRemind(@Param("within") String within);
+
+    /** Несданные задания ученика со сроком до {@code until}, включая просроченные: для пробного письма. */
+    @Query(value = """
+            SELECT * FROM assignments
+            WHERE user_id = :userId AND status IN ('todo', 'overdue') AND due_at IS NOT NULL AND due_at <= :until
+            ORDER BY due_at
+            """, nativeQuery = true)
+    List<AssignmentEntity> findOpenDueBefore(@Param("userId") Long userId, @Param("until") Instant until);
+
     /** Прикрепить текст файла ДЗ (для промпта тьютора): id материала. */
     @Query(value = "SELECT attach_homework_file(:assignmentId, :text, :fileName, :mimeType, :storageKey)",
             nativeQuery = true)

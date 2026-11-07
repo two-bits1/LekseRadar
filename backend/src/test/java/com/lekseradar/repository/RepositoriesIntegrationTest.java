@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "app.openai.api-key=sk-not-used",
         "app.credentials.key=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
         "app.sync.schedule-enabled=false",
+        "app.reminders.enabled=false",
 })
 @EnabledIfEnvironmentVariable(named = "TEST_DB_URL", matches = ".+")
 @Transactional
@@ -210,5 +211,28 @@ class RepositoriesIntegrationTest {
         assertThat(materials.findVisible(userId)).extracting(MaterialEntity::getId).contains(id);
         assertThat(materials.search(userId, "kloroplastene", null, 5, null)).isNotEmpty();
         assertThat(materials.forPrompt(userId, "kloroplastene", null, 5, null)).contains("Fotosyntesen");
+    }
+
+    /** V25: письмо о задании со сроком в ближайшие 24 часа — один раз и только если ученик не выключил напоминания. */
+    @Test
+    void emailRemindersPickDueHomeworkOnce() {
+        Long userId = newUser();
+        Instant now = Instant.now();
+        assignments.upsert(userId, "canvas", "r1", "Snart", "IT1", now.plus(3, ChronoUnit.HOURS), "todo", null, "", "assignment");
+        assignments.upsert(userId, "canvas", "r2", "Neste uke", "IT1", now.plus(5, ChronoUnit.DAYS), "todo", null, "", "assignment");
+        assignments.upsert(userId, "canvas", "r3", "Levert", "IT1", now.plus(2, ChronoUnit.HOURS), "submitted", null, "", "assignment");
+        var due = assignments.findToRemind("24 hours").stream().filter(a -> a.getUserId().equals(userId)).toList();
+        assertThat(due).extracting(AssignmentEntity::getTitle).containsExactly("Snart");
+        assertThat(assignments.findOpenDueBefore(userId, now.plus(7, ChronoUnit.DAYS)))
+                .extracting(AssignmentEntity::getTitle).containsExactly("Snart", "Neste uke");
+
+        reminders.saveAndFlush(ReminderEntity.sent(userId, due.get(0).getId(), "Snart", ReminderEntity.CHANNEL_EMAIL));
+        assertThat(assignments.findToRemind("24 hours")).noneMatch(a -> a.getUserId().equals(userId));
+
+        assignments.upsert(userId, "canvas", "r4", "Også snart", "IT1", now.plus(1, ChronoUnit.HOURS), "todo", null, "", "assignment");
+        UserEntity user = users.findById(userId).orElseThrow();
+        user.setEmailReminders(false);
+        users.saveAndFlush(user);
+        assertThat(assignments.findToRemind("24 hours")).noneMatch(a -> a.getUserId().equals(userId));
     }
 }
