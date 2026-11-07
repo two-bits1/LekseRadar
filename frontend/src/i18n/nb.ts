@@ -112,7 +112,7 @@ export const nb = {
   },
   cards: {
     title: 'Læringskort', intro: 'Repeter litt hver dag — kortene kommer tilbake akkurat når du er i ferd med å glemme dem.',
-    statsCards: 'kort', statsDue: 'til repetisjon', statsLearned: 'lært',
+    statsCards: 'kort', statsDue: 'til repetisjon', statsLearned: 'lært', statsReviews: 'repetisjoner',
     none: 'Ingen kort å repetere akkurat nå. Godt jobbet!', empty: 'Kortstokken er tom. Lag kort med AI under, eller ta en quiz.',
     showAnswer: 'Vis svaret', flipHint: 'Trykk på kortet eller mellomrom for å snu', grades: { again: 'Husket ikke', hard: 'Vanskelig', good: 'Husket', easy: 'Lett' },
     progress: (i: number, n: number) => `${i} av ${n}`, done: 'Ferdig for nå!', front: 'Spørsmål', back: 'Svar', explanation: 'Forklaring',

@@ -113,7 +113,7 @@ export const ru: Dict = {
   },
   cards: {
     title: 'Карточки', intro: 'Повторяй понемногу каждый день — карточки возвращаются, когда ты вот-вот их забудешь.',
-    statsCards: 'карточек', statsDue: 'повторить', statsLearned: 'выучено',
+    statsCards: 'карточек', statsDue: 'повторить', statsLearned: 'выучено', statsReviews: 'повторений',
     none: 'Сейчас повторять нечего. Отлично!', empty: 'Колода пуста. Создай карточки с ИИ ниже или пройди квиз.',
     showAnswer: 'Показать ответ', flipHint: 'Нажми на карточку или пробел, чтобы перевернуть', grades: { again: 'Не помню', hard: 'С трудом', good: 'Помню', easy: 'Легко' },
     progress: (i: number, n: number) => `${i} из ${n}`, done: 'На сегодня всё!', front: 'Вопрос', back: 'Ответ', explanation: 'Пояснение',
