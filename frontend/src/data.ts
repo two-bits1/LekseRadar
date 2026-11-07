@@ -1,3 +1,4 @@
+import { PATHS } from './paths';
 export const assignments = [
   {id:'likninger', subject:'Matematikk', title:'Likninger med én ukjent', description:'Jobb med oppgave 4.1–4.8 på side 92. Vis hvordan du tenker.', date:'9. nov.', day:9, source:'itslearning', color:'sage', icon:'x', duration:'25 min', urgent:true},
   {id:'novelle', subject:'Norsk', title:'En liten tekst, en stor historie', description:'Les «Karens jul» og finn kjennetegn på en novelle.', date:'10. nov.', day:10, source:'Canvas', color:'peach', icon:'Aa', duration:'30 min', urgent:false},
@@ -12,6 +13,7 @@ export const decks = [
   ['Hva er et konstantledd?', 'Et tall uten variabel, for eksempel 5 i uttrykket 2x + 5.'],
   ['Hvordan sjekker du løsningen?', 'Sett verdien inn i den opprinnelige likningen og sammenlign sidene.'],
 ];
+// Сайт-карта для /status — те же адреса, что в API.md (см. src/paths.ts).
 export const routes = [
-  ['/dashboard','Oversikt','Interaktiv demo'], ['/calendar','Kalender','Interaktiv demo'], ['/tutor','AI-veileder','Forhåndsskrevet demo'], ['/flashcards','Læringskort','Interaktiv demo'], ['/profile','Profil','Demodata'], ['/settings','Innstillinger','Delvis klar'], ['/login','Logg inn','Kun gjestetilgang'], ['/register','Opprett konto','Kommer senere'],
+  [PATHS.home,'Oversikt','Interaktiv demo'], [PATHS.homework,'Lekser og kalender','Interaktiv demo'], [PATHS.chats,'AI-veileder','Koblet til API'], [PATHS.chat(':chatId'),'Samtale','Koblet til API'], [PATHS.quizzes,'Quiz','Interaktiv demo'], [PATHS.flashcards,'Læringskort','Interaktiv demo'], [PATHS.progress,'Fremgang','Kommer senere'], [PATHS.history,'Historikk','Kommer senere'], [PATHS.profile,'Profil','Koblet til API'], [PATHS.settings,'Innstillinger','Delvis klar'], [PATHS.platforms,'Plattformer','Kommer senere'], [PATHS.login,'Logg inn','Koblet til API'], [PATHS.register,'Opprett konto','Koblet til API'],
 ];
