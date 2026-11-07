@@ -14,14 +14,14 @@ result = collect({
     "teams": {"access_token": "...", "refresh_token": "...", "expires_at": 1762500000},
     "itslearning": {"base_url": "https://sms.itslearning.com", "refresh_token": "..."},
     "inschool": {"host": "ohg-vgs.inschool.visma.no", "cookies": {"JSESSIONID": "...", "Authorization": "..."}},
-}, demo=True)               # demo=True: для платформ без данных подставить демо-задания
+})
 
 result.model_dump(mode="json")   # готовый JSON для ответа бэкенда
 ```
 
 Любую платформу можно не передавать. Ошибка одной платформы не ломает остальные.
 
-Проверка из консоли: `python -m homework --demo` (или `--creds creds.json --json`).
+Проверка из консоли: `python -m homework --creds creds.json` (добавь `--json` для JSON).
 
 ## Единый формат задания
 
@@ -35,10 +35,9 @@ result.model_dump(mode="json")   # готовый JSON для ответа бэ�
 | `url` | ссылка на задание в платформе |
 | `description` | текст задания, если платформа его отдаёт |
 | `kind` | `assignment` / `quiz` / `exam` / `discussion` / `task` |
-| `demo` | `true` для демо-данных |
 
 Ответ `collect()`: `assignments` (сначала просроченные, дальше по дедлайну), `sources` (по каждой платформе:
-`ok`, `count`, `demo`, `error`, `needs_reconnect`) и `updated_credentials`. **Бэкенд сохраняет
+`ok`, `count`, `error`, `needs_reconnect`) и `updated_credentials`. **Бэкенд сохраняет
 `updated_credentials` вместо старых**: там обновлённые токены Teams и itslearning и cookie InSchool.
 `needs_reconnect: true` значит, что пользователю нужно войти в эту платформу заново.
 
@@ -61,7 +60,6 @@ result.model_dump(mode="json")   # готовый JSON для ответа бэ�
 homework/
 ├── collect.py        collect(): все платформы параллельно → один список
 ├── models.py         Assignment, Credentials, CollectResult
-├── demo.py           демо-ответы платформ в их настоящем формате (проходят через тот же парсер)
 └── sources/          по файлу на платформу: fetch() + normalize() + функции входа
 tests/                тесты на подменённых ответах платформ (pytest)
 ```
