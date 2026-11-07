@@ -3,7 +3,7 @@
     DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar \\
     python -m homework.to_db --email ученик@школа.no --creds creds.json
 
-collect() по creds.json → UPSERT в assignments по (user_id, source, external_id).
+collect() по creds.json → sync_assignments() (V21): UPSERT в assignments по (user_id, source, external_id).
 Обновлённые токены (Teams, itslearning, cookie InSchool) записываются обратно в creds.json.
 Ученик должен уже быть зарегистрирован на сайте. Вместо --creds можно передать --from-json result.json
 (вывод `python -m homework --creds creds.json --json`), тогда платформы не опрашиваются.
@@ -18,35 +18,11 @@ import sys
 
 from .models import CollectResult
 
-# Статус «сдано» с сайта не откатывается назад, если платформа ещё показывает todo/overdue.
-UPSERT = """
-INSERT INTO assignments (user_id, source, external_id, title, course, due_at, status, url, description, kind)
-VALUES (%(user_id)s, %(source)s::platform, %(id)s, %(title)s, %(course)s, %(due)s, %(status)s::assignment_status,
-        %(url)s, %(description)s, %(kind)s)
-ON CONFLICT (user_id, source, external_id) DO UPDATE SET
-    title = EXCLUDED.title, course = EXCLUDED.course, due_at = EXCLUDED.due_at, url = EXCLUDED.url,
-    description = CASE WHEN EXCLUDED.description <> '' THEN EXCLUDED.description ELSE assignments.description END,
-    kind = EXCLUDED.kind,
-    status = CASE WHEN assignments.status IN ('submitted', 'graded') AND EXCLUDED.status IN ('todo', 'overdue')
-                  THEN assignments.status ELSE EXCLUDED.status END,
-    updated_at = now()
-RETURNING (xmax = 0) AS inserted
-"""
-
-
 def save(conn, user_id: int, result: CollectResult) -> tuple[int, int]:
-    """UPSERT всех заданий; возвращает (новых, обновлённых)."""
-    new = upd = 0
-    with conn.cursor() as cur:
-        for a in result.assignments:
-            row = a.model_dump()
-            row["user_id"] = user_id
-            cur.execute(UPSERT, row)
-            if cur.fetchone()[0]:
-                new += 1
-            else:
-                upd += 1
-    return new, upd
+    """Все задания одним вызовом sync_assignments() (миграция V21); возвращает (новых, обновлённых)."""
+    items = json.dumps([a.model_dump(mode="json") for a in result.assignments], ensure_ascii=False)
+    row = conn.execute("SELECT added, updated FROM sync_assignments(%s, %s::jsonb)", (user_id, items)).fetchone()
+    return row[0], row[1]
 
 
 def main(argv=None) -> int:
