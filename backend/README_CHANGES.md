@@ -55,3 +55,29 @@
    the tutor answers in the student's language.
 10. **`service/`** — business logic: register/login (last login, `login` event), profile
     (name, language, timezone, password), chats (archive, AI replies using `chat_context` history).
+
+---
+
+## Часть 3 / Part 3 — коммиты / commits 11–15
+
+### RU
+11. **`controller/`** — REST API по адресу `/api/v1`: вход, профиль, пароль, чаты и сообщения.
+    Контроллеры только вызывают сервисы. Проверка сервера: `/actuator/health`.
+12. **Тесты** — unit-тесты JWT без базы. Старый тест на H2 удалён.
+13. **`backend/README.md`** — установка, запуск базы, `.env`, запуск из VS Code / IntelliJ / терминала.
+14. **`docs/API.md`** — документация для фронтенда: все URL, типы TypeScript, коды ошибок, пример `fetch`.
+15. **VS Code** — запуск по F5, задачи для базы, бэкенда, тестов и фронтенда.
+
+**Проверено вручную** на PostgreSQL из `database/`: вход демо-ученика, профиль, чаты, архив, удаление,
+чужой чат → 404, ошибки валидации на русском, события в `user_events`. ИИ отвечает 502, пока на счету OpenAI нет денег.
+
+### EN
+11. **`controller/`** — REST API under `/api/v1`: login, profile, password, chats and messages.
+    Controllers only call services. Health check: `/actuator/health`.
+12. **Tests** — JWT unit tests, no database needed. Old H2 test removed.
+13. **`backend/README.md`** — install, start DB, `.env`, run from VS Code / IntelliJ / terminal.
+14. **`docs/API.md`** — frontend reference: every URL, TypeScript types, error codes, `fetch` example.
+15. **VS Code** — F5 to run, tasks for DB, backend, tests and frontend.
+
+**Manually verified** against PostgreSQL from `database/`: demo login, profile, chats, archive, delete,
+foreign chat → 404, validation errors, `user_events` rows. AI returns 502 until the OpenAI account has credits.
