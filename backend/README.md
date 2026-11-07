@@ -25,7 +25,7 @@ cd database
 docker compose up -d
 ```
 
-При первом запуске создаются все таблицы и демо-ученик **`demo@lekseradar.no` / `demo1234`**.
+При первом запуске создаются все таблицы. База пустая, пробных данных нет: ученик появляется только через регистрацию.
 Сбросить базу: `docker compose down -v && docker compose up -d`.
 
 ### 2. Секреты
@@ -45,10 +45,16 @@ docker compose up -d
 
 1. http://localhost:8080/actuator/health → `{"status":"UP"}`. Если `DOWN`, база не запущена.
 2. http://localhost:8080/swagger-ui.html:
-   1. `POST /api/v1/auth/login` → **Try it out** → `{"email":"demo@lekseradar.no","password":"demo1234"}` → **Execute**.
+   1. `POST /api/v1/auth/register` → **Try it out** → `{"email":"ola@example.com","password":"hemmelig123","displayName":"Ola"}` → **Execute**.
    2. Скопируйте `token`, нажмите **Authorize** (замок сверху) и вставьте его.
-   3. `GET /api/v1/chats` покажет демо-чат. `POST /api/v1/chats/1/messages` задаст вопрос настоящему ИИ.
+   3. `POST /api/v1/chats` создаст чат, `POST /api/v1/chats/{id}/messages` задаст вопрос настоящему ИИ.
 3. Unit-тесты (база не нужна): `./mvnw test`.
+4. Все сущности и репозитории на настоящей базе (в транзакции с откатом, в базе ничего не остаётся):
+   `TEST_DB_URL=jdbc:postgresql://localhost:5432/lekseradar TEST_DB_USER=lekseradar TEST_DB_PASSWORD=lekseradar ./mvnw test`.
+   Без `TEST_DB_URL` этот тест пропускается.
+
+При старте Hibernate сверяет все сущности с таблицами (`ddl-auto: validate`). Если миграции в `database/`
+не применены или не совпадают с кодом, бэкенд не запустится и напишет, какая колонка не та.
 
 ## API
 

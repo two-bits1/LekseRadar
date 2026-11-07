@@ -1,12 +1,14 @@
 package com.lekseradar.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.time.Instant;
 
 /**
- * Таблица {@code chat_sessions} (database/migrations/V3__chat.sql).
- * Колонка assignment_id (чат по ДЗ) пока не используется.
+ * Таблица {@code chat_sessions} (V3, V13, V14). Режим {@link ChatMode} задаётся при создании и не меняется
+ * (триггер chat_mode_locked). Чат с предметом и темой удобнее создавать функцией start_chat
+ * ({@link com.lekseradar.repository.ChatSessionRepository#startChat}).
  */
 @Entity
 @Table(name = "chat_sessions")
@@ -25,6 +27,28 @@ public class ChatSession {
     private String title;
 
     private String topic;
+
+    /** Чат по конкретному ДЗ (assignments.id) или null. */
+    @Column(name = "assignment_id")
+    private Long assignmentId;
+
+    @ColumnTransformer(write = "?::chat_mode")
+    @Column(nullable = false, updatable = false, columnDefinition = "chat_mode")
+    private ChatMode mode = ChatMode.TUTOR;
+
+    @Column(name = "subject_id")
+    private Long subjectId;
+
+    /** Только у чата quiz: какой набор вопросов он создал. */
+    @Column(name = "quiz_set_id")
+    private Long quizSetId;
+
+    /** Язык ответа ИИ; null — тьютор сначала спрашивает язык. */
+    private String language;
+
+    @ColumnTransformer(write = "?::exercise_level")
+    @Column(nullable = false, columnDefinition = "exercise_level")
+    private ExerciseLevel level = ExerciseLevel.INTERMEDIATE;
 
     @Column(nullable = false)
     private boolean archived;
@@ -48,6 +72,12 @@ public class ChatSession {
     public Long getUserId() { return userId; }
     public String getTitle() { return title; }
     public String getTopic() { return topic; }
+    public Long getAssignmentId() { return assignmentId; }
+    public ChatMode getMode() { return mode; }
+    public Long getSubjectId() { return subjectId; }
+    public Long getQuizSetId() { return quizSetId; }
+    public String getLanguage() { return language; }
+    public ExerciseLevel getLevel() { return level; }
     public boolean isArchived() { return archived; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
@@ -55,5 +85,7 @@ public class ChatSession {
     public void setTitle(String title) { this.title = title; }
     public void setTopic(String topic) { this.topic = topic; }
     public void setArchived(boolean archived) { this.archived = archived; }
+    public void setQuizSetId(Long quizSetId) { this.quizSetId = quizSetId; }
+    public void setLevel(ExerciseLevel level) { this.level = level; }
     public void touch() { this.updatedAt = Instant.now(); }
 }
