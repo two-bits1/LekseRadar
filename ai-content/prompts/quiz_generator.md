@@ -6,7 +6,7 @@
 Предмет: {{subject}}
 Тема: {{topic}}
 Уровень: {{level}}            (beginner | intermediate | advanced)
-Язык квиза: {{language}}      (код: nb, en, ru, uk ...)
+Язык квиза: {{language}}
 Количество вопросов: {{count}}
 Домашнее задание: {{homework_title}}
 <homework>
@@ -24,7 +24,7 @@
   "subject": "{{subject}}",
   "topic": "{{topic}}",
   "level": "{{level}}",
-  "language": "{{language}}",
+  "language": "{{language_code}}",
   "title": "<короткое название квиза на языке квиза>",
   "questions": [
     {
