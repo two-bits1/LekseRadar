@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { authApi, chatsApi, flashcardsApi, health, quizzesApi, subjectsApi, usersApi } from './endpoints';
+import { authApi, chatsApi, flashcardsApi, health, platformsApi, quizzesApi, subjectsApi, usersApi } from './endpoints';
 import { api, getToken, setToken } from './client';
 
 // Тесты идут в node: подменяем localStorage, window.location и fetch.
@@ -55,6 +55,9 @@ describe('URL бэкенда из API.md', () => {
     ['#23 к повторению', () => flashcardsApi.due(), 'GET', '/api/v1/flashcards/due'],
     ['#24 статистика', () => flashcardsApi.stats(), 'GET', '/api/v1/flashcards/stats'],
     ['#25 оценка', () => flashcardsApi.review(11, 4), 'POST', '/api/v1/flashcards/11/review', { grade: 4 }],
+    ['🕓 платформы', () => platformsApi.list(), 'GET', '/api/v1/platforms'],
+    ['🕓 подключить Canvas', () => platformsApi.connect('canvas', { base_url: 'https://skole.instructure.com', token: 'abc' }), 'POST', '/api/v1/platforms/canvas', { base_url: 'https://skole.instructure.com', token: 'abc' }],
+    ['🕓 отключить', () => platformsApi.disconnect('teams'), 'DELETE', '/api/v1/platforms/teams'],
     ['#26 карточки от ИИ', () => flashcardsApi.generate({ subject: 'Matematikk', topic: 'Brøk' }), 'POST', '/api/v1/flashcards/generate', { subject: 'Matematikk', topic: 'Brøk' }],
   ];
   it.each(cases)('%s', async (_name, call, method, url, body) => {
