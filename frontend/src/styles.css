@@ -336,3 +336,4 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .option.wrong .option-mark{background:var(--danger);border-color:var(--danger);color:var(--bg)}
 .option:disabled{opacity:1}
 .option:disabled:not(.right):not(.wrong){opacity:.55}
+.reminders-row{flex-wrap:wrap}.reminders-row>.feedback{flex-basis:100%;margin:4px 0 0}
