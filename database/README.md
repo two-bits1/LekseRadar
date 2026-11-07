@@ -27,6 +27,8 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V4__exercises_quizzes.sql` | `exercises`, `quizzes`, `quiz_questions`, `exercise_attempts`, функция `finish_quiz()` |
 | `V5__history_progress.sql` | `user_events` (история пользователя), виды `user_topic_progress`, `user_daily_activity`, `user_dashboard` |
 | `V6__reminders_flashcards_achievements.sql` | `reminders`, `flashcards`, `achievements`, `user_achievements` |
+| `V7__subjects_quiz_sets.sql` | `subjects`, `quiz_sets`: сохранённые квизы от ИИ; новые поля у `exercises` и `quizzes` |
+| `V8__quiz_functions.sql` | `find_quiz_set()`, `import_quiz_json()`, `start_quiz()`, `save_quiz_answer()`, виды `quiz_questions_public`, `user_quiz_progress` |
 
 ## Схема
 
@@ -71,9 +73,37 @@ INSERT INTO chat_messages (session_id, role, content, on_topic, model) VALUES (?
 Список чатов пользователя: `SELECT * FROM chat_sessions WHERE user_id = ? ORDER BY updated_at DESC`
 (новое сообщение само поднимает чат наверх).
 
-**Квиз.** Упражнения от генератора → `exercises`, квиз → `quizzes` + `quiz_questions`,
-каждый ответ и `CheckResult` → `exercise_attempts` с `quiz_id`. В конце `SELECT finish_quiz(?)`:
-ставит балл 0–100 (последний ответ на каждый вопрос, partial = 0,5) и статус `completed`.
+**Квиз из JSON от ИИ.** Пользователь выбирает предмет, тему и уровень. ИИ генерирует квиз один раз
+и отдаёт JSON в формате [`quiz/quiz.schema.json`](quiz/quiz.schema.json) (пример: [`quiz/example.json`](quiz/example.json)).
+База хранит его, и в следующий раз тот же квиз берётся из базы, без новой генерации:
+```sql
+-- 1. Есть ли готовый квиз? (регистр и лишние пробелы не важны)
+SELECT find_quiz_set('Matematikk', 'Lineære funksjoner', 'beginner', 'nb');   -- id или NULL
+-- 2. Если NULL: ИИ генерирует JSON → импорт (тот же JSON второй раз вернёт тот же id, без дубля)
+SELECT import_quiz_json(?::jsonb, :user_id);                                   -- id набора
+-- 3. Начать или продолжить незаконченный квиз этого набора
+SELECT start_quiz(:user_id, :set_id);                                           -- id квиза
+SELECT * FROM quiz_questions_public WHERE quiz_id = ? ORDER BY position;       -- вопросы без ответов
+SELECT current_position FROM quizzes WHERE id = ?;                              -- где остановился
+-- 4. Ответ: выбор проверяется в базе сам; для text передай вердикт проверки ИИ
+SELECT * FROM save_quiz_answer(:quiz_id, 1, '-4');
+SELECT * FROM save_quiz_answer(:quiz_id, 3, '["y = -2x + 5","y = -x"]');        -- multiple_choice
+SELECT * FROM save_quiz_answer(:quiz_id, 4, 'текст ответа', 'partial', 'пояснение от ИИ');
+-- 5. Итог: балл 0–100 (последний ответ на каждый вопрос, partial = 0,5)
+SELECT finish_quiz(:quiz_id);
+```
+Импорт файла вручную:
+```
+psql -d lekseradar <<'SQL'
+\set j `cat quiz/example.json`
+SELECT import_quiz_json(:'j'::jsonb);
+SQL
+```
+В Java: прочитать файл в строку и передать параметром, . Неверный JSON (нет полей, неизвестный `type`,
+правильный ответ не из `options`) отклоняется с понятной ошибкой `quiz json: ...`.
+
+Прогресс по квизам: `SELECT * FROM user_quiz_progress WHERE user_id = ?` (по предмету и теме: пройдено,
+в процессе, лучший и последний балл).
 
 **Прогресс и дашборд.**
 ```sql
