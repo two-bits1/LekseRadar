@@ -23,6 +23,10 @@ result.model_dump(mode="json")   # готовый JSON для ответа бэ�
 
 Проверка из консоли: `python -m homework --creds creds.json` (добавь `--json` для JSON).
 
+Загрузить ДЗ ученика в базу, пока нет `POST /homework/sync`: `python -m homework.to_db --email … --creds creds.json`
+(нужен `DATABASE_URL`). Войти в Teams или itslearning и записать токены: `python -m homework.login teams|itslearning --creds creds.json`.
+Пошагово: [docs/REAL-DATA.md](../docs/REAL-DATA.md).
+
 ## Единый формат задания
 
 | поле | значение |
