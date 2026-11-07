@@ -18,7 +18,7 @@ export const nb = {
     calendarUrl: 'Kalender-URL', schoolUrl: 'Skolens URL', connectLater: 'Koble til — kommer senere',
     account: 'Konto', loggedInAs: (email: string) => `Logget inn som ${email}.`, logout: 'Logg ut',
   },
-  common: { offline: 'Får ikke kontakt med serveren. Prøv igjen.', failed: 'Noe gikk galt. Prøv igjen.', loading: 'Henter …', saving: 'Lagrer …', saved: 'Lagret.' },
+  common: { keepServer: false, invalidField: 'Sjekk dette feltet.', byStatus: { 400: 'Sjekk feltene.', 401: 'Feil e-post eller passord.', 404: 'Fant ikke det du lette etter.', 409: 'Denne e-posten er allerede i bruk.', 502: 'AI-veilederen svarer ikke akkurat nå. Prøv igjen.', 503: 'AI-en er ikke satt opp på serveren ennå.', 500: 'Noe gikk galt på serveren.' }, offline: 'Får ikke kontakt med serveren. Prøv igjen.', failed: 'Noe gikk galt. Prøv igjen.', loading: 'Henter …', saving: 'Lagrer …', saved: 'Lagret.' },
   auth: {
     eyebrow: 'VELKOMMEN TIL LEKSERADAR', titleLogin: 'Fint å ha deg her.', titleRegister: 'En litt enklere skolehverdag.',
     intro: 'Mer oversikt. Mindre stress. Plass til å forstå.', login: 'Logg inn', register: 'Opprett konto',

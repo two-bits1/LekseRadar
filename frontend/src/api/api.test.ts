@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { authApi, chatsApi, health, usersApi } from './endpoints';
+import { authApi, chatsApi, flashcardsApi, health, quizzesApi, subjectsApi, usersApi } from './endpoints';
 import { api, getToken, setToken } from './client';
 
 // Тесты идут в node: подменяем localStorage, window.location и fetch.
@@ -40,6 +40,22 @@ describe('URL бэкенда из API.md', () => {
     ['#10 удалить чат', () => chatsApi.remove(7), 'DELETE', '/api/v1/chats/7'],
     ['#11 история', () => chatsApi.messages(7), 'GET', '/api/v1/chats/7/messages'],
     ['#12 вопрос ИИ', () => chatsApi.send(7, 'Hei'), 'POST', '/api/v1/chats/7/messages', { content: 'Hei' }],
+    ['#7 квиз-чат', () => chatsApi.create({ mode: 'quiz', subject: 'Matematikk', level: 'beginner' }), 'POST', '/api/v1/chats', { mode: 'quiz', subject: 'Matematikk', level: 'beginner' }],
+    ['#13 предметы', () => subjectsApi.list(), 'GET', '/api/v1/subjects'],
+    ['#14 мои квизы', () => quizzesApi.list(), 'GET', '/api/v1/quizzes'],
+    ['#15 прогресс', () => quizzesApi.progress(), 'GET', '/api/v1/quizzes/progress'],
+    ['#16 начать квиз', () => quizzesApi.start({ subject: 'Matematikk', topic: 'Brøk', level: 'beginner', count: 8 }), 'POST', '/api/v1/quizzes', { subject: 'Matematikk', topic: 'Brøk', level: 'beginner', count: 8 }],
+    ['#17 квиз', () => quizzesApi.get(5), 'GET', '/api/v1/quizzes/5'],
+    ['#18 ответ', () => quizzesApi.answer(5, { position: 1, answer: 'teller' }), 'POST', '/api/v1/quizzes/5/answers', { position: 1, answer: 'teller' }],
+    ['#19 завершить', () => quizzesApi.finish(5), 'POST', '/api/v1/quizzes/5/finish'],
+    ['#20 квиз по набору', () => quizzesApi.startSet(9), 'POST', '/api/v1/quiz-sets/9/start'],
+    ['#21 квиз в колоду', () => quizzesApi.setToFlashcards(9), 'POST', '/api/v1/quiz-sets/9/flashcards'],
+    ['#22 колода', () => flashcardsApi.list(), 'GET', '/api/v1/flashcards'],
+    ['#22 колода due', () => flashcardsApi.list(true), 'GET', '/api/v1/flashcards?due=true'],
+    ['#23 к повторению', () => flashcardsApi.due(), 'GET', '/api/v1/flashcards/due'],
+    ['#24 статистика', () => flashcardsApi.stats(), 'GET', '/api/v1/flashcards/stats'],
+    ['#25 оценка', () => flashcardsApi.review(11, 4), 'POST', '/api/v1/flashcards/11/review', { grade: 4 }],
+    ['#26 карточки от ИИ', () => flashcardsApi.generate({ subject: 'Matematikk', topic: 'Brøk' }), 'POST', '/api/v1/flashcards/generate', { subject: 'Matematikk', topic: 'Brøk' }],
   ];
   it.each(cases)('%s', async (_name, call, method, url, body) => {
     const fetch = mockFetch(200, {});
