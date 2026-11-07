@@ -91,7 +91,7 @@ export function Dashboard() {
       </section>
 
       <section className="panel">
-        <div className="panel-head"><h2><Inbox size={16} />{d.homework}</h2><Link to={PATHS.homework}>{t.hw.title}</Link></div>
+        <div className="panel-head"><h2><Inbox size={16} />{d.homework}</h2><Link to={PATHS.homework}>{t.hw.all}</Link></div>
         {data.homework === null ? <p className="panel-empty">{t.common.loading}</p>
           : nextHomework.length ? nextHomework.map(a => <Link key={a.id} to={PATHS.homework} className="row">
               <span><strong>{a.title}</strong><small>{[a.course, a.dueAt ? t.hw.due(dueFmt(a.dueAt)) : t.hw.noDue].filter(Boolean).join(' · ')}</small></span>

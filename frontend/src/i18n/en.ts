@@ -102,7 +102,7 @@ export const en: Dict = {
     none: 'No homework here.', noneAll: 'No homework yet. It shows up once a school platform is connected.', connect: 'Connect a platform',
     due: (d: string) => `Due ${d}`, noDue: 'No deadline', open: 'Open on the platform',
     markDone: 'Mark as done', markTodo: 'Not done after all', askTutor: 'Get help from the AI tutor', makeQuiz: 'Practise with a quiz',
-    starting: 'Starting …', loadFull: 'Loading the assignment text …',
+    starting: 'Starting …', all: 'All homework', loadFull: 'Loading the assignment text …',
   },
   prog: {
     title: 'Progress', intro: 'How you are doing per topic, and how active you have been over the last 30 days.',

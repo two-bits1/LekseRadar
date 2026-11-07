@@ -101,7 +101,7 @@ export const nb = {
     none: 'Ingen lekser her.', noneAll: 'Ingen lekser ennå. De dukker opp når en skoleplattform er koblet til.', connect: 'Koble til plattform',
     due: (d: string) => `Frist ${d}`, noDue: 'Uten frist', open: 'Åpne på plattformen',
     markDone: 'Merk som levert', markTodo: 'Ikke levert likevel', askTutor: 'Få hjelp av AI-veilederen', makeQuiz: 'Øv med quiz',
-    starting: 'Starter …', loadFull: 'Henter oppgaveteksten …',
+    starting: 'Starter …', all: 'Alle lekser', loadFull: 'Henter oppgaveteksten …',
   },
   prog: {
     title: 'Fremgang', intro: 'Hvordan det går per tema, og hvor aktiv du har vært de siste 30 dagene.',
