@@ -14,10 +14,13 @@ export const clearToken = () => { try { localStorage.removeItem(TOKEN_KEY); } ca
 export const isApiError = (e: unknown): e is ApiError =>
   typeof e === 'object' && e !== null && 'status' in e && 'message' in e;
 
+// Текст для ответа не в формате ApiError; интерфейс заменяет его на свой язык (forms.tsx → asApiError).
+export const FALLBACK_MESSAGE = 'Noe gikk galt. Prøv igjen.';
+
 async function toApiError(res: Response): Promise<ApiError> {
   try { const body = await res.json(); if (isApiError(body)) return body; } catch {}
   // Ответ не в формате ApiError (например, бэкенд не запущен и proxy вернул 502 без JSON).
-  return { status: res.status, message: 'Noe gikk galt. Prøv igjen.', fields: null, timestamp: new Date().toISOString() };
+  return { status: res.status, message: FALLBACK_MESSAGE, fields: null, timestamp: new Date().toISOString() };
 }
 
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {

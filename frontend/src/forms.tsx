@@ -1,10 +1,20 @@
 // Общие куски форм: поле с ошибкой под ним и приведение любой ошибки к ApiError (формат из API.md).
 import type { InputHTMLAttributes } from 'react';
-import { isApiError } from './api/client';
-import type { ApiError, Locale } from './api/types';
+import { FALLBACK_MESSAGE, isApiError } from './api/client';
+import type { ApiError } from './api/types';
 
-export const asApiError = (err: unknown): ApiError => isApiError(err) ? err
-  : { status: 0, message: 'Får ikke kontakt med serveren. Prøv igjen.', fields: null, timestamp: new Date().toISOString() };
+// keepServer: показывать текст бэкенда как есть (бэкенд пишет по-русски — это для языка ru).
+// Иначе текст берётся по коду ответа (byStatus), ошибки полей — общим invalidField.
+type ErrorTexts = { offline: string; failed: string; keepServer?: boolean; byStatus?: Partial<Record<number, string>>; invalidField?: string };
+const NB_TEXTS: ErrorTexts = { offline: 'Får ikke kontakt med serveren. Prøv igjen.', failed: FALLBACK_MESSAGE, keepServer: true };
+
+export const asApiError = (err: unknown, texts: ErrorTexts = NB_TEXTS): ApiError => {
+  if (!isApiError(err)) return { status: 0, message: texts.offline, fields: null, timestamp: new Date().toISOString() };
+  if (err.message === FALLBACK_MESSAGE) return { ...err, message: texts.failed };
+  if (texts.keepServer !== false) return err;
+  const fields = err.fields && Object.fromEntries(Object.keys(err.fields).map(k => [k, texts.invalidField ?? texts.failed]));
+  return { ...err, message: texts.byStatus?.[err.status] ?? texts.failed, fields };
+};
 
 // 400 → ошибка из fields; иначе undefined (общий message показывается отдельно).
 export const fieldError = (error: ApiError | null, name: string) => error?.fields?.[name];
@@ -20,5 +30,3 @@ export function Field({ name, label, error, ...input }: FieldProps) {
     {error && <span className="field-error" id={`${name}-error`}>{error}</span>}
   </label>;
 }
-
-export const LOCALES: Record<Locale, string> = { nb: 'Norsk bokmål', nn: 'Norsk nynorsk', en: 'English', ru: 'Русский' };
