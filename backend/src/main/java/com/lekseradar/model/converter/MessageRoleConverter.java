@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.MessageRole;
+import com.lekseradar.model.enums.MessageRole;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.AnswerType;
+import com.lekseradar.model.enums.AnswerType;
 import jakarta.persistence.Converter;
 
 /** AnswerType ↔ PostgreSQL-enum answer_type. */

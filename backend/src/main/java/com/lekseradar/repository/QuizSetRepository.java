@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.QuizSet;
+import com.lekseradar.model.QuizSetEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface QuizSetRepository extends JpaRepository<QuizSet, Long> {
+public interface QuizSetRepository extends JpaRepository<QuizSetEntity, Long> {
 
-    List<QuizSet> findBySubjectIdOrderByCreatedAtDesc(Long subjectId);
+    List<QuizSetEntity> findBySubjectIdOrderByCreatedAtDesc(Long subjectId);
 
     /** Готовый квиз по предмету, теме, уровню и языку (регистр и пробелы не важны) или null. */
     @Query(value = "SELECT find_quiz_set(:subject, :topic, CAST(:level AS exercise_level), :language)",

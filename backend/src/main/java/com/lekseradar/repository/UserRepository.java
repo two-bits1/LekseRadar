@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.User;
+import com.lekseradar.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,8 +11,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmailIgnoreCase(String email);
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+    Optional<UserEntity> findByEmailIgnoreCase(String email);
 
     boolean existsByEmailIgnoreCase(String email);
 
@@ -38,7 +38,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<Dashboard> findDashboard(@Param("userId") Long userId);
 
     /** Освоение по темам (вид user_topic_progress). */
-    interface TopicProgress {
+    interface TopicProgressResponse {
         String getTopic();
         Long getAttempts();
         Long getCorrect();
@@ -51,7 +51,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             SELECT topic, attempts, correct, partial, mastery_pct AS masteryPct, last_activity AS lastActivity
             FROM user_topic_progress WHERE user_id = :userId ORDER BY last_activity DESC
             """, nativeQuery = true)
-    List<TopicProgress> findTopicProgress(@Param("userId") Long userId);
+    List<TopicProgressResponse> findTopicProgress(@Param("userId") Long userId);
 
     /** Активность по дням (вид user_daily_activity). */
     interface DailyActivity {

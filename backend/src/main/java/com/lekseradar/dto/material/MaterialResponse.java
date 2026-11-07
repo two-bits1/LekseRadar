@@ -1,7 +1,7 @@
 package com.lekseradar.dto.material;
 
-import com.lekseradar.model.Material;
-import com.lekseradar.model.MaterialSource;
+import com.lekseradar.model.MaterialEntity;
+import com.lekseradar.model.enums.MaterialSource;
 
 import java.time.Instant;
 
@@ -15,7 +15,7 @@ public record MaterialResponse(Long id, String title, String subject, String top
                                boolean shared, Instant createdAt) {
 
     /** @param subject название предмета (subjects.name) или null */
-    public static MaterialResponse from(Material m, String subject) {
+    public static MaterialResponse from(MaterialEntity m, String subject) {
         return new MaterialResponse(m.getId(), m.getTitle(), subject, m.getTopic(), m.getFileName(),
                 m.getMimeType(), m.getFileSize(), m.getSource(),
                 m.getChunkCount() == null ? 0 : m.getChunkCount(), m.getOwnerId() == null, m.getCreatedAt());

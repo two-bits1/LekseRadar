@@ -1,6 +1,6 @@
 package com.lekseradar.dto.quiz;
 
-import com.lekseradar.model.ExerciseLevel;
+import com.lekseradar.model.enums.ExerciseLevel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 

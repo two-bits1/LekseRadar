@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.ChatMode;
+import com.lekseradar.model.enums.ChatMode;
 import jakarta.persistence.Converter;
 
 /** ChatMode ↔ PostgreSQL-enum chat_mode. */

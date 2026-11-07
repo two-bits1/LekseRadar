@@ -1,6 +1,6 @@
 package com.lekseradar.security;
 
-import com.lekseradar.config.AppProperties;
+import com.lekseradar.config.AppConfig;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -19,7 +19,7 @@ public class JwtService {
     private final SecretKey key;
     private final Duration ttl;
 
-    public JwtService(AppProperties props) {
+    public JwtService(AppConfig props) {
         byte[] bytes = props.jwt().secret().getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
             throw new IllegalStateException("app.jwt.secret должен быть не короче 32 байт");

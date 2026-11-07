@@ -2,16 +2,16 @@ package com.lekseradar.service;
 
 import com.lekseradar.dto.chat.*;
 import com.lekseradar.exception.NotFoundException;
-import com.lekseradar.model.ChatMessage;
-import com.lekseradar.model.ChatSession;
-import com.lekseradar.model.MessageRole;
-import com.lekseradar.model.User;
+import com.lekseradar.model.ChatMessageEntity;
+import com.lekseradar.model.ChatSessionEntity;
+import com.lekseradar.model.enums.MessageRole;
+import com.lekseradar.model.UserEntity;
 import com.lekseradar.repository.ChatMessageRepository;
 import com.lekseradar.repository.ChatSessionRepository;
 import com.lekseradar.repository.UserEventRepository;
-import com.lekseradar.service.ai.AiClient;
-import com.lekseradar.service.ai.AiMessage;
-import com.lekseradar.service.ai.AiReply;
+import com.lekseradar.service.ai.AiService;
+import com.lekseradar.dto.ai.AiMessageRequest;
+import com.lekseradar.dto.ai.AiResponse;
 import com.lekseradar.service.ai.Prompts;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +26,10 @@ public class ChatService {
     private final ChatSessionRepository sessions;
     private final ChatMessageRepository messages;
     private final UserEventRepository events;
-    private final AiClient ai;
+    private final AiService ai;
 
     public ChatService(ChatSessionRepository sessions, ChatMessageRepository messages, UserEventRepository events,
-                       AiClient ai) {
+                       AiService ai) {
         this.sessions = sessions;
         this.messages = messages;
         this.events = events;
@@ -38,7 +38,7 @@ public class ChatService {
 
     /** @param archived null — все чаты, true/false — только архивные / только активные */
     public List<ChatResponse> list(Long userId, Boolean archived) {
-        List<ChatSession> found = archived == null
+        List<ChatSessionEntity> found = archived == null
                 ? sessions.findByUserIdOrderByUpdatedAtDesc(userId)
                 : sessions.findByUserIdAndArchivedOrderByUpdatedAtDesc(userId, archived);
         return found.stream().map(ChatResponse::from).toList();
@@ -50,16 +50,16 @@ public class ChatService {
 
     @Transactional
     public ChatResponse create(Long userId, CreateChatRequest req) {
-        String title = req == null || isBlank(req.title()) ? ChatSession.DEFAULT_TITLE : req.title().trim();
+        String title = req == null || isBlank(req.title()) ? ChatSessionEntity.DEFAULT_TITLE : req.title().trim();
         String topic = req == null ? null : blankToNull(req.topic());
-        ChatSession s = sessions.save(new ChatSession(userId, title, topic));
+        ChatSessionEntity s = sessions.save(new ChatSessionEntity(userId, title, topic));
         events.add(userId, "chat_started", "chat_sessions", s.getId());
         return ChatResponse.from(s);
     }
 
     @Transactional
     public ChatResponse update(Long userId, Long chatId, UpdateChatRequest req) {
-        ChatSession s = owned(userId, chatId);
+        ChatSessionEntity s = owned(userId, chatId);
         if (!isBlank(req.title())) s.setTitle(req.title().trim());
         if (req.topic() != null) s.setTopic(blankToNull(req.topic()));
         if (req.archived() != null) s.setArchived(req.archived());
@@ -83,25 +83,25 @@ public class ChatService {
      * Вызов ИИ идёт вне транзакции, чтобы не держать соединение с БД во время запроса к OpenAI.
      * Если ИИ недоступен, вопрос остаётся в истории, и его можно задать снова.
      */
-    public ChatReplyResponse send(User user, Long chatId, SendMessageRequest req) {
+    public ChatReplyResponse send(UserEntity user, Long chatId, SendMessageRequest req) {
         String content = req.content().strip();
-        ChatSession s = owned(user.getId(), chatId);
+        ChatSessionEntity s = owned(user.getId(), chatId);
 
-        ChatMessage question = messages.save(ChatMessage.fromStudent(chatId, content));
+        ChatMessageEntity question = messages.save(ChatMessageEntity.fromStudent(chatId, content));
 
-        List<AiMessage> prompt = new ArrayList<>();
-        prompt.add(AiMessage.system(Prompts.tutor(s.getTopic(), user.getLocale())));
+        List<AiMessageRequest> prompt = new ArrayList<>();
+        prompt.add(AiMessageRequest.system(Prompts.tutor(s.getTopic(), user.getLocale())));
         for (ChatMessageRepository.ContextMessage m : messages.findContext(chatId)) {
             prompt.add(MessageRole.TUTOR.value().equals(m.getRole())
-                    ? AiMessage.assistant(m.getContent())
-                    : AiMessage.user(m.getContent()));
+                    ? AiMessageRequest.assistant(m.getContent())
+                    : AiMessageRequest.user(m.getContent()));
         }
 
-        AiReply reply = ai.complete(prompt);
-        ChatMessage answer = messages.save(ChatMessage.fromTutor(chatId, limit(reply.content()), reply.model(),
+        AiResponse reply = ai.complete(prompt);
+        ChatMessageEntity answer = messages.save(ChatMessageEntity.fromTutor(chatId, limit(reply.content()), reply.model(),
                 reply.tokensUsed()));
 
-        if (ChatSession.DEFAULT_TITLE.equals(s.getTitle())) {
+        if (ChatSessionEntity.DEFAULT_TITLE.equals(s.getTitle())) {
             s.setTitle(makeTitle(content));
         }
         s.touch();
@@ -112,13 +112,13 @@ public class ChatService {
     }
 
     /** Чат пользователя; чужой чат выглядит как несуществующий (404), чтобы не раскрывать id. */
-    private ChatSession owned(Long userId, Long chatId) {
+    private ChatSessionEntity owned(Long userId, Long chatId) {
         return sessions.findByIdAndUserId(chatId, userId).orElseThrow(() -> new NotFoundException("Чат не найден"));
     }
 
     /** В базе CHECK length(content) <= 8000. */
     private static String limit(String text) {
-        int max = ChatMessage.MAX_CONTENT_LENGTH;
+        int max = ChatMessageEntity.MAX_CONTENT_LENGTH;
         return text.length() <= max ? text : text.substring(0, max - 1) + "…";
     }
 

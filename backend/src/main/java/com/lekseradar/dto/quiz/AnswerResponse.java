@@ -1,7 +1,7 @@
 package com.lekseradar.dto.quiz;
 
-import com.lekseradar.model.DbEnum;
-import com.lekseradar.model.Verdict;
+import com.lekseradar.model.enums.DbEnum;
+import com.lekseradar.model.enums.Verdict;
 import com.lekseradar.repository.QuizRepository;
 
 /** Результат ответа: вердикт, пояснение и правильный ответ (показывается после ответа). */

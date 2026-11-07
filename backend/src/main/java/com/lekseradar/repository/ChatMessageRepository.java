@@ -1,15 +1,15 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.ChatMessage;
+import com.lekseradar.model.ChatMessageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
+public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, Long> {
 
-    List<ChatMessage> findBySessionIdOrderByCreatedAtAscIdAsc(Long sessionId);
+    List<ChatMessageEntity> findBySessionIdOrderByCreatedAtAscIdAsc(Long sessionId);
 
     /** Реплика из вида chat_context. */
     interface ContextMessage {

@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.FlashcardProgress;
+import com.lekseradar.model.FlashcardProgressEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 /** Колода карточек: таблица flashcard_progress, вид flashcards и функции V9. */
-public interface FlashcardRepository extends JpaRepository<FlashcardProgress, FlashcardProgress.Key> {
+public interface FlashcardRepository extends JpaRepository<FlashcardProgressEntity, FlashcardProgressEntity.Key> {
 
     /** Карточка: лицевая сторона — вопрос, обратная — ответ и пояснение (вид flashcards). */
     interface Card {

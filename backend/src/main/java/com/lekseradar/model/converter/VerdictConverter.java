@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.Verdict;
+import com.lekseradar.model.enums.Verdict;
 import jakarta.persistence.Converter;
 
 /** Verdict ↔ PostgreSQL-enum verdict. */

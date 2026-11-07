@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.Subject;
+import com.lekseradar.model.SubjectEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,10 +8,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface SubjectRepository extends JpaRepository<Subject, Long> {
-    List<Subject> findAllByOrderByName();
+public interface SubjectRepository extends JpaRepository<SubjectEntity, Long> {
+    List<SubjectEntity> findAllByOrderByName();
 
     /** Поиск по названию без учёта регистра и лишних пробелов (как norm_key в базе). */
     @Query(value = "SELECT * FROM subjects WHERE key = norm_key(:name)", nativeQuery = true)
-    Optional<Subject> findByName(@Param("name") String name);
+    Optional<SubjectEntity> findByName(@Param("name") String name);
 }

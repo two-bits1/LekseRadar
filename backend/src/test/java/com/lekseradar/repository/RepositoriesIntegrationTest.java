@@ -4,6 +4,7 @@ import com.lekseradar.dto.auth.AuthResponse;
 import com.lekseradar.dto.auth.LoginRequest;
 import com.lekseradar.dto.auth.RegisterRequest;
 import com.lekseradar.model.*;
+import com.lekseradar.model.enums.*;
 import com.lekseradar.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -36,7 +37,7 @@ class RepositoriesIntegrationTest {
 
     private static final String QUIZ_JSON = """
             {"subject": "Matematikk", "topic": "Lineære funksjoner", "level": "beginner", "language": "nb",
-             "title": "Quiz: Lineære funksjoner", "model": "test",
+             "title": "QuizEntity: Lineære funksjoner", "model": "test",
              "questions": [
                {"type": "single_choice", "question": "Stigningstallet i y = -4x + 1?",
                 "options": ["-4", "1", "4"], "correct_answer": "-4", "explanation": "Tallet foran x."},
@@ -82,7 +83,7 @@ class RepositoriesIntegrationTest {
     @Test
     void registrationLoginAndEvents() {
         Long userId = newUser();
-        assertThat(users.findById(userId)).get().extracting(User::getLastLoginAt).isNotNull();
+        assertThat(users.findById(userId)).get().extracting(UserEntity::getLastLoginAt).isNotNull();
         assertThat(events.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 50))).isNotEmpty();
         assertThat(users.findDashboard(userId)).isPresent();
     }
@@ -90,7 +91,7 @@ class RepositoriesIntegrationTest {
     @Test
     void homeworkAndPlatforms() {
         Long userId = newUser();
-        PlatformConnection pc = platforms.save(new PlatformConnection(userId, Platform.CANVAS, new byte[]{1, 2, 3}));
+        PlatformConnectionEntity pc = platforms.save(new PlatformConnectionEntity(userId, Platform.CANVAS, new byte[]{1, 2, 3}));
         pc.markSynced(true, null, false);
         platforms.flush();
         assertThat(platforms.findByUserIdAndPlatform(userId, Platform.CANVAS)).isPresent();
@@ -107,8 +108,8 @@ class RepositoriesIntegrationTest {
         assertThat(assignments.attachHomeworkFile(assignmentId, "Oppgave 1: løs likningen 2x + 3 = 7.",
                 "lab3.txt", "text/plain", null)).isPositive();
 
-        Reminder r = reminders.save(new Reminder(userId, assignmentId, "Lever Lab 3", Instant.now().minusSeconds(60)));
-        assertThat(reminders.findDue(Instant.now())).extracting(Reminder::getId).contains(r.getId());
+        ReminderEntity r = reminders.save(new ReminderEntity(userId, assignmentId, "Lever Lab 3", Instant.now().minusSeconds(60)));
+        assertThat(reminders.findDue(Instant.now())).extracting(ReminderEntity::getId).contains(r.getId());
 
         assertThat(achievements.findAll()).isNotEmpty();
         assertThat(userAchievements.unlock(userId, "connected_all")).isEqualTo(1);
@@ -122,7 +123,7 @@ class RepositoriesIntegrationTest {
         jdbc.queryForObject("SELECT save_prompt('tutor', 'Du er en veileder for {{subject}}.')", Integer.class);
 
         Long chatId = chats.startChat(userId, "tutor", "Matematikk", "Lineære funksjoner", null, null);
-        ChatSession chat = chats.findByIdAndUserId(chatId, userId).orElseThrow();
+        ChatSessionEntity chat = chats.findByIdAndUserId(chatId, userId).orElseThrow();
         assertThat(chat.getMode()).isEqualTo(ChatMode.TUTOR);
         assertThat(chat.getLevel()).isEqualTo(ExerciseLevel.INTERMEDIATE);
         assertThat(subjects.findByName("  matematikk ")).isPresent();
@@ -132,19 +133,19 @@ class RepositoriesIntegrationTest {
         assertThat(sp.getSubject()).isEqualTo("Matematikk");
         assertThat(prompts.findByKeyAndActiveTrue("tutor")).isPresent();
         assertThat(prompts.getActiveContent("tutor")).contains("{{subject}}");
-        assertThat(modePrompts.findAll()).extracting(ChatModePrompt::getMode).contains(ChatMode.TUTOR, ChatMode.QUIZ);
+        assertThat(modePrompts.findAll()).extracting(ChatModePromptEntity::getMode).contains(ChatMode.TUTOR, ChatMode.QUIZ);
 
         chats.setLanguage(chatId, "nb");
         assertThat(chats.promptVars(chatId)).contains("\"language\"");
 
-        ChatMessage m = ChatMessage.fromTutor(chatId, "Hei!", "test", 3);
+        ChatMessageEntity m = ChatMessageEntity.fromTutor(chatId, "Hei!", "test", 3);
         m.setPromptId(sp.getPromptId());
         messages.save(m);
-        messages.save(ChatMessage.fromStudent(chatId, "Hva er stigningstall?"));
+        messages.save(ChatMessageEntity.fromStudent(chatId, "Hva er stigningstall?"));
         assertThat(messages.findContext(chatId)).hasSize(2);
 
         // Свой чат через JPA (как ChatService) тоже работает: режим по умолчанию tutor
-        ChatSession own = chats.saveAndFlush(new ChatSession(userId, ChatSession.DEFAULT_TITLE, null));
+        ChatSessionEntity own = chats.saveAndFlush(new ChatSessionEntity(userId, ChatSessionEntity.DEFAULT_TITLE, null));
         assertThat(own.getMode()).isEqualTo(ChatMode.TUTOR);
     }
 
@@ -154,12 +155,12 @@ class RepositoriesIntegrationTest {
         Long setId = quizSets.importJson(QUIZ_JSON, userId);
         assertThat(quizSets.importJson(QUIZ_JSON, userId)).isEqualTo(setId);
         assertThat(quizSets.find("matematikk", "lineære  funksjoner", "beginner", "nb")).isEqualTo(setId);
-        QuizSet set = quizSets.findById(setId).orElseThrow();
+        QuizSetEntity set = quizSets.findById(setId).orElseThrow();
         assertThat(set.getSourceJson().get("questions").size()).isEqualTo(3);
         assertThat(set.getMaterialIds()).isEmpty();
 
         var questions = exercises.findByQuizSetIdOrderByPosition(setId);
-        assertThat(questions).extracting(Exercise::getQuestionType)
+        assertThat(questions).extracting(ExerciseEntity::getQuestionType)
                 .containsExactly(QuestionType.SINGLE_CHOICE, QuestionType.MULTIPLE_CHOICE, QuestionType.TEXT);
         assertThat(questions.get(0).getOptions().isArray()).isTrue();
 
@@ -174,9 +175,9 @@ class RepositoriesIntegrationTest {
         assertThat(quizzes.saveAnswer(quizId, 2, "[\"y = 3x\"]", null, null).getVerdict()).isEqualTo("incorrect");
         assertThat(quizzes.saveAnswer(quizId, 3, "Den synker", "partial", "Nesten").getVerdict()).isEqualTo("partial");
         assertThat(quizzes.finish(quizId)).isNotNull();
-        Quiz quiz = quizzes.findByIdAndUserId(quizId, userId).orElseThrow();
+        QuizEntity quiz = quizzes.findByIdAndUserId(quizId, userId).orElseThrow();
         assertThat(quiz.getStatus()).isEqualTo(QuizStatus.COMPLETED);
-        assertThat(attempts.findByQuizIdOrderByCreatedAt(quizId)).extracting(ExerciseAttempt::getVerdict)
+        assertThat(attempts.findByQuizIdOrderByCreatedAt(quizId)).extracting(ExerciseAttemptEntity::getVerdict)
                 .containsExactly(Verdict.CORRECT, Verdict.INCORRECT, Verdict.PARTIAL);
         assertThat(quizzes.findProgress(userId)).isNotEmpty();
         assertThat(users.findTopicProgress(userId)).isNotEmpty();
@@ -198,10 +199,10 @@ class RepositoriesIntegrationTest {
         Long id = materials.add(userId, "Naturfag", "Fotosyntese", "Kapittel 4",
                 "Fotosyntesen skjer i kloroplastene. Planter bruker lys, vann og karbondioksid.",
                 "kap4.txt", "text/plain", null);
-        Material m = materials.findVisible(id, userId).orElseThrow();
+        MaterialEntity m = materials.findVisible(id, userId).orElseThrow();
         assertThat(m.getSource()).isEqualTo(MaterialSource.UPLOAD);
         assertThat(chunks.findByMaterialIdOrderByPosition(id)).isNotEmpty();
-        assertThat(materials.findVisible(userId)).extracting(Material::getId).contains(id);
+        assertThat(materials.findVisible(userId)).extracting(MaterialEntity::getId).contains(id);
         assertThat(materials.search(userId, "kloroplastene", null, 5, null)).isNotEmpty();
         assertThat(materials.forPrompt(userId, "kloroplastene", null, 5, null)).contains("Fotosyntesen");
     }

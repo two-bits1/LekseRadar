@@ -1,7 +1,7 @@
 package com.lekseradar.dto.chat;
 
-import com.lekseradar.model.ChatMessage;
-import com.lekseradar.model.MessageRole;
+import com.lekseradar.model.ChatMessageEntity;
+import com.lekseradar.model.enums.MessageRole;
 
 import java.time.Instant;
 
@@ -12,7 +12,7 @@ import java.time.Instant;
  */
 public record MessageResponse(Long id, MessageRole role, String content, String model, Instant createdAt) {
 
-    public static MessageResponse from(ChatMessage m) {
+    public static MessageResponse from(ChatMessageEntity m) {
         return new MessageResponse(m.getId(), m.getRole(), m.getContent(), m.getModel(), m.getCreatedAt());
     }
 }

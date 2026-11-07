@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.Platform;
+import com.lekseradar.model.enums.Platform;
 import jakarta.persistence.Converter;
 
 /** Platform ↔ PostgreSQL-enum platform. */

@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.UserEvent;
+import com.lekseradar.model.UserEventEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,10 +14,10 @@ import java.util.List;
  * Таблица {@code user_events} (V5): лента действий пользователя. Запись через {@link #add},
  * payload остаётся значением по умолчанию '{}'.
  */
-public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
+public interface UserEventRepository extends JpaRepository<UserEventEntity, Long> {
 
     /** Лента: новые сверху, например PageRequest.of(0, 50). */
-    List<UserEvent> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable page);
+    List<UserEventEntity> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable page);
 
     @Modifying
     @Transactional

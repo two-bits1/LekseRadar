@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.QuizStatus;
+import com.lekseradar.model.enums.QuizStatus;
 import jakarta.persistence.Converter;
 
 /** QuizStatus ↔ PostgreSQL-enum quiz_status. */
