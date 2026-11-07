@@ -171,6 +171,8 @@ export function ChatView() {
       <div ref={bottom} className="chat-end" />
     </div>
 
+    {/* Панель ввода закреплена внизу экрана (CSS .chat-dock), переписка прокручивается над ней */}
+    <div className="chat-dock">
     {chat.mode === 'tutor' && chat.language && messages.length > 0 && <div className="quick" role="group" aria-label={c.quickLabel}>
       <button disabled={!!sending} onClick={() => send(c.quick.simpler)}><Lightbulb size={15} />{c.quickButtons.simpler}</button>
       <button disabled={!!sending} onClick={() => send(c.quick.example)}><Shuffle size={15} />{c.quickButtons.example}</button>
@@ -181,5 +183,6 @@ export function ChatView() {
       <button className="button dark-button" aria-label={c.send} disabled={!draft.trim() || !!sending}><ArrowUp size={18} /></button>
     </form>
     <p className="composer-hint">{c.hint(draft.length, MAX_MESSAGE)}</p>
+    </div>
   </section>;
 }
