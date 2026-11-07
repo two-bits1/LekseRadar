@@ -42,3 +42,49 @@ body{background:#07080a}
 @media(max-width:1100px){.tb-link span{display:none}.tb-link{padding:0 10px}}
 @media(max-width:760px){.topbar{padding:10px 10px 0}.topbar-inner{grid-template-columns:1fr auto;grid-template-areas:"brand actions" "nav nav";row-gap:6px;padding:10px 12px 6px;min-height:0;border-radius:16px}.tb-brand{grid-area:brand}.tb-actions{grid-area:actions;gap:12px}.tb-nav{grid-area:nav;width:100%;gap:4px}.tb-side{gap:2px}.tb-left,.tb-right{justify-content:space-around}.tb-link{flex-direction:column;gap:3px;height:auto;padding:6px 8px;font-size:10px}.tb-link span{display:block}.tb-nav .orb{--orb-size:48px}.tb-name{font-size:16px}.tb-login{font-size:14px}.btn-sm{height:34px;padding:0 12px;font-size:13px}.demo-bar{margin:8px 10px 0}}
 @media(max-width:360px){.tb-actions .btn-sm{display:none}.tb-link{padding:6px 4px}}
+/* ==== Лендинг «/» (гость): миллиметровка, заголовок, регистрация по центру ==== */
+.is-landing{background:#07080a}
+.landing{position:relative}
+.lp-hero{position:relative;margin-top:-118px;padding:190px 20px 96px;min-height:100svh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.lp-bg{position:absolute;inset:0;pointer-events:none;-webkit-mask-image:radial-gradient(ellipse 75% 70% at 50% 45%,#000 35%,transparent 100%);mask-image:radial-gradient(ellipse 75% 70% at 50% 45%,#000 35%,transparent 100%)}
+.lp-graph{width:100%;height:100%}
+.lp-minor{stroke:rgba(255,255,255,.045);stroke-width:1;fill:none}
+.lp-major{stroke:rgba(255,255,255,.085);stroke-width:1;fill:none}
+.lp-axes path{stroke:rgba(143,179,255,.32);stroke-width:1.2;fill:none}
+.lp-curve{fill:none;stroke:url(#lp-curve);stroke-width:2;stroke-linecap:round;stroke-dasharray:2400;stroke-dashoffset:0;animation:lp-draw 2.4s cubic-bezier(.65,0,.35,1) .2s backwards}
+.lp-curve-glow{stroke-width:7;opacity:.55}
+.lp-vertex{fill:#bff5e6;filter:drop-shadow(0 0 8px #5fd3c0);animation:lp-fade .6s ease 2.4s backwards}
+@keyframes lp-draw{from{stroke-dashoffset:2400}}@keyframes lp-fade{from{opacity:0}}
+.lp-hero::after{content:"";position:absolute;left:50%;top:58%;width:min(760px,90vw);height:420px;translate:-50% -50%;background:radial-gradient(closest-side,rgba(95,211,192,.16),rgba(122,156,255,.08) 55%,transparent);pointer-events:none}
+.lp-hero-inner{position:relative;z-index:1;width:100%;max-width:880px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.lp-title{font-size:clamp(34px,6.4vw,88px);line-height:1.04;font-weight:650;letter-spacing:-.035em;color:#fff;margin:0;text-wrap:balance}
+.lp-intro{max-width:620px;margin:22px 0 34px;font-size:clamp(16px,1.6vw,21px);line-height:1.5;color:#d4d5d9}
+.landing .auth-form{width:100%;max-width:400px;margin:0;padding:24px;text-align:left;background:rgba(17,18,21,.66);border:1px solid rgba(255,255,255,.1);border-radius:16px;-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 30px 80px -30px rgba(95,211,192,.35),0 0 0 1px rgba(0,0,0,.4)}
+.landing .auth-form h2{display:none}
+.landing .auth-form .field{font-size:13px;color:#c9cad0;margin:0 0 14px}
+.landing .auth-form .field input{height:44px;padding:0 13px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#fff}
+.landing .auth-form .field input:focus{outline:none;border-color:rgba(116,212,196,.6);box-shadow:0 0 0 3px rgba(116,212,196,.18)}
+.landing .auth-form .dark-button{width:100%;height:46px;font-size:15px;margin-top:6px}
+.lp-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:18px;font-size:14px;color:var(--muted)}
+.lp-links a{color:var(--text);display:inline-flex;align-items:center;gap:4px}.lp-links a:hover{text-decoration:underline;text-underline-offset:3px}
+.lp-features{max-width:1120px;margin:0 auto;padding:40px 20px 110px}
+.lp-features h2{font-size:clamp(26px,3vw,38px);letter-spacing:-.03em;font-weight:600;text-align:center;margin:0 0 40px;color:#fff}
+.lp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--glass-border);border-radius:16px;overflow:hidden;background:rgba(17,18,21,.5)}
+.lp-feature{padding:28px 24px;border-left:1px solid var(--glass-border)}.lp-feature:first-child{border-left:0}
+.lp-feature-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;color:var(--primary);background:rgba(116,212,196,.08);border:1px solid rgba(116,212,196,.2);margin-bottom:18px}
+.lp-feature h3{font-size:16px;font-weight:600;letter-spacing:-.2px;margin:0 0 8px;color:#fff}
+.lp-feature p{font-size:14px;line-height:1.6;color:var(--muted);margin:0}
+@media(max-width:900px){.lp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lp-feature:nth-child(3){border-left:0}.lp-feature:nth-child(n+3){border-top:1px solid var(--glass-border)}}
+@media(max-width:760px){.lp-hero{margin-top:-147px;padding:176px 16px 64px;min-height:auto}.lp-intro{margin:16px 0 26px}.landing .auth-form{padding:18px}}
+@media(max-width:520px){.lp-grid{grid-template-columns:1fr}.lp-feature{border-left:0!important}.lp-feature+.lp-feature{border-top:1px solid var(--glass-border)}}
+/* ==== Шар в духе Siri: тёмное ядро, цветные «ленты» по краю, светящийся ободок ==== */
+.app[data-theme=dark] .orb{background:radial-gradient(circle at 50% 58%,#0b1230 0%,#050712 62%,#020308 100%);box-shadow:0 0 calc(var(--orb-size)*.5) calc(var(--orb-size)*-.12) rgba(95,180,255,.45),0 0 calc(var(--orb-size)*.9) calc(var(--orb-size)*-.2) rgba(190,90,255,.3)}
+.app[data-theme=dark] .orb-in i{filter:blur(calc(var(--orb-size)*.085));opacity:.95}
+.app[data-theme=dark] .orb-in i:nth-child(1){background:radial-gradient(circle at 26% 34%,#3ff2d8 0,transparent 30%)}
+.app[data-theme=dark] .orb-in i:nth-child(2){background:radial-gradient(circle at 74% 30%,#4a7dff 0,transparent 30%)}
+.app[data-theme=dark] .orb-in i:nth-child(3){background:radial-gradient(circle at 60% 78%,#ff4fb8 0,transparent 27%)}
+.app[data-theme=dark] .orb-in i:nth-child(4){background:radial-gradient(circle at 34% 70%,#8f5bff 0,transparent 29%)}
+.app[data-theme=dark] .orb-sweep{inset:6%;background:conic-gradient(from 0deg,transparent 0 6%,rgba(255,90,200,.75) 16%,transparent 28%,rgba(70,210,255,.8) 46%,transparent 58%,rgba(150,110,255,.75) 74%,transparent 86%);-webkit-mask:radial-gradient(circle,transparent 46%,#000 62%,#000 72%,transparent 80%);mask:radial-gradient(circle,transparent 46%,#000 62%,#000 72%,transparent 80%);filter:blur(calc(var(--orb-size)*.035));opacity:.95;animation-duration:calc(5s * var(--s))}
+.app[data-theme=dark] .orb::after{background:radial-gradient(circle at 34% 24%,rgba(255,255,255,.55),rgba(255,255,255,0) 14%),radial-gradient(circle at 50% 50%,transparent 64%,rgba(130,190,255,.22) 80%,rgba(255,255,255,.08) 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 calc(var(--orb-size)*.16) rgba(120,170,255,.55),inset 0 calc(var(--orb-size)*-.06) calc(var(--orb-size)*.14) rgba(255,90,200,.25)}
+.app[data-theme=dark] .orb-link:hover .orb-in,.app[data-theme=dark] .orb-link:focus-visible .orb-in{filter:saturate(1.35) brightness(1.15)}
+.lp-axes path{stroke:rgba(143,179,255,.22)}
