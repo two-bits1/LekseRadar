@@ -1,6 +1,7 @@
 # Локальный PostgreSQL для LekseRadar: docker compose up -d (из папки database/)
 # Миграции применяются при первом запуске пустого тома (база пустая, без демо-данных),
-# потом сервис content загружает промпты и учебные файлы из ai-content/.
+# потом сервис content загружает промпты и учебные файлы из ai-content/, а collector собирает ДЗ для бэкенда.
+# Новая миграция на уже созданном томе сама не применится: psql ... -f migrations/V21__....sql
 # Сбросить базу: docker compose down -v && docker compose up -d
 services:
   db:
@@ -52,5 +53,16 @@ services:
       - ./testdata:/testdata:ro
     command: psql -h db -U lekseradar -d lekseradar -v ON_ERROR_STOP=1 -f /testdata/seed.sql
     restart: "no"
+  # Сбор ДЗ для бэкенда: COLLECTOR_URL=http://localhost:8090, ключ COLLECTOR_KEY (COLLECTOR-API.md).
+  # Локально ключ по умолчанию; в облаке свой: openssl rand -hex 32.
+  collector:
+    build: ../homework-collector
+    environment:
+      COLLECTOR_KEY: ${COLLECTOR_KEY:-local-dev-collector-key}
+      TEAMS_CLIENT_ID: ${TEAMS_CLIENT_ID:-}
+    ports:
+      - "127.0.0.1:8090:8090"   # только с этого компьютера
+    restart: unless-stopped
+
 volumes:
   pgdata:
