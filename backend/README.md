@@ -30,7 +30,7 @@ docker compose up -d
 
 ### 2. Промпты ИИ в базу (один раз и после каждого изменения промптов)
 
-Промпты лежат в `ai-content/prompts` (ветка `main-test-2.0`). Без них чат, квизы и карточки от ИИ отвечают `503`.
+Промпты лежат в `ai-content/prompts`, база — в `database/` (обе в ветке `PythonAPI`, миграции V1–V20). Без них чат, квизы и карточки от ИИ отвечают `503`.
 ```bash
 pip install -r ai-content/load/requirements.txt
 DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python -X utf8 ai-content/load/load.py
@@ -102,7 +102,8 @@ DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python
 - промпт — `chat_system_prompt` (активная версия из `ai_prompts`), переменные `{{...}}` — `chat_prompt_vars`,
   `{{materials}}` — `materials_for_prompt` по вопросу;
 - история — последние 10 реплик (вид `chat_context`);
-- ответ ИИ: метка `[[LANGUAGE=xx]]` → `set_chat_language`, метки вырезаются; в `chat_messages.prompt_id` пишется версия промпта;
+- язык ИИ — язык сайта (`users.locale`) или свой язык чата: `{{language}}` = «русский (ru)», `{{language_code}}` = `ru` (V17, V20);
+- в `chat_messages.prompt_id` пишется версия промпта;
 - чат `quiz`: сообщение ученика → ИИ составляет квиз (как `POST /quizzes`), в ответе `chat.quizSetId`.
 
 ### Квизы и флеш-карты

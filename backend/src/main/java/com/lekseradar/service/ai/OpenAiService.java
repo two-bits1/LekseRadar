@@ -26,7 +26,8 @@ public class OpenAiService implements AiService {
     private static final Logger log = LoggerFactory.getLogger(OpenAiService.class);
 
     /** Groq/OpenAI при лимите в минуту пишут «Please try again in 3.9075s». */
-    private static final Pattern TRY_AGAIN = Pattern.compile("try again in (\\d+(?:\\.\\d+)?)s");
+    private static final Pattern TRY_AGAIN = Pattern.compile("try again in (\\d+(?:\\.\\d+)?)(ms|s)\\b");
+    private static final int MAX_RETRIES = 2;
     private static final long MAX_RETRY_WAIT_MS = 10_000;
 
     private final RestClient http;
@@ -76,7 +77,7 @@ public class OpenAiService implements AiService {
                 // 401 — неверный ключ, 429 — лимит/нет денег на счету, 404 — неверная модель
                 int status = e.getStatusCode().value();
                 log.warn("OpenAI HTTP {}: {}", status, e.getResponseBodyAsString());
-                long waitMs = status == 429 && attempt == 1 ? retryAfterMs(e) : -1;
+                long waitMs = status == 429 && attempt <= MAX_RETRIES ? retryAfterMs(e) : -1;
                 if (waitMs >= 0) {
                     log.info("Лимит ИИ: повтор через {} мс", waitMs);
                     sleep(waitMs);
@@ -104,7 +105,7 @@ public class OpenAiService implements AiService {
         }
         if (seconds == null) {
             Matcher m = TRY_AGAIN.matcher(e.getResponseBodyAsString());
-            if (m.find()) seconds = Double.parseDouble(m.group(1));
+            if (m.find()) seconds = Double.parseDouble(m.group(1)) / ("ms".equals(m.group(2)) ? 1000 : 1);
         }
         if (seconds == null) return -1;
         long ms = (long) Math.ceil(seconds * 1000) + 300;

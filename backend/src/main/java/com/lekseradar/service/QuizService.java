@@ -15,6 +15,7 @@ import com.lekseradar.model.UserEntity;
 import com.lekseradar.model.enums.QuestionTypeEnum;
 import com.lekseradar.model.enums.QuizStatusEnum;
 import com.lekseradar.repository.*;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -120,7 +121,22 @@ public class QuizService {
             verdict = c.verdict();
             explanation = c.explanation();
         }
-        return AnswerResponseDTO.from(quizzes.saveAnswer(quizId, req.position(), answer, verdict, explanation));
+        try {
+            return AnswerResponseDTO.from(quizzes.saveAnswer(quizId, req.position(), answer, verdict, explanation));
+        } catch (DataAccessException ex) {
+            // V19: 'quiz answer: …' — неверный ответ; квиз мог завершиться параллельно — тоже 400
+            String msg = String.valueOf(ex.getMostSpecificCause().getMessage());
+            int i = msg.indexOf("quiz answer:");
+            if (i >= 0) throw new BadRequestException(firstLine(msg.substring(i + "quiz answer:".length()).strip()));
+            if (msg.contains("уже завершён")) throw new BadRequestException("Квиз уже завершён");
+            throw ex;
+        }
+    }
+
+    private static String firstLine(String s) {
+        int nl = s.indexOf('\n');
+        String line = nl > 0 ? s.substring(0, nl) : s;
+        return line.isEmpty() ? line : Character.toUpperCase(line.charAt(0)) + line.substring(1);
     }
 
     /** Итоговый балл 0–100. Повторный вызов вернёт тот же балл. */

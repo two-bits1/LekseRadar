@@ -54,7 +54,9 @@
 
 | Страница | Путь | Доступ | Что на странице | Какие API вызывает |
 |---|---|---|---|---|
-| Главная / дашборд | `/` | 🔒 | приветствие, последние чаты, (позже) ДЗ и прогресс | ✅ `GET /users/me`, ✅ `GET /chats` · 🕓 `GET /dashboard` |
+| Главная / дашборд | `/` | 🔒 | приветствие, последние чаты, карточки к повторению, (позже) ДЗ | ✅ `GET /users/me`, ✅ `GET /chats`, ✅ `GET /flashcards/stats` · 🕓 `GET /dashboard` |
+| Настройки | `/settings` | 🔒 | только фронтенд (своего API нет) | — |
+| Статус | `/status` | 🔓 | карта сайта, только фронтенд (своего API нет) | — |
 | Вход | `/login` | 🔓 | email + пароль | ✅ `POST /auth/login` |
 | Регистрация | `/register` | 🔓 | email, пароль, имя | ✅ `POST /auth/register` |
 | Профиль | `/profile` | 🔒 | имя, язык, часовой пояс, смена пароля, выход | ✅ `GET/PATCH /users/me`, ✅ `PUT /users/me/password` |
@@ -147,7 +149,7 @@ type Chat = {
   topic: string | null;
   mode: "tutor" | "quiz"; // задаётся при создании и не меняется
   subject: string | null; // название предмета
-  language: string | null;// язык ответов ИИ ("ru", "nb"…); null — тьютор сначала спросит язык
+  language: string | null;// свой язык чата ("ru", "nb"…); null — ИИ пишет на языке сайта (user.locale)
   level: "beginner" | "intermediate" | "advanced";
   assignmentId: number | null; // чат по домашнему заданию
   quizSetId: number | null;    // только у чата quiz
@@ -293,8 +295,8 @@ GET /chats?archived=false
 - **201** → `Chat`
 - **404** → `assignmentId` не найден (или чужое ДЗ)
 - Без `title` чат называется «Ny samtale» (или «Ny samtale: тема») и переименовывается по первому вопросу.
-- **Язык.** Пока у чата `language: null`, первым ответом тьютор спрашивает, на каком языке учиться.
-  Ученик отвечает («Русский», «English»…), бэкенд сохраняет язык чата, дальше тьютор пишет на нём.
+- **Язык.** ИИ отвечает на языке сайта (`user.locale`, меняется в `PATCH /users/me`) и не спрашивает язык в чате.
+  `language` у чата — свой язык чата, если он задан; `null` — язык сайта. Квизы составляются на этом же языке.
 
 ### `GET /chats/{chatId}` — один чат
 - **200** → `Chat`
@@ -332,7 +334,7 @@ GET /chats?archived=false
 
 ## Откуда ИИ берёт промпты
 
-Тексты промптов лежат в GitHub: `ai-content/prompts/*.md` (ветка `main-test-2.0`).
+Тексты промптов лежат в GitHub: `ai-content/prompts/*.md` (ветка `PythonAPI`, там же база `database/`).
 `python -X utf8 ai-content/load/load.py` загружает их в таблицу `ai_prompts` (новая версия, если текст изменился).
 Бэкенд при каждом запросе берёт активную версию из базы, перезапуск не нужен.
 

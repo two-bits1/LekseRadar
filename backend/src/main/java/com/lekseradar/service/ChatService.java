@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -35,9 +33,6 @@ import java.util.stream.Collectors;
 @Service
 public class ChatService {
     private static final int TITLE_MAX_LENGTH = 60;
-    /** Тьютор ставит эту метку, когда ученик выбрал язык. */
-    private static final Pattern LANGUAGE_TAG = Pattern.compile("\\[\\[LANGUAGE=([A-Za-z]{2,3})]]");
-    private static final Pattern LANGUAGE_QUESTION_TAG = Pattern.compile("\\[\\[LANGUAGE_QUESTION]]");
 
     private final ChatSessionRepository sessions;
     private final ChatMessageRepository messages;
@@ -125,7 +120,7 @@ public class ChatService {
                 ? quizGenerator.generate(user, s, content, null).message()
                 : tutorReply(user, s, system, content);
 
-        // перечитываем: язык или квиз чата мог поменяться
+        // перечитываем: в квиз-чате поменялись quizSetId и название
         ChatSessionEntity fresh = owned(user.getId(), chatId);
         if (ChatSessionEntity.DEFAULT_TITLE.equals(fresh.getTitle())) {
             fresh.setTitle(makeTitle(content));
@@ -149,21 +144,11 @@ public class ChatService {
         }
 
         AiResponseDTO reply = ai.complete(prompt);
-        String text = handleTags(s.getId(), reply.content());
+        String text = reply.content().strip();
 
         ChatMessageEntity answer = ChatMessageEntity.fromTutor(s.getId(), limit(text), reply.model(), reply.tokensUsed());
         answer.setPromptId(system.getPromptId());
         return messages.save(answer);
-    }
-
-    /** [[LANGUAGE=xx]] → сохранить язык чата; служебные метки ученику не показываем. */
-    private String handleTags(Long chatId, String text) {
-        Matcher lang = LANGUAGE_TAG.matcher(text);
-        if (lang.find()) {
-            sessions.setLanguage(chatId, lang.group(1).toLowerCase(Locale.ROOT));
-        }
-        String cleaned = LANGUAGE_QUESTION_TAG.matcher(LANGUAGE_TAG.matcher(text).replaceAll("")).replaceAll("");
-        return cleaned.strip();
     }
 
     private ChatResponseDTO toResponse(ChatSessionEntity s) {
