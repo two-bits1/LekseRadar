@@ -28,12 +28,20 @@ docker compose up -d
 При первом запуске создаются все таблицы. База пустая, пробных данных нет: ученик появляется только через регистрацию.
 Сбросить базу: `docker compose down -v && docker compose up -d`.
 
-### 2. Секреты
+### 2. Промпты ИИ в базу (один раз и после каждого изменения промптов)
+
+Промпты лежат в `ai-content/prompts` (ветка `main-test-2.0`). Без них чат отвечает `503`.
+```bash
+pip install -r ai-content/load/requirements.txt
+DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python -X utf8 ai-content/load/load.py
+```
+
+### 3. Секреты
 
 Скопируйте `backend/.env.example` в `backend/.env` и впишите `OPENAI_API_KEY` и `JWT_SECRET`.
 `.env` в git не попадает.
 
-### 3. Бэкенд
+### 4. Бэкенд
 
 - **VS Code:** F5 (конфигурация `▶ LekseRadar API`) или кнопка **Run** над `main()` в `LekseRadarApplication`.
 - **IntelliJ IDEA:** откройте папку `backend` и нажмите ▶ рядом с `main`.
@@ -86,10 +94,15 @@ docker compose up -d
 | GET | `/api/v1/chats/{chatId}/messages` | — | `[message]`, старые сверху |
 | POST | `/api/v1/chats/{chatId}/messages` | `{content}` (до 8000 символов) | `201 {chat, userMessage, assistantMessage}` |
 
-`chat = {id, title, topic, archived, createdAt, updatedAt}`,
+`chat = {id, title, topic, mode, subject, language, level, assignmentId, quizSetId, archived, createdAt, updatedAt}`,
 `message = {id, role: "student" | "tutor", content, model, createdAt}`. Ответ тьютора приходит в Markdown.
-В ИИ уходят последние 10 реплик (вид `chat_context`). Тьютор отвечает на языке ученика (`users.locale`).
-Чат без названия получает его по первому вопросу.
+
+Как чат работает с базой:
+- создание — функция `start_chat` (режим `tutor`/`quiz`, предмет, тема, ДЗ; она же пишет `chat_started`);
+- промпт — `chat_system_prompt` (активная версия из `ai_prompts`), переменные `{{...}}` — `chat_prompt_vars`,
+  `{{materials}}` — `materials_for_prompt` по вопросу;
+- история — последние 10 реплик (вид `chat_context`);
+- ответ ИИ: метка `[[LANGUAGE=xx]]` → `set_chat_language`, метки вырезаются; в `chat_messages.prompt_id` пишется версия промпта.
 
 ### Служебное
 `GET /actuator/health` → `{"status": "UP" | "DOWN"}`, без токена.
@@ -110,16 +123,21 @@ docker compose up -d
 
 ```
 src/main/java/com/lekseradar/
-  config/       AppProperties, SecurityConfig, CorsConfig, AiConfig, OpenApiConfig
-  controller/   REST-контроллеры: принимают запрос и вызывают сервис
-  dto/          запросы и ответы API
-  exception/    исключения и GlobalExceptionHandler (единый формат ошибок)
-  model/        JPA-сущности поверх таблиц из database/migrations
-  repository/   доступ к БД (Spring Data + JdbcTemplate для user_events)
+  config/       *Config: AppConfig (настройки app.*), SecurityConfig, CorsConfig, AiConfig, OpenApiConfig
+  controller/   *Controller: REST-контроллеры, принимают запрос и вызывают сервис
+  dto/          *Request / *Response: запросы и ответы API по разделам (auth, user, chat, quiz, homework…)
+    ai/         AiMessageRequest, AiResponse — сообщения для модели ИИ
+  exception/    *Exception и GlobalExceptionHandler (единый формат ошибок)
+  model/        *Entity: JPA-сущности, по одной на таблицу из database/migrations (20 штук)
+    enums/      Java-enum'ы для PostgreSQL-типов (chat_mode, platform, quiz_status…)
+    converter/  *Converter: enum ↔ значение в базе
+  repository/   *Repository: доступ к БД, вызовы функций базы (start_quiz, save_quiz_answer…)
   security/     JWT: JwtService, JwtAuthenticationFilter, @CurrentUser, ответ 401
-  service/      бизнес-логика
-    ai/         AiClient, OpenAiClient, Prompts (все промпты здесь)
+  service/      *Service: бизнес-логика
+    ai/         AiService (интерфейс), OpenAiService (OpenAI-совместимый API: OpenAI, Groq…)
 ```
+
+Промпты в коде не хранятся: они в таблице `ai_prompts` (загружает `ai-content/load/load.py`).
 
 ## Переменные окружения (`backend/.env`)
 
