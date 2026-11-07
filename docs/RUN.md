@@ -44,7 +44,7 @@ python -m pytest -q
 ## Что проверено перед слиянием
 | Часть | Проверка | Результат |
 |---|---|---|
-| База | все миграции V1–V14 + seed на чистом PostgreSQL 16 | ок |
+| База | все миграции V1–V15 + seed на чистом PostgreSQL 16 | ок |
 | Python | `pytest` в homework-collector | 6 из 6 |
 | Фронтенд | `pnpm build` (tsc + vite) | ок |
 | Бэкенд | `mvn test` | 3 из 3 |
