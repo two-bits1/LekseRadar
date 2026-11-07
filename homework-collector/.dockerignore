@@ -1,0 +1,6 @@
+__pycache__
+*.pyc
+tests
+creds*.json
+*.log
+.pytest_cache
