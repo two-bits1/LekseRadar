@@ -15,5 +15,7 @@ export const decks = [
 ];
 // Сайт-карта для /status — те же адреса, что в API.md (см. src/paths.ts).
 export const routes = [
-  [PATHS.home,'Oversikt','Interaktiv demo'], [PATHS.homework,'Lekser og kalender','Interaktiv demo'], [PATHS.chats,'AI-veileder','Koblet til API'], [PATHS.chat(':chatId'),'Samtale','Koblet til API'], [PATHS.quizzes,'Quiz','Interaktiv demo'], [PATHS.flashcards,'Læringskort','Interaktiv demo'], [PATHS.progress,'Fremgang','Kommer senere'], [PATHS.history,'Historikk','Kommer senere'], [PATHS.profile,'Profil','Koblet til API'], [PATHS.settings,'Innstillinger','Delvis klar'], [PATHS.platforms,'Plattformer','Kommer senere'], [PATHS.login,'Logg inn','Koblet til API'], [PATHS.register,'Opprett konto','Koblet til API'],
-];
+  [PATHS.home,'home','demo'], [PATHS.homework,'homework','demo'], [PATHS.chats,'tutor','api'], [PATHS.chat(':chatId'),'chat','api'],
+  [PATHS.quizzes,'quiz','demo'], [PATHS.flashcards,'flashcards','demo'], [PATHS.progress,'progress','later'], [PATHS.history,'history','later'],
+  [PATHS.profile,'profile','api'], [PATHS.settings,'settings','partial'], [PATHS.platforms,'platforms','later'], [PATHS.login,'login','api'], [PATHS.register,'register','api'],
+] as const;  // [адрес, ключ названия в t.status.pages, ключ статуса в t.status.states]
