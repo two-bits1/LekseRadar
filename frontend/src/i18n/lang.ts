@@ -9,7 +9,8 @@ const STORAGE_KEY = 'lekseradar-lang';
 const TAGS: Record<Lang, 'nb-NO' | 'en-GB' | 'ru-RU'> = { nb: 'nb-NO', en: 'en-GB', ru: 'ru-RU' };
 
 // Профиль хранит nb / nn / en / ru; nn и всё неизвестное показываем как nb.
-export const langFromLocale = (locale: string | null | undefined): Lang => locale === 'en' || locale === 'ru' ? locale : 'nb';
+export const langFromLocale = (locale: string | null | undefined): Lang =>
+  locale === 'en' || locale === 'ru' ? locale : locale === 'uk' ? 'en' : 'nb';  // uk → en: украинского интерфейса нет
 
 export function loadLang(): Lang {
   try { const v = localStorage.getItem(STORAGE_KEY); if (v === 'nb' || v === 'en' || v === 'ru') return v; } catch {}

@@ -19,7 +19,7 @@ export const en: Dict = {
     calendarUrl: 'Calendar URL', schoolUrl: 'School URL', connectLater: 'Connect — coming later',
     account: 'Account', loggedInAs: (email: string) => `Logged in as ${email}.`, logout: 'Log out',
   },
-  common: { offline: 'Can’t reach the server. Try again.', failed: 'Something went wrong. Try again.', loading: 'Loading …', saving: 'Saving …', saved: 'Saved.' },
+  common: { keepServer: false, invalidField: 'Check this field.', byStatus: { 400: 'Check the fields.', 401: 'Wrong email or password.', 404: 'We couldn’t find that.', 409: 'This email is already in use.', 502: 'The AI tutor isn’t responding right now. Try again.', 503: 'The AI isn’t set up on the server yet.', 500: 'Something went wrong on the server.' }, offline: 'Can’t reach the server. Try again.', failed: 'Something went wrong. Try again.', loading: 'Loading …', saving: 'Saving …', saved: 'Saved.' },
   auth: {
     eyebrow: 'WELCOME TO LEKSERADAR', titleLogin: 'Good to have you here.', titleRegister: 'A slightly easier school day.',
     intro: 'More overview. Less stress. Room to understand.', login: 'Log in', register: 'Create account',

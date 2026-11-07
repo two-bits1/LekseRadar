@@ -17,7 +17,7 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllGlobals(); });
 
 describe('langFromLocale', () => {
-  it.each([['nb', 'nb'], ['nn', 'nb'], ['en', 'en'], ['ru', 'ru'], [undefined, 'nb'], [null, 'nb'], ['xx', 'nb']] as const)(
+  it.each([['nb', 'nb'], ['nn', 'nb'], ['uk', 'en'], ['en', 'en'], ['ru', 'ru'], [undefined, 'nb'], [null, 'nb'], ['xx', 'nb']] as const)(
     '%s → %s', (locale, lang) => { expect(langFromLocale(locale)).toBe(lang); });
 });
 
