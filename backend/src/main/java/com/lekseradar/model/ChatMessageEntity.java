@@ -1,0 +1,79 @@
+package com.lekseradar.model;
+
+import com.lekseradar.model.enums.*;
+import com.lekseradar.model.converter.MessageRoleConverter;
+import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnTransformer;
+
+import java.time.Instant;
+
+/** Таблица {@code chat_messages} (database/migrations/V3__chat.sql). */
+@Entity
+@Table(name = "chat_messages")
+public class ChatMessageEntity {
+    /** CHECK в базе: length(content) BETWEEN 1 AND 8000. */
+    public static final int MAX_CONTENT_LENGTH = 8000;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "session_id", nullable = false, updatable = false)
+    private Long sessionId;
+
+    @Convert(converter = MessageRoleConverter.class)
+    @ColumnTransformer(write = "?::chat_role")
+    @Column(nullable = false, columnDefinition = "chat_role")
+    private MessageRoleEnum role;
+
+    @Column(nullable = false)
+    private String content;
+
+    /** Только у ответов тьютора: относится ли вопрос к учёбе. */
+    @Column(name = "on_topic")
+    private Boolean onTopic;
+
+    /** Какая модель ответила. */
+    private String model;
+
+    /** Версия промпта (ai_prompts.id), с которой ответил ИИ. */
+    @Column(name = "prompt_id")
+    private Long promptId;
+
+    @Column(name = "tokens_used")
+    private Integer tokensUsed;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    protected ChatMessageEntity() {}
+
+    public static ChatMessageEntity fromStudent(Long sessionId, String content) {
+        ChatMessageEntity m = new ChatMessageEntity();
+        m.sessionId = sessionId;
+        m.role = MessageRoleEnum.STUDENT;
+        m.content = content;
+        return m;
+    }
+
+    public static ChatMessageEntity fromTutor(Long sessionId, String content, String model, Integer tokensUsed) {
+        ChatMessageEntity m = new ChatMessageEntity();
+        m.sessionId = sessionId;
+        m.role = MessageRoleEnum.TUTOR;
+        m.content = content;
+        m.model = model;
+        m.tokensUsed = tokensUsed;
+        return m;
+    }
+
+    public Long getId() { return id; }
+    public Long getSessionId() { return sessionId; }
+    public MessageRoleEnum getRole() { return role; }
+    public String getContent() { return content; }
+    public Boolean getOnTopic() { return onTopic; }
+    public String getModel() { return model; }
+    public Integer getTokensUsed() { return tokensUsed; }
+    public Long getPromptId() { return promptId; }
+    public void setPromptId(Long promptId) { this.promptId = promptId; }
+    public Instant getCreatedAt() { return createdAt; }
+}

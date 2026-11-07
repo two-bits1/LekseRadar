@@ -1,0 +1,15 @@
+{
+    // Запуск: F5, или вкладка "Run and Debug" (Ctrl+Shift+D) → ▶
+    // Перед запуском: PostgreSQL запущен (database/docker compose up -d), backend/.env заполнен
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "▶ LekseRadar API",
+            "request": "launch",
+            "mainClass": "com.lekseradar.LekseRadarApplication",
+            "projectName": "lekseradar-backend",
+            "cwd": "${workspaceFolder}/backend"
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+package com.lekseradar.service.ai;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/** Сколько ждать перед повтором, когда ИИ отвечает 429 (лимит в минуту). */
+class OpenAiServiceTest {
+
+    private static HttpClientErrorException tooMany(String body, String retryAfter) {
+        HttpHeaders h = new HttpHeaders();
+        if (retryAfter != null) h.add("retry-after", retryAfter);
+        return HttpClientErrorException.create(HttpStatus.TOO_MANY_REQUESTS, "Too Many Requests", h,
+                body.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void waitFromGroqMessage() {
+        String body = "{\"error\":{\"message\":\"Rate limit reached ... Please try again in 3.9075s. Need more tokens?\"}}";
+        assertEquals(4208, OpenAiService.retryAfterMs(tooMany(body, null)));
+    }
+
+    @Test
+    void waitJustOverTenSecondsIsStillRetried() {
+        // настоящий ответ Groq при лимите в минуту (раньше было -1 и ученик сразу получал 502)
+        String body = "{\"error\":{\"message\":\"... on tokens per minute (TPM): Limit 8000, Used 6887, Requested 2450. Please try again in 10.0275s. Need more tokens?\"}}";
+        assertEquals(10328, OpenAiService.retryAfterMs(tooMany(body, null)));
+        assertEquals(-1, OpenAiService.retryAfterMs(tooMany("Please try again in 25s.", null)));
+    }
+
+    @Test
+    void waitInMilliseconds() {
+        assertEquals(1103, OpenAiService.retryAfterMs(tooMany("Please try again in 802.5ms. Need more", null)));
+    }
+
+    @Test
+    void waitFromHeader() {
+        assertEquals(2300, OpenAiService.retryAfterMs(tooMany("{}", "2")));
+    }
+
+    @Test
+    void noRetryForLongWaitOrUnknown() {
+        assertEquals(-1, OpenAiService.retryAfterMs(tooMany("Please try again in 7m12s", null)));
+        assertEquals(-1, OpenAiService.retryAfterMs(tooMany("Please try again in 45s", null)));
+        assertEquals(-1, OpenAiService.retryAfterMs(tooMany("{}", null)));
+    }
+}
