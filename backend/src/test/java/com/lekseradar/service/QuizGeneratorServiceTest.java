@@ -31,18 +31,19 @@ class QuizGeneratorServiceTest {
         ChatSessionEntity chat = new ChatSessionEntity(1L, "Quiz", "Brøk");
         chat.setLevel(ExerciseLevelEnum.BEGINNER);
         ObjectNode quiz = service.parse("""
-                {"subject":"Математика","topic":"Дроби","level":"???","language":"","title":"Brøker",
+                {"subject":"Математика","topic":"Дроби","level":"???","language":"русский (ru)","title":"Brøker",
                  "questions":[
                    {"type":"single_choice","question":"1/2 = ?","options":["0,5","2"],"correct_answer":["0,5"]},
                    {"type":"text","question":"2/4 = ?","options":["x"],"correct_answer":"1/2"}]}
                 """);
 
-        service.normalize(quiz, chat, Map.of("subject", "Matematikk", "language", "nb"), "test-model");
+        service.normalize(quiz, chat, Map.of("subject", "Matematikk", "language", "русский (ru)",
+                "language_code", "ru"), "test-model");
 
         assertEquals("Matematikk", quiz.path("subject").asText());     // предмет чата, не перевод ИИ
         assertEquals("Brøk", quiz.path("topic").asText());
         assertEquals("beginner", quiz.path("level").asText());          // неверный уровень → уровень чата
-        assertEquals("nb", quiz.path("language").asText());
+        assertEquals("ru", quiz.path("language").asText());              // код из language_code (V20)
         assertEquals("test-model", quiz.path("model").asText());
         assertEquals("0,5", quiz.path("questions").get(0).path("correct_answer").asText());
         assertFalse(quiz.path("questions").get(1).has("options"));

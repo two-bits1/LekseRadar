@@ -180,7 +180,7 @@ public class QuizGeneratorService {
 
     /**
      * Предмет и тема — как у чата (ИИ мог их перевести, а по ним потом ищется готовый набор).
-     * Уровень и язык — от ИИ, если они допустимые (ученик мог попросить «сложнее» / «на английском»).
+     * Уровень — от ИИ, если допустимый (ученик мог попросить «сложнее»). Язык — всегда язык сайта или чата.
      */
     void normalize(ObjectNode quiz, ChatSessionEntity chat, Map<String, String> vars, String model) {
         String subject = firstNonBlank(vars.get("subject"), quiz.path("subject").asText(""), "Generelt");
@@ -193,12 +193,14 @@ public class QuizGeneratorService {
         String level = quiz.path("level").asText("").strip().toLowerCase();
         quiz.put("level", LEVELS.contains(level) ? level : chat.getLevel().value());
 
-        String language = quiz.path("language").asText("").strip().toLowerCase();
-        if (!language.matches("[a-z]{2,3}")) {
-            String fromChat = vars.getOrDefault("language", "");
-            language = fromChat.matches("[a-z]{2,3}") ? fromChat : "nb";
+        // Язык задаёт сайт (V17): код из chat_prompt_vars.language_code (V20), а не то, что написал ИИ.
+        // По нему ищется готовый квиз (find_quiz_set) и проверяются текстовые ответы.
+        String code = vars.getOrDefault("language_code", "").strip().toLowerCase();
+        if (!code.matches("[a-z]{2,3}")) {
+            String fromAi = quiz.path("language").asText("").strip().toLowerCase();
+            code = fromAi.matches("[a-z]{2,3}") ? fromAi : "nb";
         }
-        quiz.put("language", language);
+        quiz.put("language", code);
         quiz.put("model", model);
 
         JsonNode questions = quiz.path("questions");

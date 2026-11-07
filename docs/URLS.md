@@ -37,6 +37,8 @@
 | `/history` | 🔒 | лента «что я делал» | 🕓 `GET /history` |
 | `/homework` | 🔒 | ДЗ со всех платформ | 🕓 `GET /homework`, 🕓 `POST /homework/sync` |
 | `/settings/platforms` | 🔒 | подключение Canvas / Teams / itslearning / InSchool | 🕓 `GET /platforms`, 🕓 `POST/DELETE /platforms/{platform}` |
+| `/settings` | 🔒 | настройки (только фронтенд) | — |
+| `/status` | 🔓 | карта сайта: что уже работает (только фронтенд) | — |
 | `*` | 🔓 | «Страница не найдена» | — |
 
 ---
@@ -153,5 +155,8 @@ export const PAGES = {
   history: "/history",
   homework: "/homework",
   platforms: "/settings/platforms",
+  // только фронтенд, своего API нет
+  settings: "/settings",
+  status: "/status",
 } as const;
 ```

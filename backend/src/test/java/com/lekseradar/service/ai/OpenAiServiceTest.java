@@ -26,6 +26,11 @@ class OpenAiServiceTest {
     }
 
     @Test
+    void waitInMilliseconds() {
+        assertEquals(1103, OpenAiService.retryAfterMs(tooMany("Please try again in 802.5ms. Need more", null)));
+    }
+
+    @Test
     void waitFromHeader() {
         assertEquals(2300, OpenAiService.retryAfterMs(tooMany("{}", "2")));
     }
