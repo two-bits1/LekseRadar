@@ -41,6 +41,7 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V15__prompt_limits.sql` | `clip_text()`: текст ДЗ в промпте не длиннее 12 000 символов |
 | `V16__no_demo_data.sql` | убран `assignments.is_demo`: пробных данных в базе нет |
 | `V17__language_from_site.sql` | язык ИИ берётся с сайта (`users.locale`), `language_name()` |
+| `V18__dashboard_overdue.sql` | дашборд: `todo` с прошедшим дедлайном считается просроченным |
 
 ## Схема
 
