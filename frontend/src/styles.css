@@ -165,3 +165,8 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(max-width:560px){.form-row{grid-template-columns:1fr}.grades{grid-template-columns:repeat(2,minmax(0,1fr))}.fcard,.fcard-inner{min-height:260px}.question{padding:16px}.question-text{font-size:17px}.quiz-actions .btn{flex:1}}
 .option .katex,.verdict .katex{font-size:1.25em}
+/* ==== Узкие экраны: шар строго по центру, кнопки настроек переносятся ==== */
+.tb-nav{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.tb-side{min-width:0}.tb-link{min-width:0}.tb-link span{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.settings-row{flex-wrap:wrap}.settings-row .actions{flex-wrap:wrap}
+@media(max-width:360px){.tb-link{padding:6px 2px;font-size:9.5px}.tb-nav{gap:2px}}
