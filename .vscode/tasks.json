@@ -1,0 +1,55 @@
+{
+    // Запуск: Ctrl+Shift+P → "Tasks: Run Task" → выберите задачу
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "База: запустить PostgreSQL",
+            "type": "shell",
+            "command": "docker compose up -d",
+            "options": { "cwd": "${workspaceFolder}/database" },
+            "problemMatcher": []
+        },
+        {
+            "label": "Backend: запустить",
+            "type": "shell",
+            "command": "./mvnw spring-boot:run",
+            "windows": { "command": ".\\mvnw.cmd spring-boot:run" },
+            "options": { "cwd": "${workspaceFolder}/backend" },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Backend: тесты",
+            "type": "shell",
+            "command": "./mvnw test",
+            "windows": { "command": ".\\mvnw.cmd test" },
+            "options": { "cwd": "${workspaceFolder}/backend" },
+            "group": { "kind": "test", "isDefault": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Backend: собрать jar",
+            "type": "shell",
+            "command": "./mvnw clean package -DskipTests",
+            "windows": { "command": ".\\mvnw.cmd clean package -DskipTests" },
+            "options": { "cwd": "${workspaceFolder}/backend" },
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Frontend: запустить",
+            "type": "shell",
+            "command": "npm run dev",
+            "options": { "cwd": "${workspaceFolder}/frontend" },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Открыть Swagger UI",
+            "type": "shell",
+            "command": "start http://localhost:8080/swagger-ui.html",
+            "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+            "problemMatcher": []
+        }
+    ]
+}

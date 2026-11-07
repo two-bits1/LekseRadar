@@ -1,0 +1,7 @@
+{
+    // VS Code сам предложит установить эти расширения при открытии проекта
+    "recommendations": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-boot-dev-pack"
+    ]
+}
