@@ -11,7 +11,7 @@
 
 Проект `distinguished-radiance`, бэкенд `https://backend-production-22b1.up.railway.app`.
 
-- [ ] **№3**: V22 на облачной базе. Postgres → Networking → Add Public Access (порт 5432) →
+- [x] **№3**: V22 на облачной базе (сделано 7 ноября, 20:22). Postgres → Networking → Add Public Access (порт 5432) →
       `python3 database/setup_cloud_db.py` → удалить Public Access. Если `ConnectionTimeout`, попробовать другую сеть Wi-Fi.
 - [ ] **№2**: переменные бэкенда:
   - `MAIL_USERNAME`, `MAIL_PASSWORD`: без них регистрация отвечает 503;
