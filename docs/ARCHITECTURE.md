@@ -71,6 +71,9 @@ erDiagram
     users ||--o{ user_events : "история действий"
     users ||--o{ reminders : "напоминания"
     users ||--o{ user_achievements : "ачивки"
+    subjects ||--o{ materials : "учебные файлы"
+    materials ||--o{ material_chunks : "фрагменты для поиска"
+    ai_prompts ||--o{ quiz_sets : "каким промптом сгенерирован"
 ```
 
 ## 4. Сценарии по шагам
@@ -127,7 +130,8 @@ sequenceDiagram
     F->>B: POST /api/chats/{id}/messages
     B->>D: INSERT chat_messages(role='student')
     B->>D: SELECT chat_context (последние 10 реплик)
-    B->>L: системный промпт + история + вопрос
+    B->>D: get_prompt('tutor'), materials_for_prompt(вопрос)
+    B->>L: системный промпт (+ фрагменты материалов) + история + вопрос
     L-->>B: ответ
     B->>D: INSERT chat_messages(role='tutor')
     B-->>F: ответ
@@ -222,6 +226,7 @@ flowchart LR
 | 🆕 `GET /api/flashcards/due` | Карточки | что повторять сейчас | вид `flashcards` |
 | 🆕 `POST /api/flashcards/{exerciseId}/review` `{grade}` | Карточки | оценка 0–5 | `review_flashcard` |
 | ✅ `GET /api/progress` → 🆕 `GET /api/dashboard` | Дашборд | сводка и графики | виды `user_*` |
+| 🆕 `GET /api/materials`, `POST /api/materials` (файл) | Материалы | список / загрузить файл, извлечь текст | `user_materials`, `add_material` |
 | 🆕 `GET /api/history` | История | лента действий | `user_events` |
 | 🆕 `GET /api/reminders` | Напоминания | ближайшие дедлайны | `reminders` |
 
@@ -239,6 +244,8 @@ flowchart LR
 | Python `collect()` без своей базы | бэкенд хранит токены зашифрованными, Python только забирает ДЗ; одна упавшая платформа не ломает остальные |
 | `updated_credentials` в ответе `collect()` | токены Teams/itslearning и cookie InSchool обновляются, бэкенд сохраняет новые |
 | `user_events` для всего | из одной таблицы строятся история, активные дни, ачивки |
+| Промпты в базе с версиями | меняем промпт без пересборки бэкенда, можно откатиться, видно каким промптом сделан квиз |
+| Материалы режутся на фрагменты, поиск в PostgreSQL | ИИ не дообучается: перед ответом бэкенд находит 5 подходящих кусков учебника и вставляет в промпт; без отдельной векторной базы |
 | Демо-режим и `seed.sql` | демо на хакатоне работает без настоящих аккаунтов |
 
 ## 7. Что надо согласовать (важно)
@@ -256,5 +263,6 @@ flowchart LR
 1. №2: перейти на миграции из `database/`, запустить `docker compose up -d` (там демо-ученик `demo@lekseradar.no` / `demo1234`).
 2. №2: эндпоинты квиза и карточек (п. 5) — это вызовы готовых функций БД.
 3. №1: экраны Квиз и Карточки по сценариям 4.4 и 4.5, дашборд по 4.6.
-4. №3: промпт генерации квиза под `quiz.schema.json`, обёртка для `collect()`.
-5. ДЗ с платформ подключаем последними, до этого демо-режим.
+4. №3: промпты в `ai-content/prompts`, учебные файлы в `ai-content/materials`, загрузка `ai-content/load/load.py`; обёртка для `collect()`.
+5. №2: брать промпты через `get_prompt(...)` вместо `Prompts.java`, материалы через `materials_for_prompt(...)`.
+6. ДЗ с платформ подключаем последними, до этого демо-режим.
