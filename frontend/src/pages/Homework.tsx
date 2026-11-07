@@ -18,6 +18,12 @@ const PLATFORM: Record<Assignment['source'], string> = { canvas: 'Canvas', teams
 export const matchesFilter = (a: Assignment, f: Filter) =>
   f === 'all' || a.status === f || (f === 'submitted' && a.status === 'graded');
 
+// Сначала то, что надо сделать (просроченное, потом по сроку), сданное и оценённое — в конце, новые сверху.
+const RANK: Record<AssignmentStatus, number> = { overdue: 0, todo: 1, submitted: 2, graded: 2 };
+const time = (a: Assignment) => a.dueAt ? Date.parse(a.dueAt) : Number.POSITIVE_INFINITY;
+export const sortHomework = (list: Assignment[]) => [...list].sort((a, b) =>
+  RANK[a.status] - RANK[b.status] || (RANK[a.status] < 2 ? time(a) - time(b) : time(b) - time(a)) || a.id - b.id);
+
 export function Homework() {
   const t = useT(); const h = t.hw; const { tag } = useLang(); const { user } = useAuth(); const navigate = useNavigate();
   const [items, setItems] = useState<Assignment[] | null>(null);
@@ -55,7 +61,7 @@ export function Homework() {
     navigate(PATHS.quiz(quiz.id));
   });
 
-  const shown = (items ?? []).filter(a => matchesFilter(a, filter));
+  const shown = sortHomework((items ?? []).filter(a => matchesFilter(a, filter)));
   const count = (f: Filter) => (items ?? []).filter(a => matchesFilter(a, f)).length;
   const pillClass = (s: AssignmentStatus) => `pill hw-${s}`;
 
