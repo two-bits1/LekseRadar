@@ -76,6 +76,17 @@ def test_itslearning_non_json_token_reply_gives_clear_error():
         assert "JSONDecodeError" not in str(e.value) and "Expecting value" not in str(e.value)
         assert e.value.needs_reconnect is reconnect
 
+
+def test_itslearning_non_json_tasks_reply_gives_clear_error():
+    def h(req):
+        if req.url.path.endswith("/oauth2/token"):
+            return httpx.Response(200, json={"access_token": "at", "expires_in": 3600})
+        return httpx.Response(200, text="<html>Maintenance</html>")
+    res = collect({"itslearning": {"base_url": "https://x.itslearning.com", "refresh_token": "rt"}}, client=client(h))
+    err = res.sources["itslearning"].error
+    assert res.sources["itslearning"].ok is False
+    assert "JSONDecodeError" not in err and "Expecting value" not in err and "itslearning" in err
+
 def test_inschool_expired_session_asks_reconnect():
     res = collect({"inschool": {"host": "s.test", "cookies": {"JSESSIONID": "x"}}},
                   client=client(lambda req: httpx.Response(401)))

@@ -39,12 +39,17 @@ def exchange_code(client: httpx.Client, base_url: str, code_or_url: str) -> dict
     return _token(client, base_url, {"grant_type": "authorization_code", "code": code})
 
 
+def _json(r: httpx.Response):
+    """Тело ответа как JSON или None, если itslearning прислал HTML-страницу ошибки, обрезанный ответ и т.п."""
+    try:
+        return r.json()
+    except ValueError:
+        return None
+
+
 def _token(client: httpx.Client, base_url: str, form: dict) -> dict:
     r = client.post(f"{base_url.rstrip('/')}/restapi/oauth2/token", data={"client_id": CLIENT_ID, **form})
-    try:
-        data = r.json() if r.content else {}
-    except ValueError:  # HTML-страница ошибки, обрезанный ответ и т.п.
-        data = None
+    data = _json(r) if r.content else {}
     if not isinstance(data, dict):
         if r.status_code >= 500:
             raise SourceError(f"itslearning не отвечает (HTTP {r.status_code}), попробуйте позже")
@@ -75,9 +80,13 @@ def fetch(client: httpx.Client, creds: ItslearningCreds):
                 "PageIndex": page, "PageSize": PAGE_SIZE, "status": status, "deadline": "All"})
             if r.status_code == 401:
                 raise SourceError("itslearning не принял токен, нужно войти заново", needs_reconnect=True)
+            if r.status_code >= 500:
+                raise SourceError(f"itslearning не отвечает (HTTP {r.status_code}), попробуйте позже")
             r.raise_for_status()
-            body = r.json()
-            chunk = body.get("EntityArray", [])
+            body = _json(r)
+            if not isinstance(body, dict):
+                raise SourceError("itslearning прислал не список заданий: проверьте адрес школы")
+            chunk = body.get("EntityArray") or []
             tasks += [dict(t, _completed=(status == "Completed")) for t in chunk]
             if len(chunk) < PAGE_SIZE or (page + 1) * PAGE_SIZE >= body.get("Total", 0):
                 break
