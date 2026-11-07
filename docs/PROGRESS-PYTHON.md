@@ -58,8 +58,22 @@ python ai-content/check/check_ai.py --email test@lekseradar.no --password LekseR
 Если `setup_cloud_db.py` падает с `ConnectionTimeout`, а в логах Postgres `could not accept SSL connection: unexpected eof`,
 виновата сеть (Wi-Fi рвёт TLS): помогла другая сеть.
 
+## Коммиты 16–21
+
+| Коммит | Шаг | Что сделано | Проверено |
+|---|---|---|---|
+| `4c3086a` | — | itslearning: не-JSON в списке заданий → понятная ошибка, весь разбор JSON через `_json()` | тест, `pytest` 20 из 20 |
+| `819dcec` | Classroom | `V22__classroom.sql`: `classroom` в типе `platform`; README и ENTITIES | чистая база V1–V22 и база на V21 → V22; `sync_assignments` принимает `source: classroom` |
+| `d7eb691` | Classroom | collector: `sources/classroom.py` (активные курсы → задания → свои сдачи, 8 потоков), `ClassroomCreds` | 3 теста, `pytest` 23 из 23 |
+| `6c79c82` | Windows | `.gitattributes`: `.sh` и `mvnw` всегда LF (иначе на Windows `init.sh` не запускается и база пустая) | — |
+| `0e075c6` | Windows | `127.0.0.1` вместо `localhost` в адресах базы для Python (на Windows psycopg зависает на IPv6) | — |
+| `4360bc8` | Classroom | `COLLECTOR-API.md`: `classroom` в `/collect`, вход и обновление токена делает бэкенд | — |
+
+Задание от №2: `FOR-PYTHON.md`. Вход Google и `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` только у бэкенда,
+у collector новых переменных нет.
+
 ## Дальше
 
-- Убрать Public Access у Postgres.
-- Бэкенд на Railway (DEPLOY-RAILWAY.md, раздел 3), ключ Groq в его Variables.
-- Шаг 4: `check_ai.py` против бэкенда на Railway, таблицу в README-TEST.md.
+- Railway: докатить V22 на облачную базу (`python3 database/setup_cloud_db.py`, нужен временный Public Access у Postgres).
+- Collector на Railway пересоберётся сам из `PythonAPI`.
+- Учебные материалы в `ai-content/materials/<Предмет>/<Тема>/`.
