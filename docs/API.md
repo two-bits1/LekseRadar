@@ -33,6 +33,48 @@
 
 ---
 
+## Страницы фронтенда (React Router)
+
+Это адреса в браузере (`http://localhost:5173/...`), их делает фронтенд. Бэкенд отдаёт только JSON по `/api/v1/...`.
+✅ — API уже готов, 🕓 — API будет позже (квизы, ДЗ и т.д. по `docs/ARCHITECTURE.md`).
+
+| Страница | Путь | Доступ | Что на странице | Какие API вызывает |
+|---|---|---|---|---|
+| Главная / дашборд | `/` | 🔒 | приветствие, последние чаты, (позже) ДЗ и прогресс | ✅ `GET /users/me`, ✅ `GET /chats` · 🕓 `GET /dashboard` |
+| Вход | `/login` | 🔓 | email + пароль | ✅ `POST /auth/login` |
+| Регистрация | `/register` | 🔓 | email, пароль, имя | ✅ `POST /auth/register` |
+| Профиль | `/profile` | 🔒 | имя, язык, часовой пояс, смена пароля, выход | ✅ `GET/PATCH /users/me`, ✅ `PUT /users/me/password` |
+| Список чатов | `/chat` | 🔒 | чаты, кнопка «Новый чат», вкладка «Архив» | ✅ `GET /chats?archived=false/true`, ✅ `POST /chats` |
+| Чат | `/chat/:chatId` | 🔒 | история, поле ввода, «Тьютор печатает…», переименовать / в архив / удалить | ✅ `GET /chats/{id}`, ✅ `GET/POST /chats/{id}/messages`, ✅ `PATCH/DELETE /chats/{id}` |
+| Домашка | `/homework` | 🔒 | ДЗ со всех платформ, кнопка «Обновить» | 🕓 `GET /homework`, 🕓 `POST /homework/sync` |
+| Квиз: выбор | `/quiz` | 🔒 | предмет, тема, уровень | 🕓 `GET /subjects`, 🕓 `POST /quizzes` |
+| Квиз: прохождение | `/quiz/:quizId` | 🔒 | вопрос, ответ, пояснение, итог | 🕓 `GET /quizzes/{id}`, 🕓 `POST /quizzes/{id}/answers`, 🕓 `POST /quizzes/{id}/finish` |
+| Флеш-карты | `/flashcards` | 🔒 | карточки к повторению, оценка 0–5 | 🕓 `GET /flashcards/due`, 🕓 `POST /flashcards/{id}/review` |
+| Прогресс | `/progress` | 🔒 | графики по предметам и дням | 🕓 `GET /dashboard` |
+| История | `/history` | 🔒 | лента «что я делал» | 🕓 `GET /history` |
+| Платформы | `/settings/platforms` | 🔒 | подключить Canvas / Teams / itslearning / InSchool | 🕓 `GET /platforms`, 🕓 `POST/DELETE /platforms/{platform}` |
+| Не найдено | `*` | 🔓 | «Страница не найдена» | — |
+
+**Правила для страниц 🔒:** нет токена → редирект на `/login`. Любой ответ `401` → удалить токен и тоже на `/login`.
+После входа или регистрации → на `/`. «Выйти» = удалить токен из `localStorage` (отдельного API для выхода нет).
+
+```tsx
+// пример маршрутов (react-router-dom)
+<Routes>
+  <Route path="/login" element={<Login />} />
+  <Route path="/register" element={<Register />} />
+  <Route element={<RequireAuth />}>          {/* нет токена → <Navigate to="/login" /> */}
+    <Route path="/" element={<Dashboard />} />
+    <Route path="/profile" element={<Profile />} />
+    <Route path="/chat" element={<ChatList />} />
+    <Route path="/chat/:chatId" element={<Chat />} />
+  </Route>
+  <Route path="*" element={<NotFound />} />
+</Routes>
+```
+
+---
+
 ## Как работает вход
 
 1. `POST /auth/login` (или `/auth/register`) → в ответе `token`.
