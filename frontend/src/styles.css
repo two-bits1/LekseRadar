@@ -223,3 +223,4 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .plat-link{align-self:flex-start;background:none;border:0;padding:0;margin-top:4px;cursor:pointer;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .spin{animation:plat-spin 1s linear infinite}@keyframes plat-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.hw-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.hw-head .btn{flex:0 0 auto}
