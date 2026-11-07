@@ -1,28 +1,28 @@
 // Главная «/» после входа — только настоящие данные (API.md): профиль, чаты, квизы, прогресс, флеш-карты.
-// ДЗ пока нет в API (🕓 GET /homework) — честный блок «скоро», без выдуманных заданий.
+// ДЗ — GET /homework: ближайшие несданные задания.
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Inbox, ListChecks, MessageSquare, Sparkles } from 'lucide-react';
 import { PATHS } from '../paths';
 import { useAuth } from '../auth';
-import { chatsApi, flashcardsApi, quizzesApi } from '../api/endpoints';
-import type { Chat, FlashcardStats, QuizProgress, QuizSummary } from '../api/types';
+import { chatsApi, flashcardsApi, homeworkApi, quizzesApi } from '../api/endpoints';
+import type { Assignment, Chat, FlashcardStats, QuizProgress, QuizSummary } from '../api/types';
 import { useLang, useT } from '../i18n';
 
-type Data = { stats: FlashcardStats | null; progress: QuizProgress[] | null; quizzes: QuizSummary[] | null; chats: Chat[] | null };
+type Data = { stats: FlashcardStats | null; progress: QuizProgress[] | null; quizzes: QuizSummary[] | null; chats: Chat[] | null; homework: Assignment[] | null };
 
 export function Dashboard() {
   const { user } = useAuth(); const t = useT(); const d = t.dashboard; const { tag } = useLang();
-  const [data, setData] = useState<Data>({ stats: null, progress: null, quizzes: null, chats: null });
+  const [data, setData] = useState<Data>({ stats: null, progress: null, quizzes: null, chats: null, homework: null });
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let off = false;
-    Promise.allSettled([flashcardsApi.stats(), quizzesApi.progress(), quizzesApi.list(), chatsApi.list(false)]).then(([s, p, q, c]) => {
+    Promise.allSettled([flashcardsApi.stats(), quizzesApi.progress(), quizzesApi.list(), chatsApi.list(false), homeworkApi.list()]).then(([s, p, q, c, h]) => {
       if (off) return;
       const val = <T,>(r: PromiseSettledResult<T>) => r.status === 'fulfilled' ? r.value : null;
-      setData({ stats: val(s), progress: val(p), quizzes: val(q), chats: val(c) });
-      setFailed([s, p, q, c].every(r => r.status === 'rejected'));
+      setData({ stats: val(s), progress: val(p), quizzes: val(q), chats: val(c), homework: val(h) });
+      setFailed([s, p, q, c, h].every(r => r.status === 'rejected'));
     });
     return () => { off = true; };
   }, []);
@@ -34,6 +34,11 @@ export function Dashboard() {
   const completed = (data.progress ?? []).reduce((n, p) => n + p.quizzesCompleted, 0);
   const progress = [...(data.progress ?? [])].filter(p => p.bestScore !== null).sort((a, b) => b.lastActivity.localeCompare(a.lastActivity)).slice(0, 5);
   const num = (v: number | undefined | null) => v ?? '—';
+  const nextHomework = (data.homework ?? []).filter(a => a.status === 'todo' || a.status === 'overdue').slice(0, 4);
+  const dueFmt = (iso: string) => {
+    try { return new Intl.DateTimeFormat(tag, { weekday: 'short', day: 'numeric', month: 'short', timeZone: user?.timezone }).format(new Date(iso)); }
+    catch { return new Date(iso).toLocaleDateString(tag); }
+  };
 
   return <section className="page dash">
     <header className="dash-head">
@@ -85,9 +90,13 @@ export function Dashboard() {
           : <p className="panel-empty">{d.noProgress}</p>}
       </section>
 
-      <section className="panel panel-quiet">
-        <div className="panel-head"><h2><Inbox size={16} />{d.homework}</h2></div>
-        <p className="panel-empty">{d.homeworkSoon}</p>
+      <section className="panel">
+        <div className="panel-head"><h2><Inbox size={16} />{d.homework}</h2><Link to={PATHS.homework}>{t.hw.all}</Link></div>
+        {data.homework === null ? <p className="panel-empty">{t.common.loading}</p>
+          : nextHomework.length ? nextHomework.map(a => <Link key={a.id} to={PATHS.homework} className="row">
+              <span><strong>{a.title}</strong><small>{[a.course, a.dueAt ? t.hw.due(dueFmt(a.dueAt)) : t.hw.noDue].filter(Boolean).join(' · ')}</small></span>
+              <span className="row-meta"><span className={`pill hw-${a.status}`}>{t.hw.status[a.status]}</span><ChevronRight size={15} /></span></Link>)
+          : <p className="panel-empty">{data.homework.length ? t.hw.none : t.hw.noneAll}</p>}
       </section>
     </div>
   </section>;

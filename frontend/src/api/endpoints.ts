@@ -1,7 +1,7 @@
-// Все URL бэкенда из API.md (таблица «Все URL бэкенда», #1–#27). Пути — относительно API_BASE (/api/v1).
+// Все URL бэкенда из API.md (таблица «Все URL бэкенда», #1–#34). Пути — относительно API_BASE (/api/v1).
 import { api, API_BASE } from './client';
 import type {
-  AnswerRequest, AnswerResult, AuthResponse, ChangePasswordRequest, Chat, ChatReply, CreateChatRequest, Deck, Flashcard,
+  AnswerRequest, AnswerResult, Assignment, AssignmentStatus, AuthResponse, Dashboard, HistoryEvent, UpdateAssignmentRequest, ChangePasswordRequest, Chat, ChatReply, CreateChatRequest, Deck, Flashcard,
   FlashcardStats, Health, LoginRequest, Message, Quiz, QuizProgress, QuizSummary, RegisterRequest, ReviewResult,
   StartQuizRequest, Subject, UpdateChatRequest, UpdateUserRequest, User, PlatformConnection, PlatformCredentials, PlatformKey,
 } from './types';
@@ -60,6 +60,19 @@ export const platformsApi = {
   list: () => api<PlatformConnection[]>('/platforms'),
   connect: (platform: PlatformKey, credentials: PlatformCredentials) => api<PlatformConnection>(`/platforms/${platform}`, json('POST', credentials)),
   disconnect: (platform: PlatformKey) => api<void>(`/platforms/${platform}`, { method: 'DELETE' }),
+};
+
+// 🔒 Домашка
+export const homeworkApi = {
+  list: (status?: AssignmentStatus) => api<Assignment[]>(status ? `/homework?status=${status}` : '/homework'),    // #30
+  get: (id: number) => api<Assignment>(`/homework/${id}`),                                                        // #31
+  update: (id: number, body: UpdateAssignmentRequest) => api<Assignment>(`/homework/${id}`, json('PATCH', body)), // #32
+};
+
+// 🔒 Дашборд и история
+export const dashboardApi = {
+  get: () => api<Dashboard>('/dashboard'),                                                                        // #33
+  history: (limit?: number) => api<HistoryEvent[]>(limit ? `/history?limit=${limit}` : '/history'),               // #34
 };
 
 // 🔓 Служебное: /actuator/health лежит вне /api/v1 (#27)

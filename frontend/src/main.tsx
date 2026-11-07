@@ -6,7 +6,9 @@ import { Dashboard } from './pages/Dashboard';
 import { Flashcards } from './pages/Flashcards';
 import { QuizStart, QuizRun } from './pages/Quiz';
 import { ChatList, ChatView } from './pages/Chats';
-import { Settings, Status, Soon } from './pages/Other';
+import { Settings, Status } from './pages/Other';
+import { Homework } from './pages/Homework';
+import { Progress, History } from './pages/Progress';
 import { Auth, Profile } from './pages/Account';
 import { type ThemeChoice, loadThemeChoice, saveThemeChoice, resolveTheme, themeColor } from './theme';
 import { PATHS } from './paths';
@@ -54,12 +56,12 @@ function App(){
     <Route path={PATHS.profile} element={<Profile/>}/>
     <Route path={PATHS.chats} element={<ChatList/>}/>
     <Route path={PATHS.chat(':chatId')} element={<ChatView/>}/>
-    <Route path={PATHS.homework} element={<Soon title={t.soon.homeworkTitle} text={t.soon.homeworkText}/>}/>
+    <Route path={PATHS.homework} element={<Homework/>}/>
     <Route path={PATHS.quizzes} element={<QuizStart/>}/>
     <Route path={PATHS.quiz(':quizId')} element={<QuizRun/>}/>
     <Route path={PATHS.flashcards} element={<Flashcards/>}/>
-    <Route path={PATHS.progress} element={<Soon title={t.soon.progressTitle} text={t.soon.progressText}/>}/>
-    <Route path={PATHS.history} element={<Soon title={t.soon.historyTitle} text={t.soon.historyText}/>}/>
+    <Route path={PATHS.progress} element={<Progress/>}/>
+    <Route path={PATHS.history} element={<History/>}/>
     <Route path={PATHS.platforms} element={<Settings theme={theme} setTheme={setTheme} platformsOnly/>}/>
     {/* Только фронтенд, тоже 🔒 */}
     <Route path={PATHS.settings} element={<Settings theme={theme} setTheme={setTheme}/>}/>
