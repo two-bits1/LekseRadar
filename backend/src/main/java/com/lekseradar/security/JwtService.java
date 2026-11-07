@@ -1,6 +1,7 @@
-package com.lekseradar.auth;
+package com.lekseradar.security;
 
 import com.lekseradar.config.AppProperties;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
+/** Выдаёт и проверяет JWT. В subject токена лежит id пользователя. */
 @Service
 public class JwtService {
     private final SecretKey key;
@@ -36,12 +38,12 @@ public class JwtService {
                 .compact();
     }
 
-    /** Возвращает id пользователя, если токен валиден. */
+    /** Возвращает id пользователя, если токен подписан нами и не истёк. */
     public Optional<Long> parseUserId(String token) {
         try {
             String sub = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
             return Optional.of(Long.parseLong(sub));
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }
     }
