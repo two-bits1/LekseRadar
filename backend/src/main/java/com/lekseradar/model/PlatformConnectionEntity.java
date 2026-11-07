@@ -23,7 +23,7 @@ public class PlatformConnectionEntity {
 
     @ColumnTransformer(write = "?::platform")
     @Column(nullable = false, updatable = false, columnDefinition = "platform")
-    private Platform platform;
+    private PlatformEnum platform;
 
     @Column(name = "credentials_enc", nullable = false)
     private byte[] credentialsEnc;
@@ -42,7 +42,7 @@ public class PlatformConnectionEntity {
 
     protected PlatformConnectionEntity() {}
 
-    public PlatformConnectionEntity(Long userId, Platform platform, byte[] credentialsEnc) {
+    public PlatformConnectionEntity(Long userId, PlatformEnum platform, byte[] credentialsEnc) {
         this.userId = userId;
         this.platform = platform;
         this.credentialsEnc = credentialsEnc;
@@ -50,7 +50,7 @@ public class PlatformConnectionEntity {
 
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
-    public Platform getPlatform() { return platform; }
+    public PlatformEnum getPlatform() { return platform; }
     public byte[] getCredentialsEnc() { return credentialsEnc; }
     public boolean isNeedsReconnect() { return needsReconnect; }
     public Instant getLastSyncedAt() { return lastSyncedAt; }

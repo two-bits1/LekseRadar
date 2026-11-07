@@ -1,8 +1,8 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.dto.auth.AuthResponse;
-import com.lekseradar.dto.auth.LoginRequest;
-import com.lekseradar.dto.auth.RegisterRequest;
+import com.lekseradar.dto.auth.AuthResponseDTO;
+import com.lekseradar.dto.auth.LoginRequestDTO;
+import com.lekseradar.dto.auth.RegisterRequestDTO;
 import com.lekseradar.model.*;
 import com.lekseradar.model.enums.*;
 import com.lekseradar.service.AuthService;
@@ -73,9 +73,9 @@ class RepositoriesIntegrationTest {
 
     private Long newUser() {
         String email = "it-" + System.nanoTime() + "@example.com";
-        AuthResponse r = auth.register(new RegisterRequest(email, "password123", "Test Elev"));
+        AuthResponseDTO r = auth.register(new RegisterRequestDTO(email, "password123", "Test Elev"));
         assertThat(r.token()).isNotBlank();
-        assertThat(auth.login(new LoginRequest(email.toUpperCase(), "password123")).user().id())
+        assertThat(auth.login(new LoginRequestDTO(email.toUpperCase(), "password123")).user().id())
                 .isEqualTo(r.user().id());
         return r.user().id();
     }
@@ -91,10 +91,10 @@ class RepositoriesIntegrationTest {
     @Test
     void homeworkAndPlatforms() {
         Long userId = newUser();
-        PlatformConnectionEntity pc = platforms.save(new PlatformConnectionEntity(userId, Platform.CANVAS, new byte[]{1, 2, 3}));
+        PlatformConnectionEntity pc = platforms.save(new PlatformConnectionEntity(userId, PlatformEnum.CANVAS, new byte[]{1, 2, 3}));
         pc.markSynced(true, null, false);
         platforms.flush();
-        assertThat(platforms.findByUserIdAndPlatform(userId, Platform.CANVAS)).isPresent();
+        assertThat(platforms.findByUserIdAndPlatform(userId, PlatformEnum.CANVAS)).isPresent();
 
         Instant due = Instant.now().plus(2, ChronoUnit.DAYS);
         assertThat(assignments.upsert(userId, "canvas", "5001", "Lab 3", "IT1", due, "todo", null, "", "assignment")).isEqualTo(1);
@@ -102,7 +102,7 @@ class RepositoriesIntegrationTest {
         var list = assignments.findForUser(userId);
         assertThat(list).hasSize(1);
         assertThat(list.get(0).getTitle()).isEqualTo("Lab 3 (ny)");
-        assertThat(list.get(0).getStatus()).isEqualTo(AssignmentStatus.SUBMITTED);
+        assertThat(list.get(0).getStatus()).isEqualTo(AssignmentStatusEnum.SUBMITTED);
 
         Long assignmentId = list.get(0).getId();
         assertThat(assignments.attachHomeworkFile(assignmentId, "Oppgave 1: løs likningen 2x + 3 = 7.",
@@ -124,8 +124,8 @@ class RepositoriesIntegrationTest {
 
         Long chatId = chats.startChat(userId, "tutor", "Matematikk", "Lineære funksjoner", null, null);
         ChatSessionEntity chat = chats.findByIdAndUserId(chatId, userId).orElseThrow();
-        assertThat(chat.getMode()).isEqualTo(ChatMode.TUTOR);
-        assertThat(chat.getLevel()).isEqualTo(ExerciseLevel.INTERMEDIATE);
+        assertThat(chat.getMode()).isEqualTo(ChatModeEnum.TUTOR);
+        assertThat(chat.getLevel()).isEqualTo(ExerciseLevelEnum.INTERMEDIATE);
         assertThat(subjects.findByName("  matematikk ")).isPresent();
 
         var sp = chats.systemPrompt(chatId);
@@ -133,7 +133,7 @@ class RepositoriesIntegrationTest {
         assertThat(sp.getSubject()).isEqualTo("Matematikk");
         assertThat(prompts.findByKeyAndActiveTrue("tutor")).isPresent();
         assertThat(prompts.getActiveContent("tutor")).contains("{{subject}}");
-        assertThat(modePrompts.findAll()).extracting(ChatModePromptEntity::getMode).contains(ChatMode.TUTOR, ChatMode.QUIZ);
+        assertThat(modePrompts.findAll()).extracting(ChatModePromptEntity::getMode).contains(ChatModeEnum.TUTOR, ChatModeEnum.QUIZ);
 
         chats.setLanguage(chatId, "nb");
         assertThat(chats.promptVars(chatId)).contains("\"language\"");
@@ -146,7 +146,7 @@ class RepositoriesIntegrationTest {
 
         // Свой чат через JPA (как ChatService) тоже работает: режим по умолчанию tutor
         ChatSessionEntity own = chats.saveAndFlush(new ChatSessionEntity(userId, ChatSessionEntity.DEFAULT_TITLE, null));
-        assertThat(own.getMode()).isEqualTo(ChatMode.TUTOR);
+        assertThat(own.getMode()).isEqualTo(ChatModeEnum.TUTOR);
     }
 
     @Test
@@ -161,7 +161,7 @@ class RepositoriesIntegrationTest {
 
         var questions = exercises.findByQuizSetIdOrderByPosition(setId);
         assertThat(questions).extracting(ExerciseEntity::getQuestionType)
-                .containsExactly(QuestionType.SINGLE_CHOICE, QuestionType.MULTIPLE_CHOICE, QuestionType.TEXT);
+                .containsExactly(QuestionTypeEnum.SINGLE_CHOICE, QuestionTypeEnum.MULTIPLE_CHOICE, QuestionTypeEnum.TEXT);
         assertThat(questions.get(0).getOptions().isArray()).isTrue();
 
         Long quizId = quizzes.start(userId, setId);
@@ -176,9 +176,9 @@ class RepositoriesIntegrationTest {
         assertThat(quizzes.saveAnswer(quizId, 3, "Den synker", "partial", "Nesten").getVerdict()).isEqualTo("partial");
         assertThat(quizzes.finish(quizId)).isNotNull();
         QuizEntity quiz = quizzes.findByIdAndUserId(quizId, userId).orElseThrow();
-        assertThat(quiz.getStatus()).isEqualTo(QuizStatus.COMPLETED);
+        assertThat(quiz.getStatus()).isEqualTo(QuizStatusEnum.COMPLETED);
         assertThat(attempts.findByQuizIdOrderByCreatedAt(quizId)).extracting(ExerciseAttemptEntity::getVerdict)
-                .containsExactly(Verdict.CORRECT, Verdict.INCORRECT, Verdict.PARTIAL);
+                .containsExactly(VerdictEnum.CORRECT, VerdictEnum.INCORRECT, VerdictEnum.PARTIAL);
         assertThat(quizzes.findProgress(userId)).isNotEmpty();
         assertThat(users.findTopicProgress(userId)).isNotEmpty();
         assertThat(users.findDailyActivity(userId)).isNotEmpty();
@@ -200,7 +200,7 @@ class RepositoriesIntegrationTest {
                 "Fotosyntesen skjer i kloroplastene. Planter bruker lys, vann og karbondioksid.",
                 "kap4.txt", "text/plain", null);
         MaterialEntity m = materials.findVisible(id, userId).orElseThrow();
-        assertThat(m.getSource()).isEqualTo(MaterialSource.UPLOAD);
+        assertThat(m.getSource()).isEqualTo(MaterialSourceEnum.UPLOAD);
         assertThat(chunks.findByMaterialIdOrderByPosition(id)).isNotEmpty();
         assertThat(materials.findVisible(userId)).extracting(MaterialEntity::getId).contains(id);
         assertThat(materials.search(userId, "kloroplastene", null, 5, null)).isNotEmpty();

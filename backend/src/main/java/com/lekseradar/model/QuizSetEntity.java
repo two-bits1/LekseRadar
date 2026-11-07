@@ -29,7 +29,7 @@ public class QuizSetEntity {
     private String topicKey;
 
     @Column(columnDefinition = "exercise_level")
-    private ExerciseLevel level;
+    private ExerciseLevelEnum level;
 
     private String language;
 
@@ -71,7 +71,7 @@ public class QuizSetEntity {
     public Long getSubjectId() { return subjectId; }
     public String getTopic() { return topic; }
     public String getTopicKey() { return topicKey; }
-    public ExerciseLevel getLevel() { return level; }
+    public ExerciseLevelEnum getLevel() { return level; }
     public String getLanguage() { return language; }
     public String getTitle() { return title; }
     public Integer getQuestionCount() { return questionCount; }

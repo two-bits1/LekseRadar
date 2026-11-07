@@ -1,7 +1,7 @@
 package com.lekseradar.service.ai;
 
-import com.lekseradar.dto.ai.AiMessageRequest;
-import com.lekseradar.dto.ai.AiResponse;
+import com.lekseradar.dto.ai.AiMessageRequestDTO;
+import com.lekseradar.dto.ai.AiResponseDTO;
 import java.util.List;
 
 /**
@@ -10,8 +10,8 @@ import java.util.List;
  */
 public interface AiService {
     /** Обычный текстовый ответ (Markdown). */
-    AiResponse complete(List<AiMessageRequest> messages);
+    AiResponseDTO complete(List<AiMessageRequestDTO> messages);
 
     /** Ответ строго в виде JSON-объекта (для генерации квизов и проверки ответов). */
-    AiResponse completeJson(List<AiMessageRequest> messages);
+    AiResponseDTO completeJson(List<AiMessageRequestDTO> messages);
 }

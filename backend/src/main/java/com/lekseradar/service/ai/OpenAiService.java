@@ -1,7 +1,7 @@
 package com.lekseradar.service.ai;
 
-import com.lekseradar.dto.ai.AiMessageRequest;
-import com.lekseradar.dto.ai.AiResponse;
+import com.lekseradar.dto.ai.AiMessageRequestDTO;
+import com.lekseradar.dto.ai.AiResponseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.lekseradar.config.AppConfig;
 import com.lekseradar.exception.AiServiceException;
@@ -40,16 +40,16 @@ public class OpenAiService implements AiService {
     }
 
     @Override
-    public AiResponse complete(List<AiMessageRequest> messages) {
+    public AiResponseDTO complete(List<AiMessageRequestDTO> messages) {
         return call(messages, false);
     }
 
     @Override
-    public AiResponse completeJson(List<AiMessageRequest> messages) {
+    public AiResponseDTO completeJson(List<AiMessageRequestDTO> messages) {
         return call(messages, true);
     }
 
-    private AiResponse call(List<AiMessageRequest> messages, boolean json) {
+    private AiResponseDTO call(List<AiMessageRequestDTO> messages, boolean json) {
         Map<String, Object> body = new HashMap<>();
         body.put("model", model);
         body.put("messages", messages);
@@ -64,7 +64,7 @@ public class OpenAiService implements AiService {
                 throw new AiServiceException("ИИ вернул пустой ответ");
             }
             JsonNode tokens = res.path("usage").path("total_tokens");
-            return new AiResponse(content, res.path("model").asText(model), tokens.isNumber() ? tokens.asInt() : null);
+            return new AiResponseDTO(content, res.path("model").asText(model), tokens.isNumber() ? tokens.asInt() : null);
         } catch (RestClientResponseException e) {
             // 401 — неверный ключ, 429 — лимит/нет денег на счету, 404 — неверная модель
             log.warn("OpenAI HTTP {}: {}", e.getStatusCode().value(), e.getResponseBodyAsString());

@@ -38,7 +38,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<Dashboard> findDashboard(@Param("userId") Long userId);
 
     /** Освоение по темам (вид user_topic_progress). */
-    interface TopicProgressResponse {
+    interface TopicProgressResponseDTO {
         String getTopic();
         Long getAttempts();
         Long getCorrect();
@@ -51,7 +51,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             SELECT topic, attempts, correct, partial, mastery_pct AS masteryPct, last_activity AS lastActivity
             FROM user_topic_progress WHERE user_id = :userId ORDER BY last_activity DESC
             """, nativeQuery = true)
-    List<TopicProgressResponse> findTopicProgress(@Param("userId") Long userId);
+    List<TopicProgressResponseDTO> findTopicProgress(@Param("userId") Long userId);
 
     /** Активность по дням (вид user_daily_activity). */
     interface DailyActivity {

@@ -25,7 +25,7 @@ public class ChatController {
 
     @GetMapping
     @Operation(summary = "Мои чаты", description = "Последние обновлённые сверху")
-    public List<ChatResponse> list(@CurrentUser UserEntity user,
+    public List<ChatResponseDTO> list(@CurrentUser UserEntity user,
                                    @Parameter(description = "true — только архив, false — только активные, не указан — все")
                                    @RequestParam(required = false) Boolean archived) {
         return chats.list(user.getId(), archived);
@@ -34,20 +34,20 @@ public class ChatController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Создать чат", description = "Тело необязательно")
-    public ChatResponse create(@CurrentUser UserEntity user, @Valid @RequestBody(required = false) CreateChatRequest req) {
+    public ChatResponseDTO create(@CurrentUser UserEntity user, @Valid @RequestBody(required = false) CreateChatRequestDTO req) {
         return chats.create(user.getId(), req);
     }
 
     @GetMapping("/{chatId}")
     @Operation(summary = "Один чат")
-    public ChatResponse get(@CurrentUser UserEntity user, @PathVariable Long chatId) {
+    public ChatResponseDTO get(@CurrentUser UserEntity user, @PathVariable Long chatId) {
         return chats.get(user.getId(), chatId);
     }
 
     @PatchMapping("/{chatId}")
     @Operation(summary = "Переименовать, сменить тему, архивировать")
-    public ChatResponse update(@CurrentUser UserEntity user, @PathVariable Long chatId,
-                               @Valid @RequestBody UpdateChatRequest req) {
+    public ChatResponseDTO update(@CurrentUser UserEntity user, @PathVariable Long chatId,
+                               @Valid @RequestBody UpdateChatRequestDTO req) {
         return chats.update(user.getId(), chatId, req);
     }
 
@@ -60,15 +60,15 @@ public class ChatController {
 
     @GetMapping("/{chatId}/messages")
     @Operation(summary = "Сообщения чата", description = "Старые сверху")
-    public List<MessageResponse> messages(@CurrentUser UserEntity user, @PathVariable Long chatId) {
+    public List<MessageResponseDTO> messages(@CurrentUser UserEntity user, @PathVariable Long chatId) {
         return chats.messages(user.getId(), chatId);
     }
 
     @PostMapping("/{chatId}/messages")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Задать вопрос ИИ", description = "Возвращает сохранённый вопрос и ответ ИИ (Markdown)")
-    public ChatReplyResponse send(@CurrentUser UserEntity user, @PathVariable Long chatId,
-                                  @Valid @RequestBody SendMessageRequest req) {
+    public ChatReplyResponseDTO send(@CurrentUser UserEntity user, @PathVariable Long chatId,
+                                  @Valid @RequestBody SendMessageRequestDTO req) {
         return chats.send(user, chatId, req);
     }
 }

@@ -29,7 +29,7 @@ public class ExerciseAttemptEntity {
     private String answer;
 
     @Column(columnDefinition = "verdict")
-    private Verdict verdict;
+    private VerdictEnum verdict;
 
     private String explanation;
 
@@ -43,7 +43,7 @@ public class ExerciseAttemptEntity {
     public Long getExerciseId() { return exerciseId; }
     public Long getQuizId() { return quizId; }
     public String getAnswer() { return answer; }
-    public Verdict getVerdict() { return verdict; }
+    public VerdictEnum getVerdict() { return verdict; }
     public String getExplanation() { return explanation; }
     public Instant getCreatedAt() { return createdAt; }
 }

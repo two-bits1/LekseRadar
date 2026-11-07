@@ -38,10 +38,10 @@ public class QuizEntity {
     private String topic;
 
     @Column(columnDefinition = "exercise_level")
-    private ExerciseLevel level;
+    private ExerciseLevelEnum level;
 
     @Column(columnDefinition = "quiz_status")
-    private QuizStatus status;
+    private QuizStatusEnum status;
 
     /** 0–100, после finish_quiz. */
     private BigDecimal score;
@@ -66,8 +66,8 @@ public class QuizEntity {
     public Long getQuizSetId() { return quizSetId; }
     public String getTitle() { return title; }
     public String getTopic() { return topic; }
-    public ExerciseLevel getLevel() { return level; }
-    public QuizStatus getStatus() { return status; }
+    public ExerciseLevelEnum getLevel() { return level; }
+    public QuizStatusEnum getStatus() { return status; }
     public BigDecimal getScore() { return score; }
     public Integer getCurrentPosition() { return currentPosition; }
     public Instant getStartedAt() { return startedAt; }

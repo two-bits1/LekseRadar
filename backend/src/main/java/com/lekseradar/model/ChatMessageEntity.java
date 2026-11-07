@@ -24,7 +24,7 @@ public class ChatMessageEntity {
     @Convert(converter = MessageRoleConverter.class)
     @ColumnTransformer(write = "?::chat_role")
     @Column(nullable = false, columnDefinition = "chat_role")
-    private MessageRole role;
+    private MessageRoleEnum role;
 
     @Column(nullable = false)
     private String content;
@@ -51,7 +51,7 @@ public class ChatMessageEntity {
     public static ChatMessageEntity fromStudent(Long sessionId, String content) {
         ChatMessageEntity m = new ChatMessageEntity();
         m.sessionId = sessionId;
-        m.role = MessageRole.STUDENT;
+        m.role = MessageRoleEnum.STUDENT;
         m.content = content;
         return m;
     }
@@ -59,7 +59,7 @@ public class ChatMessageEntity {
     public static ChatMessageEntity fromTutor(Long sessionId, String content, String model, Integer tokensUsed) {
         ChatMessageEntity m = new ChatMessageEntity();
         m.sessionId = sessionId;
-        m.role = MessageRole.TUTOR;
+        m.role = MessageRoleEnum.TUTOR;
         m.content = content;
         m.model = model;
         m.tokensUsed = tokensUsed;
@@ -68,7 +68,7 @@ public class ChatMessageEntity {
 
     public Long getId() { return id; }
     public Long getSessionId() { return sessionId; }
-    public MessageRole getRole() { return role; }
+    public MessageRoleEnum getRole() { return role; }
     public String getContent() { return content; }
     public Boolean getOnTopic() { return onTopic; }
     public String getModel() { return model; }
