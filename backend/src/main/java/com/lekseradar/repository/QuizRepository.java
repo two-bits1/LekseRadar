@@ -2,6 +2,7 @@ package com.lekseradar.repository;
 
 import com.lekseradar.model.QuizEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,16 @@ public interface QuizRepository extends JpaRepository<QuizEntity, Long> {
     @Transactional
     @Query(value = "SELECT start_quiz(:userId, :setId)", nativeQuery = true)
     Long start(@Param("userId") Long userId, @Param("setId") Long setId);
+
+    /** Откуда квиз: квиз-чат, где ИИ его составил, и ДЗ. null не меняет значение. */
+    @Modifying
+    @Transactional
+    @Query(value = """
+            UPDATE quizzes SET chat_session_id = coalesce(CAST(:chatId AS bigint), chat_session_id),
+                               assignment_id   = coalesce(CAST(:assignmentId AS bigint), assignment_id)
+            WHERE id = :quizId
+            """, nativeQuery = true)
+    int link(@Param("quizId") Long quizId, @Param("chatId") Long chatId, @Param("assignmentId") Long assignmentId);
 
     /** Вопрос для экрана квиза, без правильного ответа (вид quiz_questions_public). */
     interface PublicQuestion {

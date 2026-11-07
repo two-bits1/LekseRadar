@@ -2,6 +2,7 @@ package com.lekseradar.repository;
 
 import com.lekseradar.model.QuizSetEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,4 +26,11 @@ public interface QuizSetRepository extends JpaRepository<QuizSetEntity, Long> {
     @Transactional
     @Query(value = "SELECT import_quiz_json(CAST(:json AS jsonb), :userId)", nativeQuery = true)
     Long importJson(@Param("json") String json, @Param("userId") Long userId);
+
+    /** Каким промптом составлен набор (quiz_sets.prompt_id, V12): пишется один раз, при первом импорте. */
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE quiz_sets SET prompt_id = :promptId WHERE id = :setId AND prompt_id IS NULL",
+            nativeQuery = true)
+    int setPromptIfEmpty(@Param("setId") Long setId, @Param("promptId") Long promptId);
 }

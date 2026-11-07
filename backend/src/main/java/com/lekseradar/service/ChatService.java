@@ -1,11 +1,8 @@
 package com.lekseradar.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lekseradar.dto.ai.AiMessageRequestDTO;
 import com.lekseradar.dto.ai.AiResponseDTO;
 import com.lekseradar.dto.chat.*;
-import com.lekseradar.exception.ApiException;
 import com.lekseradar.exception.NotFoundException;
 import com.lekseradar.model.ChatMessageEntity;
 import com.lekseradar.model.ChatSessionEntity;
@@ -16,13 +13,8 @@ import com.lekseradar.model.enums.MessageRoleEnum;
 import com.lekseradar.repository.AssignmentRepository;
 import com.lekseradar.repository.ChatMessageRepository;
 import com.lekseradar.repository.ChatSessionRepository;
-import com.lekseradar.repository.MaterialRepository;
 import com.lekseradar.repository.SubjectRepository;
 import com.lekseradar.service.ai.AiService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,40 +24,39 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * ИИ-чат. Режим, промпт и данные для промпта берутся из базы:
- * start_chat → chat_system_prompt + chat_prompt_vars (+ materials_for_prompt) → ответ ИИ.
+ * ИИ-чат двух видов (режим задаётся при создании):
+ * <ul>
+ *   <li>{@code tutor} — репетитор отвечает текстом по промпту tutor;</li>
+ *   <li>{@code quiz} — каждое сообщение ученика («квиз по дробям», «сложнее») → ИИ составляет квиз
+ *       по промпту quiz_generator, в ответе чата {@code chat.quizSetId}.</li>
+ * </ul>
+ * Промпты берутся из базы ({@link PromptService}), туда их кладёт ai-content/load/load.py.
  */
 @Service
 public class ChatService {
-    private static final Logger log = LoggerFactory.getLogger(ChatService.class);
-
     private static final int TITLE_MAX_LENGTH = 60;
-    private static final int MATERIALS_LIMIT = 5;
-    /** Сколько вопросов просить у ИИ в режиме quiz ({{count}} в промпте). */
-    private static final int QUIZ_QUESTION_COUNT = 10;
     /** Тьютор ставит эту метку, когда ученик выбрал язык. */
     private static final Pattern LANGUAGE_TAG = Pattern.compile("\\[\\[LANGUAGE=([A-Za-z]{2,3})]]");
     private static final Pattern LANGUAGE_QUESTION_TAG = Pattern.compile("\\[\\[LANGUAGE_QUESTION]]");
-    private static final Pattern PROMPT_VAR = Pattern.compile("\\{\\{(\\w+)}}");
 
     private final ChatSessionRepository sessions;
     private final ChatMessageRepository messages;
     private final SubjectRepository subjects;
     private final AssignmentRepository assignments;
-    private final MaterialRepository materials;
+    private final PromptService prompts;
+    private final QuizGeneratorService quizGenerator;
     private final AiService ai;
-    private final ObjectMapper mapper;
 
     public ChatService(ChatSessionRepository sessions, ChatMessageRepository messages, SubjectRepository subjects,
-                       AssignmentRepository assignments, MaterialRepository materials, AiService ai,
-                       ObjectMapper mapper) {
+                       AssignmentRepository assignments, PromptService prompts, QuizGeneratorService quizGenerator,
+                       AiService ai) {
         this.sessions = sessions;
         this.messages = messages;
         this.subjects = subjects;
         this.assignments = assignments;
-        this.materials = materials;
+        this.prompts = prompts;
+        this.quizGenerator = quizGenerator;
         this.ai = ai;
-        this.mapper = mapper;
     }
 
     /** @param archived null — все чаты, true/false — только архивные / только активные */
@@ -121,33 +112,20 @@ public class ChatService {
     }
 
     /**
-     * Вопрос → ИИ → ответ. Промпт режима чата берётся из базы и заполняется данными чата
-     * (язык, предмет, тема, ДЗ, слабые темы, учебные материалы). Вызов ИИ идёт вне транзакции,
-     * чтобы не держать соединение с БД. Если ИИ недоступен, вопрос остаётся в истории.
+     * Сообщение ученика → ИИ → ответ. Вызов ИИ идёт вне транзакции, чтобы не держать соединение с БД.
+     * Если ИИ недоступен, вопрос остаётся в истории.
      */
     public ChatReplyResponseDTO send(UserEntity user, Long chatId, SendMessageRequestDTO req) {
         String content = req.content().strip();
         ChatSessionEntity s = owned(user.getId(), chatId);
-        ChatSessionRepository.SystemPrompt system = loadSystemPrompt(chatId);
+        ChatSessionRepository.SystemPrompt system = prompts.forChat(chatId);   // нет промпта → 503 до сохранения
 
         ChatMessageEntity question = messages.save(ChatMessageEntity.fromStudent(chatId, content));
+        ChatMessageEntity answer = s.getMode() == ChatModeEnum.QUIZ
+                ? quizGenerator.generate(user, s, content, null).message()
+                : tutorReply(user, s, system, content);
 
-        List<AiMessageRequestDTO> prompt = new ArrayList<>();
-        prompt.add(AiMessageRequestDTO.system(render(system.getContent(), promptVars(s, user, content))));
-        for (ChatMessageRepository.ContextMessage m : messages.findContext(chatId)) {
-            prompt.add(MessageRoleEnum.TUTOR.value().equals(m.getRole())
-                    ? AiMessageRequestDTO.assistant(m.getContent())
-                    : AiMessageRequestDTO.user(m.getContent()));
-        }
-
-        AiResponseDTO reply = ai.complete(prompt);
-        String text = handleTags(chatId, reply.content());
-
-        ChatMessageEntity answer = ChatMessageEntity.fromTutor(chatId, limit(text), reply.model(), reply.tokensUsed());
-        answer.setPromptId(system.getPromptId());
-        answer = messages.save(answer);
-
-        // перечитываем: язык мог поменяться в set_chat_language
+        // перечитываем: язык или квиз чата мог поменяться
         ChatSessionEntity fresh = owned(user.getId(), chatId);
         if (ChatSessionEntity.DEFAULT_TITLE.equals(fresh.getTitle())) {
             fresh.setTitle(makeTitle(content));
@@ -158,45 +136,24 @@ public class ChatService {
         return new ChatReplyResponseDTO(toResponse(fresh), MessageResponseDTO.from(question), MessageResponseDTO.from(answer));
     }
 
-    private ChatSessionRepository.SystemPrompt loadSystemPrompt(Long chatId) {
-        try {
-            ChatSessionRepository.SystemPrompt p = sessions.systemPrompt(chatId);
-            if (p == null || p.getContent() == null) throw new IllegalStateException("empty prompt");
-            return p;
-        } catch (DataAccessException | IllegalStateException e) {
-            log.error("Нет промпта для чата {}: {}", chatId, e.getMessage());
-            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Промпт для чата не загружен в базу: запустите ai-content/load/load.py");
+    /** Промпт tutor + {{переменные}} + последние 10 реплик (chat_context). */
+    private ChatMessageEntity tutorReply(UserEntity user, ChatSessionEntity s,
+                                         ChatSessionRepository.SystemPrompt system, String content) {
+        List<AiMessageRequestDTO> prompt = new ArrayList<>();
+        prompt.add(AiMessageRequestDTO.system(PromptService.render(system.getContent(),
+                prompts.chatVars(s, user.getId(), content))));
+        for (ChatMessageRepository.ContextMessage m : messages.findContext(s.getId())) {
+            prompt.add(MessageRoleEnum.TUTOR.value().equals(m.getRole())
+                    ? AiMessageRequestDTO.assistant(m.getContent())
+                    : AiMessageRequestDTO.user(m.getContent()));
         }
-    }
 
-    /** Значения для {{...}}: из chat_prompt_vars, плюс {{materials}} и {{count}}. */
-    private Map<String, String> promptVars(ChatSessionEntity s, UserEntity user, String question) {
-        Map<String, String> vars = new HashMap<>();
-        try {
-            Map<String, Object> raw = mapper.readValue(sessions.promptVars(s.getId()), new TypeReference<>() {});
-            raw.forEach((k, v) -> vars.put(k, v == null ? "" : String.valueOf(v)));
-        } catch (Exception e) {
-            log.warn("chat_prompt_vars({}) не разобран: {}", s.getId(), e.getMessage());
-        }
-        String found = materials.forPrompt(user.getId(), question, s.getSubjectId(), MATERIALS_LIMIT, s.getTopic());
-        vars.put("materials", isBlank(found) ? "нет материалов" : found);
-        if (s.getMode() == ChatModeEnum.QUIZ) {
-            vars.putIfAbsent("count", String.valueOf(QUIZ_QUESTION_COUNT));
-        }
-        return vars;
-    }
+        AiResponseDTO reply = ai.complete(prompt);
+        String text = handleTags(s.getId(), reply.content());
 
-    /** Подставляет {{key}}; неизвестные переменные остаются как есть. */
-    static String render(String template, Map<String, String> vars) {
-        Matcher m = PROMPT_VAR.matcher(template);
-        StringBuilder out = new StringBuilder();
-        while (m.find()) {
-            String value = vars.get(m.group(1));
-            m.appendReplacement(out, Matcher.quoteReplacement(value != null ? value : m.group()));
-        }
-        m.appendTail(out);
-        return out.toString();
+        ChatMessageEntity answer = ChatMessageEntity.fromTutor(s.getId(), limit(text), reply.model(), reply.tokensUsed());
+        answer.setPromptId(system.getPromptId());
+        return messages.save(answer);
     }
 
     /** [[LANGUAGE=xx]] → сохранить язык чата; служебные метки ученику не показываем. */
