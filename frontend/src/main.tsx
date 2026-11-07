@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, NavLink, Link, Navigate, useLocation } from 'react-router-dom';
-import { CalendarDays, Layers, UserRound, Settings2, ArrowUpRight, Radar, LogIn } from 'lucide-react';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
 import { Dashboard } from './pages/Dashboard';
 import { Flashcards } from './pages/Learning';
 import { ChatList, ChatView } from './pages/Chats';
@@ -9,8 +9,8 @@ import { Calendar, Settings, Status, Soon } from './pages/Other';
 import { Auth, Profile } from './pages/Account';
 import { type ThemeChoice, loadThemeChoice, saveThemeChoice, resolveTheme, themeColor } from './theme';
 import { PATHS } from './paths';
-import { AuthProvider, RequireAuth, useAuth } from './auth';
-import { OrbLink } from './components/Orb';
+import { AuthProvider, RequireAuth } from './auth';
+import { AppHeader } from './components/AppHeader';
 import { I18nProvider, useT } from './i18n';
 import './styles.css';
 const darkQuery='(prefers-color-scheme: dark)';
@@ -33,12 +33,6 @@ function useTheme(){
 }
 // Старые адреса (до API.md) ведут на новые, ?assignment=… сохраняется.
 function Moved({to}:{to:string}){const {search}=useLocation();return <Navigate to={to+search} replace/>;}
-// Справа в шапке: «Logg inn» до входа; после входа пусто — профиль уже есть в меню (вариант B).
-function HeaderUser(){
- const {token}=useAuth();const t=useT();
- if(token)return null;
- return <Link to={PATHS.login} className="guest"><span className="avatar"><LogIn size={16}/></span><span>{t.header.login}</span></Link>;
-}
 function App(){
  const {choice:theme,resolved,setChoice:setTheme}=useTheme();
  const t=useT();
@@ -46,9 +40,7 @@ function App(){
  const toggle=(id:string)=>setCompleted(items=>items.includes(id)?items.filter(i=>i!==id):[...items,id]);
  return <div className="app" data-theme={resolved}>
   <a className="skip" href="#main">{t.header.skip}</a>
-  <header className="header"><Link to={PATHS.home} className="brand" aria-label={t.header.home}><span className="brand-mark"><Radar size={21}/></span><span>LekseRadar<span className="brand-dot">.</span></span></Link>
-  <nav aria-label={t.nav.main}><NavLink to={PATHS.homework}><CalendarDays/><span>{t.nav.calendar}</span></NavLink><NavLink to={PATHS.flashcards}><Layers/><span>{t.nav.flashcards}</span></NavLink><OrbLink to={PATHS.chats} label={t.nav.tutor}/><NavLink to={PATHS.profile}><UserRound/><span>{t.nav.profile}</span></NavLink><NavLink to={PATHS.settings}><Settings2/><span>{t.nav.settings}</span></NavLink></nav>
-  <HeaderUser/></header>
+  <AppHeader/>
   <div className="demo-bar"><span className="live-dot"/>{t.demoBar.text}<Link to={PATHS.status}>{t.demoBar.link} <ArrowUpRight size={13}/></Link></div>
   <main id="main"><Routes>
    {/* 🔓 Страницы из API.md */}
