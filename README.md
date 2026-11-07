@@ -5,7 +5,7 @@ Google Classroom) в одном месте и помогает их сделат
 
 Ветка `main-test-4.0` — финальная сборка из трёх PR: `PythonAPI` (#9), `JavaAPI-setup` (#2), `Frontend-setup` (#10).
 Тестовых данных нет: ученик создаётся регистрацией. Результаты проверки: [README-TEST.md](README-TEST.md),
-что осталось: [TODO.md](TODO.md).
+что осталось: [TODO.md](TODO.md), все правки после проверки командой: [CHANGES.md](CHANGES.md).
 
 **Railway собран, но пока требует дополнительной настройки:** [RAILWAY-STATUS.md](RAILWAY-STATUS.md).
 
