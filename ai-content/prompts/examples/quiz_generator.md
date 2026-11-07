@@ -9,7 +9,8 @@
 |---|---|
 | `{{subject}}`, `{{topic}}` | выбор пользователя |
 | `{{level}}` | beginner / intermediate / advanced |
-| `{{language}}` | `users.locale` |
+| `{{language}}` | название языка сайта (`users.locale`, или свой язык чата): `русский (ru)` |
+| `{{language_code}}` | код языка (`ru`, `nb`) для поля `"language"` JSON квиза (V20) |
 | `{{count}}` | сколько вопросов (по умолчанию 8, максимум 30) |
 | `{{materials}}` | `search_materials(topic, subject_id, 8)` — может быть пусто |
 
