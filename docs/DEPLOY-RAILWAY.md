@@ -1,5 +1,7 @@
 # Деплой на Railway: база, collector и бэкенд
 
+> **Статус (7 ноября):** Railway собран, но пока не работает целиком — см. [RAILWAY-STATUS.md](RAILWAY-STATUS.md).
+
 Один проект Railway, три сервиса: **Postgres**, **collector** (без публичного адреса) и **backend** (№2).
 Фронт отдельно на Vercel ([PLAN-FRONTEND.md](https://github.com/two-bits1/LekseRadar/blob/main-test-3.0/docs/PLAN-FRONTEND.md), шаг 4). Время: около часа.
 
