@@ -12,4 +12,4 @@ public class LekseRadarApplication {
     public static void main(String[] args) {
         SpringApplication.run(LekseRadarApplication.class, args);
     }
-}
+} 

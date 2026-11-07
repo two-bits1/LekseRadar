@@ -1,8 +1,8 @@
 package com.lekseradar.controller;
 
-import com.lekseradar.dto.auth.AuthResponse;
-import com.lekseradar.dto.auth.LoginRequest;
-import com.lekseradar.dto.auth.RegisterRequest;
+import com.lekseradar.dto.auth.AuthResponseDTO;
+import com.lekseradar.dto.auth.LoginRequestDTO;
+import com.lekseradar.dto.auth.RegisterRequestDTO;
 import com.lekseradar.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -25,13 +25,13 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Регистрация", description = "Возвращает JWT-токен и профиль")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest req) {
+    public AuthResponseDTO register(@Valid @RequestBody RegisterRequestDTO req) {
         return auth.register(req);
     }
 
     @PostMapping("/login")
     @Operation(summary = "Вход", description = "Возвращает JWT-токен и профиль")
-    public AuthResponse login(@Valid @RequestBody LoginRequest req) {
+    public AuthResponseDTO login(@Valid @RequestBody LoginRequestDTO req) {
         return auth.login(req);
     }
 }

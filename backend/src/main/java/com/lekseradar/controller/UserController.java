@@ -1,9 +1,9 @@
 package com.lekseradar.controller;
 
-import com.lekseradar.dto.user.ChangePasswordRequest;
-import com.lekseradar.dto.user.UpdateProfileRequest;
-import com.lekseradar.dto.user.UserResponse;
-import com.lekseradar.model.User;
+import com.lekseradar.dto.user.ChangePasswordRequestDTO;
+import com.lekseradar.dto.user.UpdateProfileRequestDTO;
+import com.lekseradar.dto.user.UserResponseDTO;
+import com.lekseradar.model.UserEntity;
 import com.lekseradar.security.CurrentUser;
 import com.lekseradar.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,20 +24,20 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "Мой профиль")
-    public UserResponse me(@CurrentUser User user) {
-        return UserResponse.from(user);
+    public UserResponseDTO me(@CurrentUser UserEntity user) {
+        return UserResponseDTO.from(user);
     }
 
     @PatchMapping
     @Operation(summary = "Изменить имя, язык или часовой пояс")
-    public UserResponse updateProfile(@CurrentUser User user, @Valid @RequestBody UpdateProfileRequest req) {
+    public UserResponseDTO updateProfile(@CurrentUser UserEntity user, @Valid @RequestBody UpdateProfileRequestDTO req) {
         return users.updateProfile(user.getId(), req);
     }
 
     @PutMapping("/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Сменить пароль", description = "Нужен текущий пароль. Выданные токены продолжают работать")
-    public void changePassword(@CurrentUser User user, @Valid @RequestBody ChangePasswordRequest req) {
+    public void changePassword(@CurrentUser UserEntity user, @Valid @RequestBody ChangePasswordRequestDTO req) {
         users.changePassword(user.getId(), req);
     }
 }

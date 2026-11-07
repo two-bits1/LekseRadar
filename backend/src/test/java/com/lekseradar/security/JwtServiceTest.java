@@ -1,6 +1,6 @@
 package com.lekseradar.security;
 
-import com.lekseradar.config.AppProperties;
+import com.lekseradar.config.AppConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,7 +10,7 @@ class JwtServiceTest {
     private static final String SECRET = "test-secret-test-secret-test-secret-123";
 
     private static JwtService service(String secret, long ttlHours) {
-        return new JwtService(new AppProperties(new AppProperties.Jwt(secret, ttlHours), null, null));
+        return new JwtService(new AppConfig(new AppConfig.Jwt(secret, ttlHours), null, null));
     }
 
     @Test
