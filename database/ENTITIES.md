@@ -2,7 +2,7 @@
 
 Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO)
 и во фронтенде (TypeScript-типы). База — ветка `PythonAPI`, бэкенд — ветка `JavaAPI-setup`.
-Источник правды — миграции `database/migrations/V1–V16`. Бэкенд таблицы не создаёт, но при старте
+Источник правды — миграции `database/migrations/V1–V17`. Бэкенд таблицы не создаёт, но при старте
 сверяет с ними все сущности (`ddl-auto: validate`) и не запустится, если колонка или тип не совпадают.
 
 **Пробных данных нет нигде.** База стартует пустой (seed.sql удалён, `assignments.is_demo` убран в V16),
@@ -169,7 +169,7 @@ erDiagram
 | `mode` | chat_mode | enum `ChatMode` + конвертер | нет | `'tutor'::chat_mode` |  | tutor — репетитор, quiz — генерация квизов; не меняется |
 | `subject_id` | bigint | Long | да |  | FK → subjects.id | предмет |
 | `quiz_set_id` | bigint | Long | да |  | FK → quiz_sets.id SET NULL | квиз, созданный в этом чате |
-| `language` | text | String | да |  |  | язык ученика; NULL — ещё не выбран |
+| `language` | text | String | да |  |  | свой язык чата; NULL — язык сайта (`users.locale`), см. V17 |
 | `level` | exercise_level | enum `ExerciseLevel` + конвертер | нет | `'intermediate'::exercise_level` |  | уровень квиза в чате quiz |
 
 Ограничения и индексы: `CHECK ((language ~ '^[a-z]{2,3}$'))`; индекс `chat_sessions_user btree (user_id, updated_at DESC)`; индекс `chat_sessions_user_mode btree (user_id, mode, updated_at DESC)`.
