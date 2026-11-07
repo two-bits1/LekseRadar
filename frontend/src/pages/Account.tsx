@@ -7,7 +7,7 @@ import { useAuth, initialOf } from '../auth';
 import { usersApi } from '../api/endpoints';
 import type { ApiError, User } from '../api/types';
 import { Field, asApiError, fieldError, generalError } from '../forms';
-import { Orb } from '../components/Orb';
+import { Radar } from 'lucide-react';
 import { useT } from '../i18n';
 
 // POST /auth/login | /auth/register → токен → на «/».
@@ -15,7 +15,7 @@ import { useT } from '../i18n';
 export function Auth({register=false}:{register?:boolean}){
  const auth=useAuth();const t=useT();const a=t.auth;
  if(auth.token)return <Navigate to={PATHS.home} replace/>;
- return <section className="page auth-page"><Orb size={56}/><div className="eyebrow">{a.eyebrow}</div><h1>{register?a.titleRegister:a.titleLogin}</h1><p>{a.intro}</p><AuthForm register={register}/><Link className="text-link" to={register?PATHS.login:PATHS.register}>{register?a.toLogin:a.toRegister}</Link></section>;
+ return <section className="page auth-page"><span className="auth-logo" aria-hidden="true"><Radar size={28}/></span><div className="eyebrow">{a.eyebrow}</div><h1>{register?a.titleRegister:a.titleLogin}</h1><p>{a.intro}</p><AuthForm register={register}/><Link className="text-link" to={register?PATHS.login:PATHS.register}>{register?a.toLogin:a.toRegister}</Link></section>;
 }
 
 // Сама форма — та же на /login, /register и в центре лендинга.
