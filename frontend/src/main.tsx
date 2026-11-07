@@ -61,11 +61,11 @@ function App(){
     <Route path={PATHS.chats} element={<ChatList/>}/>
     <Route path={PATHS.chat(':chatId')} element={<ChatView/>}/>
     <Route path={PATHS.homework} element={<Calendar/>}/>
-    <Route path={PATHS.quizzes} element={<Flashcards key="quiz" initialMode="Quiz"/>}/>
-    <Route path={PATHS.quiz(':quizId')} element={<Flashcards key="quiz" initialMode="Quiz"/>}/>
+    <Route path={PATHS.quizzes} element={<Flashcards key="quiz" initialMode="quiz"/>}/>
+    <Route path={PATHS.quiz(':quizId')} element={<Flashcards key="quiz" initialMode="quiz"/>}/>
     <Route path={PATHS.flashcards} element={<Flashcards key="cards"/>}/>
-    <Route path={PATHS.progress} element={<Soon title="Fremgang" text="Grafer per fag og dag kommer når fremgangen lagres på kontoen din."/>}/>
-    <Route path={PATHS.history} element={<Soon title="Historikk" text="Her ser du snart hva du har jobbet med, steg for steg."/>}/>
+    <Route path={PATHS.progress} element={<Soon title={t.soon.progressTitle} text={t.soon.progressText}/>}/>
+    <Route path={PATHS.history} element={<Soon title={t.soon.historyTitle} text={t.soon.historyText}/>}/>
     <Route path={PATHS.platforms} element={<Settings theme={theme} setTheme={setTheme} platformsOnly/>}/>
     {/* Только фронтенд, тоже 🔒 */}
     <Route path={PATHS.settings} element={<Settings theme={theme} setTheme={setTheme}/>}/>
@@ -76,7 +76,7 @@ function App(){
    <Route path="/dashboard" element={<Moved to={PATHS.home}/>}/>
    <Route path="/tutor" element={<Moved to={PATHS.chats}/>}/>
    <Route path="/calendar" element={<Moved to={PATHS.homework}/>}/>
-   <Route path="*" element={<section className="page"><h1>Her var det stille.</h1><p>Denne siden finnes ikke ennå.</p><Link className="button" to={PATHS.status}>Se alle sidene</Link></section>}/>
+   <Route path="*" element={<section className="page"><h1>{t.notFound.title}</h1><p>{t.notFound.text}</p><Link className="button" to={PATHS.status}>{t.notFound.link}</Link></section>}/>
   </Routes></main>
   <footer><Link to={PATHS.home}>LekseRadar.</Link><span>{t.footer.tagline}</span><Link to={PATHS.status}>{t.footer.status} <ArrowUpRight size={12}/></Link></footer>
  </div>;

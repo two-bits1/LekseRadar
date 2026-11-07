@@ -63,4 +63,33 @@ export const en: Dict = {
     typing: 'The AI tutor is typing …', retry: 'Try again', inputLabel: 'Your question', placeholder: 'What are you wondering about?', send: 'Send',
     hint: (n: number, max: number) => `Enter sends · Shift+Enter for a new line · ${n}/${max}`,
   },
+  learning: {
+    eyebrow: 'TURN KNOWLEDGE INTO SOMETHING THAT STICKS', title: 'A little practice. More mastery.',
+    modes: { cards: 'Cards', quiz: 'Quiz', practice: 'Practice' },
+    learned: (n: number, total: number) => `${n} of ${total} learned`,
+    question: 'Question', answer: 'Answer', flip: 'Flip the card.', think: 'THINK ABOUT THIS', answerEyebrow: 'ANSWER', flipHint: 'Tap to flip the card',
+    prev: 'Previous card', next: 'Next card', practiceMore: 'Practise more', iKnowThis: 'I know this', allLearned: 'All cards learned. Well done!',
+    quizEyebrow: 'DEMO QUESTION · 1 OF 1', practiceEyebrow: 'DEMO EXERCISE · 1 OF 1', yourAnswer: 'Your answer', check: 'Check answer',
+    demoNote1: 'Demo cards for maths. More subjects and generation are coming later.', demoNote2: 'Progress only lasts for this session.',
+  },
+  calendar: {
+    eyebrow: 'OVERVIEW GIVES BREATHING ROOM', title: 'One thing at a time.', intro: 'Deadlines, small reminders and room for life in between.',
+    month: 'Month', demoWeek: 'Demo week', prevMonth: 'Previous month', nextMonth: 'Next month',
+    open: (subject: string, title: string) => `Open ${subject}: ${title}`, close: 'Close', explore: 'Explore with the tutor',
+    demoNote: 'The demo deadlines are in November 2026. No real notifications are enabled.',
+  },
+  soon: {
+    eyebrow: 'COMING SOON', text: 'This page already has its address, but the content is waiting for the API.', toOverview: 'Back to overview',
+    progressTitle: 'Progress', progressText: 'Charts by subject and day will arrive when progress is saved to your account.',
+    historyTitle: 'History', historyText: 'Soon you’ll see what you’ve worked on, step by step.',
+  },
+  notFound: { title: 'It’s quiet here.', text: 'This page doesn’t exist yet.', link: 'See all pages' },
+  status: {
+    eyebrow: 'OPENLY IN DEVELOPMENT', title1: 'The whole prototype.', title2: 'One link to share.',
+    intro: 'Pages require login, except login, sign-up and this overview. Unfinished features are marked, so you always know what actually works.',
+    sitemap: 'Sitemap and status', version: 'Version 0.1', copied: 'Link copied', copy: 'Copy link to the sitemap',
+    note1: 'This address is a preview. Publish the project for a permanent public link.', note2: 'GitHub stores the code; Vercel shows the running website.',
+    pages: { home: 'Overview', homework: 'Homework and calendar', tutor: 'AI tutor', chat: 'Chat', quiz: 'Quiz', flashcards: 'Flashcards', progress: 'Progress', history: 'History', profile: 'Profile', settings: 'Settings', platforms: 'Platforms', login: 'Log in', register: 'Create account' },
+    states: { demo: 'Interactive demo', api: 'Connected to API', later: 'Coming later', partial: 'Partly ready' },
+  },
 };

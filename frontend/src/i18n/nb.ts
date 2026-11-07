@@ -62,6 +62,35 @@ export const nb = {
     typing: 'AI-veilederen skriver …', retry: 'Prøv igjen', inputLabel: 'Ditt spørsmål', placeholder: 'Hva lurer du på?', send: 'Send',
     hint: (n: number, max: number) => `Enter sender · Shift+Enter gir ny linje · ${n}/${max}`,
   },
+  learning: {
+    eyebrow: 'GJØR KUNNSKAP TIL NOE SOM SITTER', title: 'Litt øving. Mer mestring.',
+    modes: { cards: 'Kort', quiz: 'Quiz', practice: 'Øvingsoppgaver' },
+    learned: (n: number, total: number) => `${n} av ${total} lært`,
+    question: 'Spørsmål', answer: 'Svar', flip: 'Snu kortet.', think: 'TENK LITT PÅ DETTE', answerEyebrow: 'SVAR', flipHint: 'Trykk for å snu kortet',
+    prev: 'Forrige kort', next: 'Neste kort', practiceMore: 'Øv mer', iKnowThis: 'Dette kan jeg', allLearned: 'Alle kortene er lært. Godt jobbet!',
+    quizEyebrow: 'DEMOSPØRSMÅL · 1 AV 1', practiceEyebrow: 'DEMOØVELSE · 1 AV 1', yourAnswer: 'Ditt svar', check: 'Sjekk svaret',
+    demoNote1: 'Demokort for matematikk. Flere fag og generering kommer senere.', demoNote2: 'Fremgangen gjelder bare denne åpne økten.',
+  },
+  calendar: {
+    eyebrow: 'OVERSIKT GIR PUSTEROM', title: 'En ting om gangen.', intro: 'Frister, små påminnelser og plass til livet imellom.',
+    month: 'Måned', demoWeek: 'Demouke', prevMonth: 'Forrige måned', nextMonth: 'Neste måned',
+    open: (subject: string, title: string) => `Åpne ${subject}: ${title}`, close: 'Lukk', explore: 'Utforsk med veilederen',
+    demoNote: 'Demofristene ligger i november 2026. Ingen ekte varsler er aktivert.',
+  },
+  soon: {
+    eyebrow: 'KOMMER SNART', text: 'Denne siden er klar i adressen, men innholdet venter på API-et.', toOverview: 'Til oversikten',
+    progressTitle: 'Fremgang', progressText: 'Grafer per fag og dag kommer når fremgangen lagres på kontoen din.',
+    historyTitle: 'Historikk', historyText: 'Her ser du snart hva du har jobbet med, steg for steg.',
+  },
+  notFound: { title: 'Her var det stille.', text: 'Denne siden finnes ikke ennå.', link: 'Se alle sidene' },
+  status: {
+    eyebrow: 'ÅPENT UNDER UTVIKLING', title1: 'Hele prototypen.', title2: 'Én lenke å dele.',
+    intro: 'Sidene krever innlogging, bortsett fra innlogging, registrering og denne oversikten. Uferdige funksjoner er merket, slik at du alltid vet hva som faktisk virker.',
+    sitemap: 'Sidekart og status', version: 'Versjon 0.1', copied: 'Lenken er kopiert', copy: 'Kopier lenke til sidekartet',
+    note1: 'Denne adressen er en forhåndsvisning. Publiser prosjektet for en varig offentlig lenke.', note2: 'GitHub lagrer koden; Vercel viser den kjørende nettsiden.',
+    pages: { home: 'Oversikt', homework: 'Lekser og kalender', tutor: 'AI-veileder', chat: 'Samtale', quiz: 'Quiz', flashcards: 'Læringskort', progress: 'Fremgang', history: 'Historikk', profile: 'Profil', settings: 'Innstillinger', platforms: 'Plattformer', login: 'Logg inn', register: 'Opprett konto' },
+    states: { demo: 'Interaktiv demo', api: 'Koblet til API', later: 'Kommer senere', partial: 'Delvis klar' },
+  },
 };
 
 export type Dict = typeof nb;
