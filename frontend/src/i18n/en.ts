@@ -119,6 +119,8 @@ export const en: Dict = {
     correctAnswer: 'Correct answer', next: 'Next question', prev: 'Previous', finish: 'Finish quiz', finishing: 'Calculating …',
     resultTitle: 'Quiz finished', result: (n: number) => `You got ${n} %`, toCards: 'Learn with flashcards', toCardsDone: (n: number) => `${n} new cards in your deck.`,
     again: 'New quiz', back: 'All quizzes', notFound: 'Quiz not found.',
+    resultEyebrow: 'Result', resultCorrect: 'correct', resultPartial: 'partly', resultWrong: 'wrong', resultReview: 'Review',
+    tiers: { great: ['Brilliant!', 'You know this topic. Try a higher level next time.'], good: ['Well done!', 'Most of it sticks. Turn the mistakes into cards and the rest will too.'], keep: ['Good start', 'This is just the beginning. Learn with cards and take the quiz again in a few days.'] },
   },
   cards: {
     title: 'Flashcards', intro: 'Review a little every day — cards come back just as you are about to forget them.',
@@ -128,6 +130,9 @@ export const en: Dict = {
     progress: (i: number, n: number) => `${i} of ${n}`, done: 'Done for now!', front: 'Question', back: 'Answer', explanation: 'Explanation',
     generateTitle: 'Cards from AI', generateIntro: 'Pick a subject and topic, and AI makes cards for you.', generate: 'Make cards', generating: 'AI is making cards …',
     generated: (n: number) => `${n} new cards added.`,
+    sessionEyebrow: 'Session finished', sessionTitle: (n: number) => `You reviewed ${n} cards`, remembered: 'remembered',
+    sessionText: (learned: number) => `${learned} cards learned in total. The ones you struggled with will come back soon.`,
+    more: 'Check for more cards', toHome: 'To the overview',
   },
   hw: {
     title: 'Homework', intro: 'All homework from your school platforms, nearest deadline first.',
