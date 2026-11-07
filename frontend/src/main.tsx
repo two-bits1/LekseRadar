@@ -11,6 +11,7 @@ import { type ThemeChoice, loadThemeChoice, saveThemeChoice, resolveTheme, theme
 import { PATHS } from './paths';
 import { AuthProvider, RequireAuth, useAuth } from './auth';
 import { OrbLink } from './components/Orb';
+import { I18nProvider, useT } from './i18n';
 import './styles.css';
 const darkQuery='(prefers-color-scheme: dark)';
 function useTheme(){
@@ -34,20 +35,21 @@ function useTheme(){
 function Moved({to}:{to:string}){const {search}=useLocation();return <Navigate to={to+search} replace/>;}
 // Справа в шапке: «Logg inn» до входа; после входа пусто — профиль уже есть в меню (вариант B).
 function HeaderUser(){
- const {token}=useAuth();
+ const {token}=useAuth();const t=useT();
  if(token)return null;
- return <Link to={PATHS.login} className="guest"><span className="avatar"><LogIn size={16}/></span><span>Logg inn</span></Link>;
+ return <Link to={PATHS.login} className="guest"><span className="avatar"><LogIn size={16}/></span><span>{t.header.login}</span></Link>;
 }
 function App(){
  const {choice:theme,resolved,setChoice:setTheme}=useTheme();
+ const t=useT();
  const [completed,setCompleted]=useState<string[]>([]);
  const toggle=(id:string)=>setCompleted(items=>items.includes(id)?items.filter(i=>i!==id):[...items,id]);
  return <div className="app" data-theme={resolved}>
-  <a className="skip" href="#main">Hopp til innhold</a>
-  <header className="header"><Link to={PATHS.home} className="brand" aria-label="LekseRadar — oversikt"><span className="brand-mark"><Radar size={21}/></span><span>LekseRadar<span className="brand-dot">.</span></span></Link>
-  <nav aria-label="Hovedmeny"><NavLink to={PATHS.homework}><CalendarDays/><span>Kalender</span></NavLink><NavLink to={PATHS.flashcards}><Layers/><span>Læringskort</span></NavLink><OrbLink to={PATHS.chats} label="AI-veileder"/><NavLink to={PATHS.profile}><UserRound/><span>Profil</span></NavLink><NavLink to={PATHS.settings}><Settings2/><span>Innstillinger</span></NavLink></nav>
+  <a className="skip" href="#main">{t.header.skip}</a>
+  <header className="header"><Link to={PATHS.home} className="brand" aria-label={t.header.home}><span className="brand-mark"><Radar size={21}/></span><span>LekseRadar<span className="brand-dot">.</span></span></Link>
+  <nav aria-label={t.nav.main}><NavLink to={PATHS.homework}><CalendarDays/><span>{t.nav.calendar}</span></NavLink><NavLink to={PATHS.flashcards}><Layers/><span>{t.nav.flashcards}</span></NavLink><OrbLink to={PATHS.chats} label={t.nav.tutor}/><NavLink to={PATHS.profile}><UserRound/><span>{t.nav.profile}</span></NavLink><NavLink to={PATHS.settings}><Settings2/><span>{t.nav.settings}</span></NavLink></nav>
   <HeaderUser/></header>
-  <div className="demo-bar"><span className="live-dot"/>En liten smakebit av en enklere skolehverdag.<Link to={PATHS.status}>Utforsk demoen <ArrowUpRight size={13}/></Link></div>
+  <div className="demo-bar"><span className="live-dot"/>{t.demoBar.text}<Link to={PATHS.status}>{t.demoBar.link} <ArrowUpRight size={13}/></Link></div>
   <main id="main"><Routes>
    {/* 🔓 Страницы из API.md */}
    <Route path={PATHS.login} element={<Auth/>}/>
@@ -76,7 +78,7 @@ function App(){
    <Route path="/calendar" element={<Moved to={PATHS.homework}/>}/>
    <Route path="*" element={<section className="page"><h1>Her var det stille.</h1><p>Denne siden finnes ikke ennå.</p><Link className="button" to={PATHS.status}>Se alle sidene</Link></section>}/>
   </Routes></main>
-  <footer><Link to={PATHS.home}>LekseRadar.</Link><span>Lær litt. Forstå mer.</span><Link to={PATHS.status}>Prototype · Se utviklingsstatus <ArrowUpRight size={12}/></Link></footer>
+  <footer><Link to={PATHS.home}>LekseRadar.</Link><span>{t.footer.tagline}</span><Link to={PATHS.status}>{t.footer.status} <ArrowUpRight size={12}/></Link></footer>
  </div>;
 }
-createRoot(document.getElementById('root')!).render(<React.StrictMode><BrowserRouter><AuthProvider><App/></AuthProvider></BrowserRouter></React.StrictMode>);
+createRoot(document.getElementById('root')!).render(<React.StrictMode><BrowserRouter><AuthProvider><I18nProvider><App/></I18nProvider></AuthProvider></BrowserRouter></React.StrictMode>);

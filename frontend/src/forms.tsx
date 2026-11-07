@@ -1,7 +1,7 @@
 // Общие куски форм: поле с ошибкой под ним и приведение любой ошибки к ApiError (формат из API.md).
 import type { InputHTMLAttributes } from 'react';
 import { isApiError } from './api/client';
-import type { ApiError, Locale } from './api/types';
+import type { ApiError } from './api/types';
 
 export const asApiError = (err: unknown): ApiError => isApiError(err) ? err
   : { status: 0, message: 'Får ikke kontakt med serveren. Prøv igjen.', fields: null, timestamp: new Date().toISOString() };
@@ -20,5 +20,3 @@ export function Field({ name, label, error, ...input }: FieldProps) {
     {error && <span className="field-error" id={`${name}-error`}>{error}</span>}
   </label>;
 }
-
-export const LOCALES: Record<Locale, string> = { nb: 'Norsk bokmål', nn: 'Norsk nynorsk', en: 'English', ru: 'Русский' };
