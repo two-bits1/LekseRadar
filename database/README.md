@@ -32,6 +32,9 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 | `V7__subjects_quiz_sets.sql` | `subjects`, `quiz_sets`: сохранённые квизы от ИИ; новые поля у `exercises` и `quizzes` |
 | `V8__quiz_functions.sql` | `find_quiz_set()`, `import_quiz_json()`, `start_quiz()`, `save_quiz_answer()`, виды `quiz_questions_public`, `user_quiz_progress` |
 | `V9__flashcards_from_quizzes.sql` | `flashcard_progress`, вид `flashcards`, `add_quiz_set_to_flashcards()`, `review_flashcard()`, ошибка в квизе → карточка |
+| `V10__materials.sql` | `materials`, `material_chunks` (полнотекстовый индекс): учебные файлы для ИИ-репетитора |
+| `V11__material_functions.sql` | `add_material()` (нарезка на фрагменты), `search_materials()`, `materials_for_prompt()`, вид `user_materials` |
+| `V12__ai_prompts.sql` | `ai_prompts` с версиями: `save_prompt()`, `get_prompt()`, `activate_prompt()` |
 
 ## Схема
 
@@ -132,6 +135,26 @@ SELECT * FROM user_daily_activity WHERE user_id = ? ORDER BY day;
 Лента: `SELECT * FROM user_events WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`.
 
 **Напоминания.** К отправке: `SELECT * FROM reminders WHERE sent_at IS NULL AND remind_at <= now()`.
+
+**Промпты ИИ.** Лежат в базе с версиями (загрузка из `ai-content/prompts`, см. `ai-content/load/load.py`):
+```sql
+SELECT get_prompt('tutor');                 -- текст активной версии, переменные {{...}} подставляет Java
+SELECT activate_prompt('tutor', 1);         -- откат на старую версию
+```
+
+**Учебные материалы для тьютора.** Файлы из `ai-content/materials` грузит `load.py`;
+файл, загруженный пользователем на сайте, Java сохраняет сам (текст извлекает бэкенд):
+```sql
+SELECT add_material(:user_id, 'Matematikk', 'Lineære funksjoner', 'Kapittel 3', :text,
+                    p_file_name => 'kap3.pdf', p_mime_type => 'application/pdf');   -- id материала
+-- перед ответом ИИ: готовый текст для {{materials}} в промпте тьютора
+SELECT materials_for_prompt(:user_id, :question, :subject_id, 5);
+-- то же построчно (для ссылок [M<id>] во фронте)
+SELECT * FROM search_materials(:user_id, :question, :subject_id, 5);
+SELECT * FROM user_materials WHERE owner_id = :user_id OR owner_id IS NULL;      -- экран «Материалы»
+```
+Поиск полнотекстовый (`simple`, без векторов): слова вопроса через ИЛИ, длинные слова по началу.
+Пользователь видит свои материалы и общие (`owner_id IS NULL`).
 
 ## Безопасность
 
