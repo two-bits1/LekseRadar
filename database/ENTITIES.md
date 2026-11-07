@@ -2,7 +2,7 @@
 
 Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO)
 и во фронтенде (TypeScript-типы). База — ветка `PythonAPI`, бэкенд — ветка `JavaAPI-setup`.
-Источник правды — миграции `database/migrations/V1–V24`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
+Источник правды — миграции `database/migrations/V1–V25`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
 поэтому поля сущностей должны совпадать с колонками ниже.
 
 **Состояние бэкенда.** Сейчас в `JavaAPI-setup` есть только `User`, `ChatSession`, `ChatMessage`, `MessageRole`
@@ -109,6 +109,7 @@ erDiagram
 | `display_name` | text | String | нет |  |  | имя на сайте |
 | `locale` | text | String | нет | `'nb'` |  | язык интерфейса и тьютора |
 | `timezone` | text | String | нет | `'Europe/Oslo'` |  | часовой пояс для дедлайнов |
+| `email_reminders` | boolean | boolean | нет | `true` |  | напоминать о ДЗ письмом за 24 ч до срока (V25) |
 | `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
 | `last_login_at` | timestamptz | Instant | да |  |  | последний вход |
 
