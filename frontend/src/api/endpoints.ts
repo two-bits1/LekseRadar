@@ -2,7 +2,7 @@
 import { api, API_BASE } from './client';
 import type {
   AnswerRequest, AnswerResult, Assignment, AssignmentStatus, AuthResponse, Dashboard, HistoryEvent, UpdateAssignmentRequest, ChangePasswordRequest, Chat, ChatReply, CreateChatRequest, Deck, Flashcard,
-  FlashcardStats, Health, LoginRequest, Message, Quiz, QuizProgress, QuizSummary, RegisterRequest, ReviewResult,
+  FlashcardStats, Health, LoginRequest, Message, Quiz, QuizProgress, QuizSummary, RegisterRequest, RegisterStarted, VerifyEmailRequest, ReviewResult,
   StartQuizRequest, Subject, UpdateChatRequest, UpdateUserRequest, User, PlatformConnection, PlatformCredentials, PlatformKey,
 } from './types';
 
@@ -10,7 +10,8 @@ const json = (method: string, body?: unknown): RequestInit => body === undefined
 
 // 🔓 Авторизация
 export const authApi = {
-  register: (body: RegisterRequest) => api<AuthResponse>('/auth/register', json('POST', body)),  // #1
+  register: (body: RegisterRequest) => api<RegisterStarted>('/auth/register', json('POST', body)),           // #1: код на email
+  verifyEmail: (body: VerifyEmailRequest) => api<AuthResponse>('/auth/register/verify', json('POST', body)), // #44
   login: (body: LoginRequest) => api<AuthResponse>('/auth/login', json('POST', body)),           // #2
 };
 

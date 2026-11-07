@@ -28,6 +28,7 @@ describe('URL бэкенда из API.md', () => {
   const cases: [string, () => Promise<unknown>, string, string, unknown?][] = [
     ['#1 регистрация', () => authApi.register({ email: 'ann@example.com', password: 'secret123', displayName: 'Ann' }), 'POST', '/api/v1/auth/register', { email: 'ann@example.com', password: 'secret123', displayName: 'Ann' }],
     ['#2 вход', () => authApi.login({ email: 'demo@lekseradar.no', password: 'demo1234' }), 'POST', '/api/v1/auth/login', { email: 'demo@lekseradar.no', password: 'demo1234' }],
+    ['#44 код из письма', () => authApi.verifyEmail({ email: 'ann@example.com', code: '123456' }), 'POST', '/api/v1/auth/register/verify', { email: 'ann@example.com', code: '123456' }],
     ['#3 мой профиль', () => usersApi.me(), 'GET', '/api/v1/users/me'],
     ['#4 изменить профиль', () => usersApi.update({ locale: 'en' }), 'PATCH', '/api/v1/users/me', { locale: 'en' }],
     ['#5 сменить пароль', () => usersApi.changePassword({ currentPassword: 'a', newPassword: 'newSecret123' }), 'PUT', '/api/v1/users/me/password', { currentPassword: 'a', newPassword: 'newSecret123' }],

@@ -23,19 +23,44 @@ export function AuthForm({register=false}:{register?:boolean}){
  const auth=useAuth();const navigate=useNavigate();const t=useT();const a=t.auth;
  const [form,setForm]=useState({email:'',password:'',displayName:''});
  const [error,setError]=useState<ApiError|null>(null);const [busy,setBusy]=useState(false);
+ const [sentTo,setSentTo]=useState<string|null>(null);
  const set=(k:keyof typeof form)=>(e:ChangeEvent<HTMLInputElement>)=>setForm(f=>({...f,[k]:e.target.value}));
  const errorFor=(k:string)=>fieldError(error,k)??(error?.status===409&&k==='email'?error.message:undefined);
  const general=error?.status===409?null:generalError(error);
  const submit=async(e:FormEvent)=>{e.preventDefault();setBusy(true);setError(null);
-  try{if(register)await auth.register(form);else await auth.login({email:form.email,password:form.password});navigate(PATHS.home,{replace:true})}
+  try{if(register)setSentTo((await auth.register(form)).email);else{await auth.login({email:form.email,password:form.password});navigate(PATHS.home,{replace:true})}}
   catch(err){setError(asApiError(err,t.common))}
   finally{setBusy(false)}};
+ if(register&&sentTo)return <VerifyEmailForm email={sentTo} resend={()=>auth.register(form)} back={()=>setSentTo(null)}/>;
  return <form className="lesson-card auth-form" onSubmit={submit} noValidate><h2>{register?a.register:a.login}</h2>
   {register&&<Field name="displayName" label={a.name} type="text" autoComplete="name" required placeholder={a.namePlaceholder} value={form.displayName} onChange={set('displayName')} error={errorFor('displayName')}/>}
   <Field name="email" label={a.email} type="email" autoComplete="email" required placeholder={a.emailPlaceholder} value={form.email} onChange={set('email')} error={errorFor('email')}/>
   <Field name="password" label={a.password} type="password" autoComplete={register?'new-password':'current-password'} required minLength={register?8:undefined} placeholder={register?a.passwordHint:''} value={form.password} onChange={set('password')} error={errorFor('password')}/>
   {general&&<p role="alert" className="feedback danger">{general}</p>}
   <button className="button dark-button" disabled={busy}>{busy?(register?a.registering:a.loggingIn):(register?a.register:a.login)}</button>
+ </form>;
+}
+
+// Шаг 2 регистрации: 6 цифр из письма → аккаунт создан и сразу вход.
+function VerifyEmailForm({email,resend,back}:{email:string;resend:()=>Promise<unknown>;back:()=>void}){
+ const auth=useAuth();const navigate=useNavigate();const t=useT();const a=t.auth;
+ const [code,setCode]=useState('');const [note,setNote]=useState<string|null>(null);
+ const [error,setError]=useState<ApiError|null>(null);const [busy,setBusy]=useState(false);
+ const run=async(action:()=>Promise<void>)=>{setBusy(true);setError(null);setNote(null);
+  try{await action()}catch(err){setError(asApiError(err,t.common))}finally{setBusy(false)}};
+ const submit=(e:FormEvent)=>{e.preventDefault();
+  run(async()=>{await auth.verifyEmail({email,code:code.trim()});navigate(PATHS.home,{replace:true})})};
+ return <form className="lesson-card auth-form" onSubmit={submit} noValidate><h2>{a.codeTitle}</h2>
+  <p>{a.codeSent(email)}</p>
+  <Field name="code" label={a.code} type="text" inputMode="numeric" autoComplete="one-time-code" required maxLength={6}
+   placeholder="123456" value={code} onChange={e=>setCode(e.target.value.replace(/D/g,''))} error={fieldError(error,'code')}/>
+  {note&&<p role="status" className="feedback success">{note}</p>}
+  {generalError(error)&&<p role="alert" className="feedback danger">{generalError(error)}</p>}
+  <button className="button dark-button" disabled={busy||code.length!==6}>{busy?a.verifying:a.verify}</button>
+  <div className="auth-code-links">
+   <button type="button" className="text-link" disabled={busy} onClick={()=>run(async()=>{await resend();setNote(a.resent)})}>{a.resend}</button>
+   <button type="button" className="text-link" disabled={busy} onClick={back}>{a.back}</button>
+  </div>
  </form>;
 }
 
