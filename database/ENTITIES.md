@@ -37,3 +37,415 @@ SQL для каждого сценария — [README.md](README.md).
 
 Типы вопросов квиза — не enum, а текст с CHECK: `exercises.question_type` = `single_choice` | `multiple_choice` | `text`
 (Java: `QuestionType`).
+
+## Связи между таблицами
+
+Все внешние ключи. `||` — обязательная связь, `|o` — может быть пустой.
+
+```mermaid
+erDiagram
+    achievements ||--o{ user_achievements : "achievement_code"
+    ai_prompts |o--o{ chat_messages : "prompt_id"
+    ai_prompts |o--o{ quiz_sets : "prompt_id"
+    assignments |o--o{ chat_sessions : "assignment_id"
+    assignments |o--o{ exercises : "assignment_id"
+    assignments |o--o{ materials : "assignment_id"
+    assignments |o--o{ quizzes : "assignment_id"
+    assignments |o--o{ reminders : "assignment_id"
+    chat_sessions |o--o{ quizzes : "chat_session_id"
+    chat_sessions ||--o{ chat_messages : "session_id"
+    exercises ||--o{ exercise_attempts : "exercise_id"
+    exercises ||--o{ flashcard_progress : "exercise_id"
+    exercises ||--o{ quiz_questions : "exercise_id"
+    materials ||--o{ material_chunks : "material_id"
+    quiz_sets |o--o{ chat_sessions : "quiz_set_id"
+    quiz_sets |o--o{ exercises : "quiz_set_id"
+    quiz_sets |o--o{ quizzes : "quiz_set_id"
+    quizzes |o--o{ exercise_attempts : "quiz_id"
+    quizzes ||--o{ quiz_questions : "quiz_id"
+    subjects |o--o{ chat_sessions : "subject_id"
+    subjects |o--o{ exercises : "subject_id"
+    subjects |o--o{ materials : "subject_id"
+    subjects |o--o{ quizzes : "subject_id"
+    subjects ||--o{ quiz_sets : "subject_id"
+    users |o--o{ exercises : "user_id"
+    users |o--o{ materials : "owner_id"
+    users |o--o{ quiz_sets : "created_by"
+    users ||--o{ assignments : "user_id"
+    users ||--o{ chat_sessions : "user_id"
+    users ||--o{ exercise_attempts : "user_id"
+    users ||--o{ flashcard_progress : "user_id"
+    users ||--o{ platform_connections : "user_id"
+    users ||--o{ quizzes : "user_id"
+    users ||--o{ reminders : "user_id"
+    users ||--o{ user_achievements : "user_id"
+    users ||--o{ user_events : "user_id"
+```
+
+## Таблицы
+
+### Пользователи
+
+#### `users`
+
+Ученик: вход, язык, часовой пояс. Бэкенд: ✅ `User`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `email` | citext | String | нет |  |  | логин, без учёта регистра |
+| `password_hash` | text | String | нет |  |  | bcrypt из Spring Security |
+| `display_name` | text | String | нет |  |  | имя на сайте |
+| `locale` | text | String | нет | `'nb'` |  | язык интерфейса и тьютора |
+| `timezone` | text | String | нет | `'Europe/Oslo'` |  | часовой пояс для дедлайнов |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+| `last_login_at` | timestamptz | Instant | да |  |  | последний вход |
+
+Ограничения и индексы: `UNIQUE (email)`.
+
+### Платформы и домашка
+
+#### `platform_connections`
+
+Подключённая платформа ученика и зашифрованный доступ к ней. Одна строка на (ученик, платформа). Бэкенд: 🕓 `PlatformConnection`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `user_id` | bigint | Long | нет |  | FK → users.id CASCADE | ученик |
+| `platform` | platform | enum `Platform` + конвертер | нет |  |  | canvas / teams / itslearning / inschool |
+| `credentials_enc` | bytea | byte[] | нет |  |  | токены или cookie, зашифрованы бэкендом (AES-GCM) |
+| `needs_reconnect` | boolean | Boolean | нет | `false` |  | нужно войти заново (из `SourceResult.needs_reconnect`) |
+| `last_synced_at` | timestamptz | Instant | да |  |  | последний удачный сбор ДЗ |
+| `last_error` | text | String | да |  |  | последняя ошибка сбора (из `SourceResult.error`) |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+
+Ограничения и индексы: `UNIQUE (user_id, platform)`.
+
+#### `assignments`
+
+ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id). Бэкенд: 🕓 `Assignment`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `user_id` | bigint | Long | нет |  | FK → users.id CASCADE | ученик |
+| `source` | platform | enum `Platform` + конвертер | нет |  |  | платформа, откуда ДЗ |
+| `external_id` | text | String | нет |  |  | id задания на платформе (`Assignment.id` из `collect()`) |
+| `title` | text | String | нет |  |  | название |
+| `course` | text | String | нет | `''` |  | предмет / курс на платформе |
+| `due_at` | timestamptz | Instant | да |  |  | дедлайн |
+| `status` | assignment_status | enum `AssignmentStatus` + конвертер | нет | `'todo'::assignment_status` |  | todo / overdue / submitted / graded |
+| `url` | text | String | да |  |  | ссылка на задание на платформе |
+| `description` | text | String | нет | `''` |  | текст задания с платформы |
+| `kind` | text | String | нет | `'assignment'` |  | assignment / quiz / exam / discussion / task |
+| `is_demo` | boolean | Boolean | нет | `false` |  | демо-задание (не настоящее) |
+| `first_seen_at` | timestamptz | Instant | нет | `now()` |  | когда впервые собрано |
+| `updated_at` | timestamptz | Instant | нет | `now()` |  | когда изменено |
+
+Ограничения и индексы: `UNIQUE (user_id, source, external_id)`; индекс `assignments_user_due btree (user_id, status, due_at)`.
+
+### ИИ-чат
+
+#### `chat_sessions`
+
+Чат: репетитор (`tutor`) или генерация квизов (`quiz`). Создавать через `start_chat()`. Бэкенд: ✅ `ChatSession` — не хватает полей `assignment_id`, `mode`, `subject_id`, `quiz_set_id`, `language`, `level`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `user_id` | bigint | Long | нет |  | FK → users.id CASCADE | ученик |
+| `assignment_id` | bigint | Long | да |  | FK → assignments.id SET NULL | чат по конкретному ДЗ |
+| `title` | text | String | нет | `'Ny samtale'` |  | название чата в списке |
+| `topic` | text | String | да |  |  | тема |
+| `archived` | boolean | Boolean | нет | `false` |  | в архиве |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+| `updated_at` | timestamptz | Instant | нет | `now()` |  | время последнего сообщения (триггер) |
+| `mode` | chat_mode | enum `ChatMode` + конвертер | нет | `'tutor'::chat_mode` |  | tutor — репетитор, quiz — генерация квизов; не меняется |
+| `subject_id` | bigint | Long | да |  | FK → subjects.id | предмет |
+| `quiz_set_id` | bigint | Long | да |  | FK → quiz_sets.id SET NULL | квиз, созданный в этом чате |
+| `language` | text | String | да |  |  | язык ученика; NULL — ещё не выбран |
+| `level` | exercise_level | enum `ExerciseLevel` + конвертер | нет | `'intermediate'::exercise_level` |  | уровень квиза в чате quiz |
+
+Ограничения и индексы: `CHECK ((language ~ '^[a-z]{2,3}$'))`; индекс `chat_sessions_user btree (user_id, updated_at DESC)`; индекс `chat_sessions_user_mode btree (user_id, mode, updated_at DESC)`.
+
+#### `chat_messages`
+
+Сообщения чата. История для ИИ — вид `chat_context`. Бэкенд: ✅ `ChatMessage` — не хватает поля `prompt_id`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `session_id` | bigint | Long | нет |  | FK → chat_sessions.id CASCADE | чат |
+| `role` | chat_role | enum `ChatRole` + конвертер | нет |  |  | student / tutor / system |
+| `content` | text | String | нет |  |  | текст, 1–8000 символов |
+| `on_topic` | boolean | Boolean | да |  |  | вопрос про учёбу или нет (только у ответов тьютора) |
+| `model` | text | String | да |  |  | какая модель ответила |
+| `tokens_used` | integer | Integer | да |  |  | сколько токенов потратил ответ |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | время сообщения |
+| `prompt_id` | bigint | Long | да |  | FK → ai_prompts.id | какая версия промпта использована |
+
+Ограничения и индексы: `CHECK (((length(content) >= 1) AND (length(content) <= 8000)))`; индекс `chat_messages_session btree (session_id, created_at)`.
+
+#### `chat_mode_prompts`
+
+Какой промпт подключён к режиму чата. Бэкенд: ⚙️ только чтение через `chat_system_prompt()`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `mode` | chat_mode | enum `ChatMode` + конвертер | нет |  | PK | режим чата |
+| `prompt_key` | text | String | нет |  |  | какой промпт у режима |
+
+### Промпты и учебные материалы
+
+#### `ai_prompts`
+
+Промпты ИИ с версиями, одна активная версия на ключ. Бэкенд: ⚙️ `get_prompt()`, `chat_system_prompt()`; грузит `ai-content/load/load.py`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `key` | text | String | нет |  |  | tutor, quiz_generator, answer_checker … |
+| `version` | integer | Integer | нет |  |  | номер версии |
+| `content` | text | String | нет |  |  | текст промпта с {{переменными}} |
+| `content_hash` | text | String | нет |  |  | md5 текста, защита от дублей |
+| `is_active` | boolean | Boolean | нет | `true` |  | активная версия (одна на ключ) |
+| `note` | text | String | да |  |  | откуда загружен |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+
+Ограничения и индексы: `UNIQUE (key, version)`; `CHECK ((btrim(content) <> ''))`; `CHECK ((key ~ '^[a-z0-9_]+$'))`; индекс `UNIQUE ai_prompts_one_active btree (key) WHERE is_active`.
+
+#### `materials`
+
+Учебные файлы для ИИ-репетитора и файлы ДЗ (как текст). Бэкенд: 🕓 `Material` (список и удаление); добавлять через `add_material()` / `attach_homework_file()`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `owner_id` | bigint | Long | да |  | FK → users.id CASCADE | NULL = общий материал для всех |
+| `subject_id` | bigint | Long | да |  | FK → subjects.id | предмет |
+| `topic` | text | String | да |  |  | тема |
+| `topic_key` | text | String | да | `вычисляется: norm_key(topic)` |  | тема в нижнем регистре для поиска |
+| `title` | text | String | нет |  |  | название материала |
+| `file_name` | text | String | да |  |  | имя файла |
+| `mime_type` | text | String | да |  |  | тип файла |
+| `file_size` | bigint | Long | да |  |  | размер в байтах |
+| `storage_key` | text | String | да |  |  | где лежит оригинал файла |
+| `source` | material_source | enum `MaterialSource` + конвертер | нет | `'upload'::material_source` |  | upload / url / platform / teacher / seed |
+| `source_url` | text | String | да |  |  | ссылка-источник |
+| `language` | text | String | нет | `'nb'` |  | язык (nb, en, ru, uk …) |
+| `content_hash` | text | String | нет |  |  | md5 текста: повторная загрузка не дублирует |
+| `char_count` | integer | Integer | нет | `0` |  | длина текста |
+| `chunk_count` | integer | Integer | нет | `0` |  | на сколько фрагментов нарезан |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+| `assignment_id` | bigint | Long | да |  | FK → assignments.id SET NULL | файл ДЗ, если материал — текст задания |
+
+Ограничения и индексы: `CHECK (((length(title) >= 1) AND (length(title) <= 300)))`; индекс `UNIQUE materials_dedup btree (COALESCE(owner_id, (0)::bigint), content_hash)`; индекс `materials_owner btree (owner_id, created_at DESC)`; индекс `materials_subject btree (subject_id, topic_key)`; индекс `materials_assignment btree (assignment_id)`.
+
+#### `material_chunks`
+
+Фрагменты материалов с полнотекстовым индексом. Бэкенд: ⚙️ не маппить; поиск через `search_materials()` / `materials_for_prompt()`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `material_id` | bigint | Long | нет |  | FK → materials.id CASCADE | материал |
+| `position` | integer | Integer | нет |  |  | порядковый номер |
+| `content` | text | String | нет |  |  | фрагмент текста (~1200 символов) |
+| `tsv` | tsvector | — (не маппить) | да | `вычисляется: to_tsvector('simple'::regco…` |  | индекс полнотекстового поиска |
+
+Ограничения и индексы: `UNIQUE (material_id, "position")`; индекс `material_chunks_tsv gin (tsv)`.
+
+### Квизы
+
+#### `subjects`
+
+Предметы для выбора в квизе. Создаются сами при импорте квиза или создании чата. Бэкенд: 🕓 `Subject`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `name` | text | String | нет |  |  | название предмета как ввёл пользователь |
+| `key` | text | String | нет |  |  | нормализованное имя: lower, без лишних пробелов |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+
+Ограничения и индексы: `UNIQUE (key)`.
+
+#### `quiz_sets`
+
+Сохранённый квиз от ИИ: один JSON на (предмет, тема, уровень, язык), используется снова. Бэкенд: 🕓 `QuizSet` (только чтение); создавать через `import_quiz_json()`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `subject_id` | bigint | Long | нет |  | FK → subjects.id | предмет |
+| `topic` | text | String | нет |  |  | тема |
+| `topic_key` | text | String | нет |  |  | тема в нижнем регистре для поиска |
+| `level` | exercise_level | enum `ExerciseLevel` + конвертер | нет |  |  | уровень сложности |
+| `language` | text | String | нет | `'nb'` |  | язык (nb, en, ru, uk …) |
+| `title` | text | String | нет |  |  | название |
+| `question_count` | integer | Integer | нет |  |  | сколько вопросов |
+| `source_json` | jsonb | String (JSON) / JsonNode | нет |  |  | исходный JSON от ИИ как есть |
+| `content_hash` | text | String | нет |  |  | md5 вопросов: один и тот же JSON не импортируется дважды |
+| `model` | text | String | да |  |  | какая модель сгенерировала |
+| `created_by` | bigint | Long | да |  | FK → users.id SET NULL | кто первым сгенерировал |
+| `times_used` | integer | Integer | нет | `0` |  | сколько раз квиз запускали |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+| `material_ids` | int8[] | List<Long> | нет | `'{}'::bigint[]` |  | какие материалы ИИ использовал |
+| `prompt_id` | bigint | Long | да |  | FK → ai_prompts.id | какая версия промпта использована |
+
+Ограничения и индексы: `UNIQUE (content_hash)`; `CHECK (((length(topic) >= 1) AND (length(topic) <= 100)))`; индекс `quiz_sets_lookup btree (subject_id, topic_key, level, language, created_at DESC)`.
+
+#### `exercises`
+
+Вопросы квиза. Они же — флеш-карты. Бэкенд: 🕓 `Exercise` (только чтение); вопросы без ответов — вид `quiz_questions_public`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `user_id` | bigint | Long | да |  | FK → users.id CASCADE | NULL = общий каталог |
+| `assignment_id` | bigint | Long | да |  | FK → assignments.id SET NULL | ДЗ, к которому относится |
+| `topic` | text | String | нет |  |  | тема |
+| `level` | exercise_level | enum `ExerciseLevel` + конвертер | нет |  |  | уровень сложности |
+| `statement` | text | String | нет |  |  | текст вопроса |
+| `correct_answer` | text | String | нет |  |  | правильный ответ (для multiple_choice — JSON-массив) |
+| `answer_type` | answer_type | enum `AnswerType` + конвертер | нет |  |  | exact — сравнение, free — проверяет ИИ |
+| `options` | jsonb | String (JSON) / JsonNode | да |  |  | варианты ответа для квиза с выбором; NULL = ответ текстом |
+| `generated` | boolean | Boolean | нет | `true` |  | сгенерирован ИИ |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+| `subject_id` | bigint | Long | да |  | FK → subjects.id | предмет |
+| `quiz_set_id` | bigint | Long | да |  | FK → quiz_sets.id CASCADE | набор вопросов квиза |
+| `position` | integer | Integer | да |  |  | порядковый номер |
+| `question_type` | text | String | нет | `'text'` |  | single_choice / multiple_choice / text |
+| `explanation` | text | String | да |  |  | пояснение к правильному ответу |
+
+Ограничения и индексы: `UNIQUE (quiz_set_id, "position")`; `CHECK (((length(correct_answer) >= 1) AND (length(correct_answer) <= 2000)))`; `CHECK ((question_type = ANY (ARRAY['single_choice', 'multiple_choice', 'text'])))`; `CHECK (((length(statement) >= 1) AND (length(statement) <= 2000)))`; `CHECK (((length(topic) >= 1) AND (length(topic) <= 100)))`; индекс `exercises_topic btree (topic, level)`; индекс `UNIQUE exercises_set_position btree (quiz_set_id, "position")`.
+
+#### `quizzes`
+
+Попытка ученика пройти квиз, с местом, где он остановился. Бэкенд: 🕓 `Quiz`; старт `start_quiz()`, конец `finish_quiz()`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `user_id` | bigint | Long | нет |  | FK → users.id CASCADE | ученик |
+| `assignment_id` | bigint | Long | да |  | FK → assignments.id SET NULL | квиз по ДЗ |
+| `chat_session_id` | bigint | Long | да |  | FK → chat_sessions.id SET NULL | квиз из чата |
+| `title` | text | String | нет |  |  | название квиза |
+| `topic` | text | String | нет |  |  | тема |
+| `level` | exercise_level | enum `ExerciseLevel` + конвертер | нет |  |  | уровень сложности |
+| `status` | quiz_status | enum `QuizStatus` + конвертер | нет | `'in_progress'::quiz_status` |  | in_progress / completed / abandoned |
+| `score` | numeric | BigDecimal | да |  |  | итог 0–100, ставит `finish_quiz()` |
+| `started_at` | timestamptz | Instant | нет | `now()` |  | начало |
+| `completed_at` | timestamptz | Instant | да |  |  | конец |
+| `subject_id` | bigint | Long | да |  | FK → subjects.id | предмет |
+| `quiz_set_id` | bigint | Long | да |  | FK → quiz_sets.id | набор вопросов квиза |
+| `current_position` | integer | Integer | нет | `1` |  | на каком вопросе остановился |
+
+Ограничения и индексы: `CHECK (((score >= (0)::numeric) AND (score <= (100)::numeric)))`; индекс `quizzes_user btree (user_id, started_at DESC)`; индекс `quizzes_user_set btree (user_id, quiz_set_id)`.
+
+#### `quiz_questions`
+
+Порядок вопросов в попытке. Бэкенд: ⚙️ заполняет `start_quiz()`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `quiz_id` | bigint | Long | нет |  | PK, FK → quizzes.id CASCADE | попытка квиза |
+| `position` | integer | Integer | нет |  | PK | порядковый номер |
+| `exercise_id` | bigint | Long | нет |  | FK → exercises.id | вопрос |
+
+Ограничения и индексы: `UNIQUE (quiz_id, exercise_id)`; `CHECK (("position" >= 1))`.
+
+#### `exercise_attempts`
+
+Ответы ученика с вердиктом. Бэкенд: 🕓 `ExerciseAttempt` (только чтение); писать через `save_quiz_answer()`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `user_id` | bigint | Long | нет |  | FK → users.id CASCADE | ученик |
+| `exercise_id` | bigint | Long | нет |  | FK → exercises.id CASCADE | вопрос |
+| `quiz_id` | bigint | Long | да |  | FK → quizzes.id CASCADE | попытка квиза |
+| `answer` | text | String | нет |  |  | ответ ученика |
+| `verdict` | verdict | enum `Verdict` + конвертер | нет |  |  | correct / incorrect / partial |
+| `explanation` | text | String | да |  |  | пояснение к ответу |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда ответил |
+
+Ограничения и индексы: `CHECK (((length(answer) >= 1) AND (length(answer) <= 4000)))`; индекс `attempts_user btree (user_id, created_at DESC)`; индекс `attempts_quiz btree (quiz_id)`.
+
+### Флеш-карты
+
+#### `flashcard_progress`
+
+Колода ученика и расписание повторов SM-2. Карточка = вопрос из `exercises`. Бэкенд: ⚙️ через вид `flashcards` и `review_flashcard()`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `user_id` | bigint | Long | нет |  | PK, FK → users.id CASCADE | ученик |
+| `exercise_id` | bigint | Long | нет |  | PK, FK → exercises.id CASCADE | вопрос |
+| `ease` | numeric | BigDecimal | нет | `2.5` |  | SM-2: насколько легко даётся |
+| `interval_days` | integer | Integer | нет | `0` |  | через сколько дней повтор |
+| `repetitions` | integer | Integer | нет | `0` |  | успешных повторов подряд |
+| `reviews` | integer | Integer | нет | `0` |  | сколько раз повторял |
+| `lapses` | integer | Integer | нет | `0` |  | сколько раз забыл |
+| `next_review_at` | timestamptz | Instant | нет | `now()` |  | когда показать снова |
+| `last_reviewed_at` | timestamptz | Instant | да |  |  | последний повтор |
+| `added_at` | timestamptz | Instant | нет | `now()` |  | когда попала в колоду |
+
+Ограничения и индексы: индекс `flashcard_progress_due btree (user_id, next_review_at)`.
+
+### История, напоминания, ачивки
+
+#### `user_events`
+
+Лента всех действий: из неё строятся история, активные дни и ачивки. Бэкенд: ✅ `UserEventRepository.add(...)` (без сущности).
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `user_id` | bigint | Long | нет |  | FK → users.id CASCADE | ученик |
+| `type` | text | String | нет |  |  | что произошло: chat_started, quiz_completed, material_added … |
+| `ref_table` | text | String | да |  |  | например 'quizzes' |
+| `ref_id` | bigint | Long | да |  |  | id строки в ref_table |
+| `payload` | jsonb | String (JSON) / JsonNode | нет | `'{}'::jsonb` |  | детали события |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+
+Ограничения и индексы: индекс `user_events_user btree (user_id, created_at DESC)`.
+
+#### `reminders`
+
+Напоминания о дедлайнах. Бэкенд: 🕓 `Reminder`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `id` | bigint | Long | нет | `авто` | PK | ключ |
+| `user_id` | bigint | Long | нет |  | FK → users.id CASCADE | ученик |
+| `assignment_id` | bigint | Long | да |  | FK → assignments.id CASCADE | ДЗ, к которому относится |
+| `message` | text | String | нет |  |  | текст напоминания |
+| `remind_at` | timestamptz | Instant | нет |  |  | когда напомнить |
+| `channel` | text | String | нет | `'in_app'` |  | in_app / email / push |
+| `sent_at` | timestamptz | Instant | да |  |  | когда отправлено; NULL — ещё нет |
+| `created_at` | timestamptz | Instant | нет | `now()` |  | когда создано |
+
+Ограничения и индексы: индекс `reminders_due btree (remind_at) WHERE (sent_at IS NULL)`.
+
+#### `achievements`
+
+Список ачивок, заполнен миграцией. Бэкенд: 🕓 `Achievement` (справочник).
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `code` | text | String | нет |  | PK | например 'first_quiz' |
+| `title` | text | String | нет |  |  | название |
+| `description` | text | String | нет |  |  | за что даётся |
+| `icon` | text | String | да |  |  | иконка |
+
+#### `user_achievements`
+
+Какие ачивки получил ученик. Бэкенд: 🕓 `UserAchievement`.
+
+| Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
+|---|---|---|---|---|---|---|
+| `user_id` | bigint | Long | нет |  | PK, FK → users.id CASCADE | ученик |
+| `achievement_code` | text | String | нет |  | PK, FK → achievements.code | какая ачивка |
+| `unlocked_at` | timestamptz | Instant | нет | `now()` |  | когда получена |
