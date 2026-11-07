@@ -197,6 +197,8 @@ Java не умеет вызывать Python-функцию напрямую. О
 
 ## 7. Деплой (все)
 
+Выбран Railway, пошагово: [docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md).
+
 | Часть | Где | Переменные |
 |---|---|---|
 | База | Neon / Railway PostgreSQL 16 | применить `database/migrations`, затем `load.py`, **без** `testdata` |

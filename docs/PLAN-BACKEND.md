@@ -144,6 +144,8 @@ record Source(boolean ok, int count, String error, boolean needsReconnect) {}
 
 ## Шаг 6. Деплой (1 ч)
 
+Выбран Railway: [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md), раздел 3. Ниже то же коротко.
+
 Railway или Render, Java 21, `./mvnw package -DskipTests` → `java -jar target/lekseradar-backend-0.1.0.jar`.
 
 | Переменная | Откуда |
