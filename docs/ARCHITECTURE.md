@@ -5,6 +5,12 @@
 
 ## 1. Общая схема
 
+![Схема работы LekseRadar](schema.png)
+
+_Картинка: `docs/schema.png`, исходник: `docs/schema.mmd` (пересобрать: `npx @mermaid-js/mermaid-cli -i docs/schema.mmd -o docs/schema.png -s 2`)._
+
+То же самое подробнее:
+
 ```mermaid
 flowchart LR
     subgraph FE["Frontend · React + Tailwind (№1)"]
