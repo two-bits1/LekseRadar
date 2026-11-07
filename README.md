@@ -64,6 +64,8 @@ cd frontend && pnpm install && pnpm dev
 | [database/testdata/README.md](database/testdata/README.md) | все | тестовый ученик и его данные |
 | [ai-content/prompts/README.md](ai-content/prompts/README.md) | бэк, №3 | промпты, язык, файл ДЗ, как собрать запрос к ИИ |
 | [README-TEST.md](README-TEST.md) | все | что проверено в main-test-3.0, что исправлено и что осталось |
+| [PLAN-MVP.md](PLAN-MVP.md) | все | **план до готового MVP**: этапы, кто делает, когда готово |
+| [docs/REAL-DATA.md](docs/REAL-DATA.md) | все | как загрузить настоящие ДЗ ученика (Canvas, Teams, itslearning, InSchool) |
 
 ![Страницы, API и база](docs/api-map.png)
 
@@ -73,7 +75,7 @@ cd frontend && pnpm install && pnpm dev
 `docker compose --profile testdata` ✅ · **в браузере: вход тестовым учеником → ДЗ → чат по заданию → квиз → карточки → прогресс** ✅.
 Ответы ИИ проверены на локальной заглушке, с настоящим ключом Groq не проверялись.
 
-Что осталось и кто делает: [README-TEST.md](README-TEST.md).
+Что осталось и кто делает: **[PLAN-MVP.md](PLAN-MVP.md)**. Настоящие ДЗ ученика уже сейчас: [docs/REAL-DATA.md](docs/REAL-DATA.md).
 
 ## Команда
 
