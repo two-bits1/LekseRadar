@@ -1,20 +1,21 @@
 // ИИ-чат на настоящем API (API.md, «ИИ-чат»): /chat — список, /chat/:chatId — переписка.
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import Markdown from 'react-markdown';
-import { Archive, ArchiveRestore, ArrowLeft, ArrowUp, ArrowUpRight, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Archive, ArchiveRestore, ArrowLeft, ArrowUp, ArrowUpRight, Lightbulb, ListChecks, Pencil, Play, Plus, RotateCcw, Shuffle, Trash2 } from 'lucide-react';
+import { Md } from '../components/Md';
 import { Orb } from '../components/Orb';
 import { setOrbThinking } from '../components/orbState';
-import { assignments } from '../data';
 import { PATHS } from '../paths';
 import { useAuth } from '../auth';
-import { chatsApi } from '../api/endpoints';
+import { chatsApi, quizzesApi } from '../api/endpoints';
 import type { ApiError, Chat, CreateChatRequest, Message, UpdateChatRequest } from '../api/types';
 import { Field, asApiError } from '../forms';
 import { useLang, useT } from '../i18n';
 
 const MAX_MESSAGE = 8000;  // как @Size в SendMessageRequest
 const MAX_TITLE = 200;
+// Пока у чата нет языка, тьютор сначала спрашивает его (API.md) — ученик отвечает названием языка.
+const TUTOR_LANGS = ['Norsk', 'English', 'Русский', 'Українська'];
 
 // Даты на языке интерфейса и в часовом поясе из профиля.
 function useDateFormat() {
@@ -27,10 +28,8 @@ function useDateFormat() {
 }
 
 // /chat: GET /chats?archived=false|true, «Ny samtale» → POST /chats.
-// /chat?assignment=… (кнопка «Lær med AI» у задания) → сразу новый чат по заданию.
 export function ChatList() {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
   const fmt = useDateFormat();
   const t = useT(); const c = t.chat;
   const [archived, setArchived] = useState(false);
@@ -45,19 +44,11 @@ export function ChatList() {
     return () => { off = true; };
   }, [archived]);
 
-  const start = async (body: CreateChatRequest = {}, replace = false) => {
+  const start = async (body: CreateChatRequest = {}) => {
     setCreating(true); setError(null);
-    try { const chat = await chatsApi.create(body); navigate(PATHS.chat(chat.id), { replace }); }
+    try { const chat = await chatsApi.create(body); navigate(PATHS.chat(chat.id)); }
     catch (e) { setError(asApiError(e, t.common)); setCreating(false); }
   };
-
-  const assignment = assignments.find(a => a.id === params.get('assignment'));
-  const started = useRef(false);  // StrictMode вызывает эффект дважды — чат должен создаться один раз
-  useEffect(() => {
-    if (!assignment || started.current) return;
-    started.current = true;
-    start({ title: assignment.title, topic: assignment.subject }, true);
-  }, [assignment]);
 
   return <section className="page narrow">
     <div className="page-intro"><Orb /><div className="eyebrow">{c.eyebrow}</div><h1>{c.title}</h1><p>{c.intro}</p></div>
@@ -65,7 +56,6 @@ export function ChatList() {
       <div className="filters">{[false, true].map(a => <button key={String(a)} aria-pressed={archived === a} className={archived === a ? 'selected' : ''} onClick={() => setArchived(a)}>{a ? c.archive : c.active}</button>)}</div>
       <button className="button dark-button" onClick={() => start()} disabled={creating}><Plus size={16} />{creating ? c.starting : c.newChat}</button>
     </div>
-    {assignment && creating && <p role="status" className="quiet-note">{c.startingAbout(assignment.title)}</p>}
     {error && <p role="alert" className="feedback danger">{error.message}</p>}
     <article className="lesson-card">
       {chats === null ? !error && <p>{c.loadingList}</p>
@@ -133,6 +123,14 @@ export function ChatView() {
     setActionError(null);
     try { setChat(await chatsApi.update(id, body)); setRenaming(null); } catch (e) { setActionError(asApiError(e, t.common)); }
   };
+  // Квиз-чат: ИИ составил набор → «Start quizen» → POST /quiz-sets/{quizSetId}/start → /quiz/:id.
+  const [startingQuiz, setStartingQuiz] = useState(false);
+  const startQuiz = async () => {
+    if (!chat?.quizSetId) return;
+    setStartingQuiz(true); setActionError(null);
+    try { const quiz = await quizzesApi.startSet(chat.quizSetId); navigate(PATHS.quiz(quiz.id)); }
+    catch (e) { setActionError(asApiError(e, t.common)); setStartingQuiz(false); }
+  };
   const remove = async () => {
     if (!chat || !window.confirm(c.confirmDelete(chat.title))) return;
     try { await chatsApi.remove(id); navigate(PATHS.chats, { replace: true }); } catch (e) { setActionError(asApiError(e, t.common)); }
@@ -162,15 +160,28 @@ export function ChatView() {
       {messages.length === 0 && !sending && <p className="quiet-note">{c.emptyThread}</p>}
       {messages.map(m => <div key={m.id} className={`msg ${m.role}`}>
         {m.role === 'tutor'
-          ? <Markdown components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" /> }}>{m.content}</Markdown>
+          ? <Md>{m.content}</Md>
           : <p>{m.content}</p>}
         <time dateTime={m.createdAt}>{m.role === 'tutor' ? `${t.nav.tutor} · ` : ''}{fmt(m.createdAt)}</time>
       </div>)}
       {sending && <><div className="msg student pending"><p>{sending}</p></div><div className="msg tutor typing" role="status"><span className="dots" aria-hidden="true"><i /><i /><i /></span>{c.typing}</div></>}
       {sendError && <div role="alert" className="feedback danger"><span>{sendError.error.message}</span>{sendError.error.status === 502 && <button onClick={() => send(sendError.content)}><RotateCcw size={14} />{c.retry}</button>}</div>}
+      {chat.mode === 'tutor' && !chat.language && !sending && <div className="chat-lang">
+        <p><strong>{c.langTitle}</strong><small>{c.langHint}</small></p>
+        <div className="actions wrap">{TUTOR_LANGS.map(name => <button key={name} onClick={() => send(name)}>{name}</button>)}</div>
+      </div>}
+      {chat.mode === 'quiz' && chat.quizSetId && !sending && <div className="chat-lang">
+        <p><strong>{c.quizReady}</strong></p>
+        <button className="btn btn-primary btn-sm" onClick={startQuiz} disabled={startingQuiz}><Play size={15} />{c.startQuiz}</button>
+      </div>}
       <div ref={bottom} className="chat-end" />
     </div>
 
+    {chat.mode === 'tutor' && chat.language && messages.length > 0 && <div className="quick" role="group" aria-label={c.quickLabel}>
+      <button disabled={!!sending} onClick={() => send(c.quick.simpler)}><Lightbulb size={15} />{c.quickButtons.simpler}</button>
+      <button disabled={!!sending} onClick={() => send(c.quick.example)}><Shuffle size={15} />{c.quickButtons.example}</button>
+      <button disabled={!!sending} onClick={() => send(c.quick.practice)}><ListChecks size={15} />{c.quickButtons.practice}</button>
+    </div>}
     <form className="composer" onSubmit={submit}>
       <textarea aria-label={c.inputLabel} placeholder={c.placeholder} rows={2} maxLength={MAX_MESSAGE} value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={onKeyDown} />
       <button className="button dark-button" aria-label={c.send} disabled={!draft.trim() || !!sending}><ArrowUp size={18} /></button>

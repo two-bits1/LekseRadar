@@ -115,3 +115,11 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .meter{width:90px;height:4px;border-radius:4px;background:var(--soft);overflow:hidden;flex-shrink:0}.meter>span{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#5fd3c0,#7a9cff)}
 @media(max-width:860px){.dash-grid{grid-template-columns:1fr}.dash-head{align-items:flex-start}}
 @media(max-width:560px){.dash{padding-top:24px}.dash-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{padding:12px}.stat strong{font-size:24px}.stat>span{font-size:11px}.dash-actions{width:100%}.dash-actions .btn{flex:1;padding:0 10px;font-size:13px}.meter{width:56px}}
+/* ==== Чат: выбор языка, быстрые действия, формулы ==== */
+.chat-lang{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 18px;border-radius:14px;background:var(--glass);border:1px solid rgba(116,212,196,.25);box-shadow:0 18px 50px -28px var(--glow)}
+.chat-lang p{margin:0}.chat-lang strong{display:block;font-size:15px;color:var(--text)}.chat-lang small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.quick button{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px;border-radius:9px;font-size:13px;font-weight:500;color:var(--text);background:var(--glass);border:1px solid var(--glass-border);transition:border-color .15s,color .15s}
+.quick button:hover:not(:disabled){border-color:rgba(116,212,196,.45);color:var(--primary)}.quick button svg{color:var(--primary)}
+.quick+.composer{margin-top:8px}
+.katex{font-size:1.05em}.msg .katex-display{margin:8px 0;overflow-x:auto;overflow-y:hidden}
