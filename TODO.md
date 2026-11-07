@@ -18,7 +18,12 @@
   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: без них Classroom отвечает 503. В Google Cloud Console добавить
     redirect URI `https://lekseradar-eight.vercel.app/settings/platforms`;
   - `CORS_ORIGINS=https://lekseradar-eight.vercel.app,http://localhost:5173`;
-- [ ] Ветки сервисов: collector ← `PythonAPI`, backend ← `JavaAPI-setup` (или `main-test-4.0`, если показывать эту сборку).
+- [ ] **Чтобы исправления из main-test-4.0 попали на сайт** (квизы, карточки, чат, профиль, вход):
+  1. Railway → `backend` → Settings → Source → Branch: `main-test-4.0` (Root Directory `backend` тот же);
+  2. Railway → `collector` → Branch: `main-test-4.0` (Root Directory `homework-collector`);
+  3. **№3**: V23–V24 и новый промпт квиза на облачную базу: `git switch main-test-4.0 && git pull`, временно Public Access,
+     `python3 database/setup_cloud_db.py`, Public Access убрать;
+  4. Vercel → Settings → Git → Production Branch: `main-test-4.0` → Redeploy.
 - [ ] По желанию: `TEAMS_CLIENT_ID` у collector (вход в Teams по коду).
 
 ## Vercel (фронт), №1
