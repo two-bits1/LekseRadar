@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, Check, Clock3, Sparkles, Layers, ChevronRight, CalendarDays, MessageSquare } from 'lucide-react';
 import { assignments } from '../data';
-import { Orb } from '../main';
+import { Orb } from '../components/Orb';
 import { PATHS, chatAbout, homeworkItem } from '../paths';
 import { useAuth } from '../auth';
 import { chatsApi } from '../api/endpoints';

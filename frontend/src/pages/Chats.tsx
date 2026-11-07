@@ -3,7 +3,8 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Markdown from 'react-markdown';
 import { Archive, ArchiveRestore, ArrowLeft, ArrowUp, ArrowUpRight, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
-import { Orb } from '../main';
+import { Orb } from '../components/Orb';
+import { setOrbThinking } from '../components/orbState';
 import { assignments } from '../data';
 import { PATHS } from '../paths';
 import { useAuth } from '../auth';
@@ -98,11 +99,12 @@ export function ChatView() {
   }, [id]);
 
   useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }); }, [messages.length, sending, sendError]);
+  useEffect(() => () => setOrbThinking(false), []);  // ушли со страницы, пока ждали ответ — шар успокаивается
 
   // Ответ ИИ идёт 2–15 с. 502 → вопрос уже сохранён на сервере, подтягиваем историю и даём «Prøv igjen».
   // NB: повтор по API.md = тот же POST ещё раз, поэтому в истории будет дубль вопроса (пункт 12 аудита, нужен фикс на бэкенде).
   const send = async (content: string) => {
-    setSending(content); setSendError(null);
+    setSending(content); setSendError(null); setOrbThinking(true);
     try {
       const reply = await chatsApi.send(id, content);
       setChat(reply.chat);
@@ -112,7 +114,7 @@ export function ChatView() {
       setSendError({ content, error });
       if (error.status === 502) chatsApi.messages(id).then(setMessages).catch(() => {});
       else setDraft(d => d || content);  // вопрос не сохранился — возвращаем текст в поле
-    } finally { setSending(null); }
+    } finally { setSending(null); setOrbThinking(false); }
   };
 
   const submit = (e?: FormEvent) => {
