@@ -14,12 +14,9 @@ def client(handler):
     return httpx.Client(transport=httpx.MockTransport(handler))
 
 
-def test_demo_covers_all_sources_in_one_format():
-    res = collect(demo=True)
-    assert set(res.sources) == {"canvas", "teams", "itslearning", "inschool"}
-    assert all(a.demo for a in res.assignments)
-    assert {a.status for a in res.assignments} <= {"todo", "overdue", "submitted", "graded"}
-    assert res.assignments[0].status == "overdue"  # просроченные первыми
+def test_no_credentials_gives_empty_result():
+    res = collect()
+    assert res.assignments == [] and res.sources == {}
 
 
 def test_canvas_parses_planner_and_follows_pages():
@@ -68,11 +65,11 @@ def test_itslearning_tasks_and_code_exchange():
     assert {a.id: a.status for a in res.assignments} == {"1": "todo", "2": "submitted"}
 
 
-def test_inschool_expired_session_asks_reconnect_and_demo_fills_rest():
-    res = collect({"inschool": {"host": "s.test", "cookies": {"JSESSIONID": "x"}}}, demo=True,
+def test_inschool_expired_session_asks_reconnect():
+    res = collect({"inschool": {"host": "s.test", "cookies": {"JSESSIONID": "x"}}},
                   client=client(lambda req: httpx.Response(401)))
     assert res.sources["inschool"].ok is False and res.sources["inschool"].needs_reconnect
-    assert res.sources["canvas"].demo and not any(a.source == "inschool" for a in res.assignments)
+    assert res.assignments == []
 
 
 def test_one_broken_source_does_not_break_others():

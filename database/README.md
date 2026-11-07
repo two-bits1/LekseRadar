@@ -15,7 +15,7 @@ cd database
 docker compose up -d        # Postgres на localhost:5432, база/логин/пароль: lekseradar
 ```
 
-При первом старте применяются все миграции и `seed.sql` (демо-ученик `demo@lekseradar.no`, пароль `demo1234`).
+При первом старте применяются все миграции. База стартует пустой, без демо-данных: ученика создаёт регистрация.
 Сбросить: `docker compose down -v && docker compose up -d`.
 
 Бэкенд таблицы не создаёт (`ddl-auto: none`): схема только здесь. Новые изменения — новой миграцией `V16__...sql`,
@@ -70,8 +70,8 @@ erDiagram
 **Синхронизация ДЗ.** Результат `collect()` записывается upsert'ом, `updated_credentials` заменяют
 `platform_connections.credentials_enc`:
 ```sql
-INSERT INTO assignments (user_id, source, external_id, title, course, due_at, status, url, description, kind, is_demo)
-VALUES (?, ?::platform, ?, ?, ?, ?, ?::assignment_status, ?, ?, ?, ?)
+INSERT INTO assignments (user_id, source, external_id, title, course, due_at, status, url, description, kind)
+VALUES (?, ?::platform, ?, ?, ?, ?, ?::assignment_status, ?, ?, ?)
 ON CONFLICT (user_id, source, external_id) DO UPDATE
 SET title = EXCLUDED.title, course = EXCLUDED.course, due_at = EXCLUDED.due_at, status = EXCLUDED.status,
     url = EXCLUDED.url, description = EXCLUDED.description, updated_at = now();

@@ -12,9 +12,7 @@ flowchart TB
         direction LR
         COL["collect()<br/><small>все платформы параллельно</small>"]
         NORM["Единый формат задания<br/><small>предмет · название · дедлайн<br/>статус · ссылка</small>"]
-        DEMO["Демо-режим<br/><small>готовые ДЗ без аккаунтов</small>"]
         COL --> NORM
-        DEMO -.-> NORM
     end
 
     subgraph BE["③ Backend · Java"]
@@ -55,7 +53,7 @@ flowchart TB
     classDef fe fill:#fdf4ff,stroke:#c026d3,color:#701a75
     classDef db fill:#f5f3ff,stroke:#7c3aed,color:#3b0764
     class CV,TM,IT,IS src
-    class COL,NORM,DEMO py
+    class COL,NORM py
     class API,AI be
     class FE fe
     class HW,CH,QZ,FC,PR,RM db
