@@ -1,7 +1,8 @@
-package com.lekseradar.common;
+package com.lekseradar.exception;
 
 import org.springframework.http.HttpStatus;
 
+/** Базовая ошибка API: HTTP-статус и понятное пользователю сообщение. */
 public class ApiException extends RuntimeException {
     private final HttpStatus status;
 
@@ -12,9 +13,5 @@ public class ApiException extends RuntimeException {
 
     public HttpStatus getStatus() {
         return status;
-    }
-
-    public static ApiException notFound(String what) {
-        return new ApiException(HttpStatus.NOT_FOUND, what + " не найден");
     }
 }
