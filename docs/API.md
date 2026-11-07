@@ -115,7 +115,7 @@ type User = {
   id: number;
   email: string;
   displayName: string;
-  locale: "nb" | "nn" | "en" | "ru";   // язык интерфейса и ИИ-тьютора
+  locale: "nb" | "nn" | "en" | "ru" | "uk";   // язык интерфейса
   timezone: string;                    // "Europe/Oslo"
   createdAt: string;                   // ISO-8601, UTC: "2026-11-07T09:40:00Z"
   lastLoginAt: string | null;
@@ -125,8 +125,14 @@ type AuthResponse = { token: string; user: User };
 
 type Chat = {
   id: number;
-  title: string;          // "Ny samtale", пока нет первого вопроса
+  title: string;          // "Ny samtale" (переименуется по первому вопросу), "Ny samtale: тема" или "Quiz: тема"
   topic: string | null;
+  mode: "tutor" | "quiz"; // задаётся при создании и не меняется
+  subject: string | null; // название предмета
+  language: string | null;// язык ответов ИИ ("ru", "nb"…); null — тьютор сначала спросит язык
+  level: "beginner" | "intermediate" | "advanced";
+  assignmentId: number | null; // чат по домашнему заданию
+  quizSetId: number | null;    // только у чата quiz
   archived: boolean;
   createdAt: string;
   updatedAt: string;      // последнее сообщение или изменение чата (по нему сортируется список)
@@ -183,6 +189,7 @@ type ApiError = {
 { "displayName": "Ann", "locale": "en", "timezone": "Europe/Oslo" }
 ```
 - **200** → `User`
+- `locale` — `nb`, `nn`, `en`, `ru`, `uk`
 - **400** → неизвестный `locale` или `timezone`
 
 ### `PUT /users/me/password` — сменить пароль
@@ -204,12 +211,19 @@ GET /chats?archived=false
 - **200** → `Chat[]`
 
 ### `POST /chats` — новый чат
-Тело необязательно.
+Тело необязательно, все поля тоже.
 ```json
-{ "title": "Algebra", "topic": "lineære funksjoner" }
+{ "title": "Algebra", "topic": "lineære funksjoner", "subject": "Matematikk",
+  "mode": "tutor", "level": "beginner", "assignmentId": null }
 ```
+- `mode` — `tutor` (по умолчанию) или `quiz`, потом не меняется
+- `subject` — название предмета; если такого ещё нет, он создаётся
+- `level` — `beginner` / `intermediate` (по умолчанию) / `advanced`
 - **201** → `Chat`
-- Без `title` чат назовётся по первому вопросу.
+- **404** → `assignmentId` не найден (или чужое ДЗ)
+- Без `title` чат называется «Ny samtale» (или «Ny samtale: тема») и переименовывается по первому вопросу.
+- **Язык.** Пока у чата `language: null`, первым ответом тьютор спрашивает, на каком языке учиться.
+  Ученик отвечает («Русский», «English»…), бэкенд сохраняет язык чата, дальше тьютор пишет на нём.
 
 ### `GET /chats/{chatId}` — один чат
 - **200** → `Chat`
@@ -236,6 +250,8 @@ GET /chats?archived=false
 - `content` — от 1 до 8000 символов
 - **201** → `ChatReply` (вопрос + ответ тьютора + обновлённый чат)
 - **502** → ИИ недоступен. Вопрос уже сохранён в истории, можно показать кнопку «Повторить».
+- **503** → промпты ИИ не загружены в базу (настройка сервера). Вопрос при этом не сохраняется.
+- Тьютор знает предмет, тему, уровень, текст ДЗ (если чат по ДЗ), слабые темы ученика и учебные материалы.
 - Ответ идёт 2–15 секунд: покажите индикатор «Тьютор печатает…».
 
 ---
@@ -267,6 +283,7 @@ GET /chats?archived=false
 | 404 | не найдено (или чужое) | «Не найдено» |
 | 409 | email уже занят | показать `message` у поля email |
 | 502 | ИИ недоступен | показать `message` и кнопку «Повторить» |
+| 503 | промпты ИИ не загружены в базу (ошибка настройки сервера) | показать `message` |
 | 500 | ошибка сервера | «Что-то пошло не так» |
 
 ---
