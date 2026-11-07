@@ -1,4 +1,4 @@
--- Напоминания, флеш-карты и ачивки (функции 5–7 из README, «ситуативно»).
+-- Напоминания и ачивки (функции 5–6 из README). Флеш-карты — часть квизов, см. V9.
 
 -- Напоминания о дедлайнах ДЗ или о своём событии
 CREATE TABLE reminders (
@@ -13,22 +13,6 @@ CREATE TABLE reminders (
 );
 -- Очередь к отправке: SELECT * FROM reminders WHERE sent_at IS NULL AND remind_at <= now();
 CREATE INDEX reminders_due ON reminders (remind_at) WHERE sent_at IS NULL;
-
--- Флеш-карты с интервальным повторением (SM-2 упрощённо)
-CREATE TABLE flashcards (
-    id              BIGSERIAL PRIMARY KEY,
-    user_id         BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    assignment_id   BIGINT       REFERENCES assignments(id) ON DELETE SET NULL,
-    topic           TEXT         NOT NULL,
-    front           TEXT         NOT NULL,
-    back            TEXT         NOT NULL,
-    ease            NUMERIC(4,2) NOT NULL DEFAULT 2.5,
-    interval_days   INT          NOT NULL DEFAULT 0,
-    next_review_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    reviews         INT          NOT NULL DEFAULT 0,
-    created_at      TIMESTAMPTZ  NOT NULL DEFAULT now()
-);
-CREATE INDEX flashcards_review ON flashcards (user_id, next_review_at);
 
 -- Каталог ачивок и полученные ачивки
 CREATE TABLE achievements (

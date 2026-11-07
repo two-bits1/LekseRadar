@@ -85,8 +85,4 @@ INSERT INTO user_achievements (user_id, achievement_code) VALUES (1, 'first_chat
 INSERT INTO reminders (user_id, assignment_id, message, remind_at)
 SELECT 1, id, 'Frist i morgen: ' || title, due_at - interval '1 day' FROM assignments WHERE due_at > now();
 
-INSERT INTO flashcards (user_id, topic, front, back) VALUES
- (1, 'lineære funksjoner', 'Stigningstall', 'Hvor mye y endrer seg når x øker med 1'),
- (1, 'lineære funksjoner', 'Konstantledd',  'Der grafen krysser y-aksen');
-
 COMMIT;
