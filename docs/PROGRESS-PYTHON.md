@@ -21,8 +21,30 @@ cd homework-collector && pip install -r requirements.txt
 COLLECTOR_KEY=$(openssl rand -hex 32) uvicorn homework.server:app --port 8090
 ```
 
+## Коммиты 6–10
+
+| Коммит | Шаг плана | Что сделано | Проверено |
+|---|---|---|---|
+| `0239d3f` | 3 | `homework-collector/Dockerfile` (без root, healthcheck, без access-log), сервис `collector` в `database/docker-compose.yml` на `127.0.0.1:8090` | образ собран, `/health` → ok, без ключа 401, с ключом 200, в логах нет запросов |
+| `a93a39e` | 3 | README сборщика: раздел «HTTP-сервис», структура; `docs/RUN.md`: collector и V21 | — |
+| `8db93b8` | 5 | `database/migrate.sh`: докатывает только новые миграции, учёт в `schema_migrations`, `--baseline`, `--status`; `init.sh` тоже ведёт учёт | чистая база: V1–V21, повтор ничего не делает; старая база без учёта → просит `--baseline`; база на V20 + `--baseline 20` → применилась V21; Docker-том: 21 запись |
+| `69adca3` | 4 | `ai-content/check/check_ai.py`: чат по ДЗ, квиз от ИИ (и `quiz_sets.language`), проверка ответа на ru и nb, таблица для README-TEST | прогон на бэкенде с локальной заглушкой ИИ: все шаги проходят, проверка языка ловит ответ не на том языке |
+| `594d11b` | 5 | `homework-collector/railway.json`, `HOST`/`PORT` в образе для Railway | `HOST=0.0.0.0` проверен локально; `HOST=::` здесь не проверить (в песочнице нет IPv6) |
+
+**Обновить свою локальную базу до V21:**
+```bash
+database/migrate.sh "postgresql://lekseradar:lekseradar@localhost:5432/lekseradar" --baseline 20
+```
+
+**Проверить ИИ с ключом Groq** (ключ в `backend/.env`, бэкенд запущен):
+```bash
+pip install 'psycopg[binary]'
+python ai-content/check/check_ai.py --email test@lekseradar.no --password LekseRadar2026 \
+  --database-url postgresql://lekseradar:lekseradar@localhost:5432/lekseradar
+```
+Таблицу из вывода — в README-TEST.md.
+
 ## Дальше
 
-- Шаг 3: `Dockerfile`, сервис `collector` в `docker-compose.yml`, раздел в README сборщика.
-- Шаг 4: проверка ИИ с ключом Groq — нужен ключ от Ильи.
-- Шаг 5: деплой — нужен выбор хостинга и доступ к нему.
+- Шаг 5: инструкция деплоя на Railway (база, collector, переменные для бэкенда).
+- Шаг 4: прогон `check_ai.py` с настоящим ключом — нужен ключ.
