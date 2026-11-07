@@ -3,13 +3,13 @@ flowchart TB
     U(["👤 Ученик"])
     LEG["<b>Легенда</b><br/><small>сплошная линия — уже работает в main-test<br/>пунктир — ещё не подключено</small>"]
 
-    FE["<b>① Frontend · React + Vite</b><br/><small>frontend/<br/>Дашборд · Календарь · AI-veileder · Læringskort · Профиль<br/>сейчас на демо-данных</small>"]
+    FE["<b>① Frontend · React + Vite</b><br/><small>/login · / · /chat · /homework · /quiz<br/>/flashcards · /progress · /profile<br/>сейчас на демо-данных</small>"]
 
-    subgraph BE["② Backend · Java 21 · Spring Boot · backend/"]
+    subgraph BE["② Backend · Java 21 · Spring Boot · /api/v1"]
         direction LR
-        AUTH["Вход и профиль<br/><small>/api/v1/auth · /users/me<br/>JWT, bcrypt</small>"]
-        CHAT["ИИ-чат<br/><small>/api/v1/chats · /messages</small>"]
-        TODO["Нужно добавить<br/><small>ДЗ · квизы · карточки<br/>дашборд · материалы</small>"]
+        AUTH["Вход и профиль ✅<br/><small>/auth/register · /auth/login<br/>/users/me · /users/me/password</small>"]
+        CHAT["ИИ-чат ✅<br/><small>/chats · /chats/{id}/messages</small>"]
+        TODO["🕓 Нужно добавить<br/><small>/homework · /quizzes · /flashcards<br/>/dashboard · /history · /platforms</small>"]
         AIC["AiClient<br/><small>OpenAI по API-ключу из .env</small>"]
         CHAT --> AIC
     end
