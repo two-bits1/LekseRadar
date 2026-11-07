@@ -65,6 +65,17 @@ def test_itslearning_tasks_and_code_exchange():
     assert {a.id: a.status for a in res.assignments} == {"1": "todo", "2": "submitted"}
 
 
+
+def test_itslearning_non_json_token_reply_gives_clear_error():
+    import pytest
+    from homework.models import SourceError
+    for status, reconnect in ((200, True), (400, True), (503, False)):
+        c = client(lambda req: httpx.Response(status, text="<html>Login error</html>"))
+        with pytest.raises(SourceError) as e:
+            itslearning.exchange_code(c, "https://x.itslearning.com", "abc")
+        assert "JSONDecodeError" not in str(e.value) and "Expecting value" not in str(e.value)
+        assert e.value.needs_reconnect is reconnect
+
 def test_inschool_expired_session_asks_reconnect():
     res = collect({"inschool": {"host": "s.test", "cookies": {"JSESSIONID": "x"}}},
                   client=client(lambda req: httpx.Response(401)))
