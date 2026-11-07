@@ -1,44 +1,46 @@
-# Как запустить и проверить весь LekseRadar (ветка main-test-2.0)
+# Как запустить и проверить весь LekseRadar (ветка main-test-3.0)
 
-В main-test-2.0: `main-test-1.0` + свежие `JavaAPI-setup` и `Frontend-setup`.
-
-## 1. База (PostgreSQL 16, Docker)
+## 1. База, промпты и тестовые данные (Docker)
 ```bash
 cd database
-docker compose up -d          # миграции V1–V14 + демо-данные
-# сброс: docker compose down -v && docker compose up -d
+docker compose --profile testdata up -d   # миграции V1–V20 → промпты из ai-content → тестовые данные
+# без тестовых данных: docker compose up -d
+# сброс: docker compose --profile testdata down -v && docker compose --profile testdata up -d
 ```
-Демо-ученик: `demo@lekseradar.no` / `demo1234`.
+- Сервис `content` сам загружает промпты и учебные файлы (`ai-content/load/load.py`) и завершается.
+- Сервис `testdata` создаёт ученика `test@lekseradar.no` / `LekseRadar2026` с 16 ДЗ по 10 предметам, 5 готовыми квизами
+  и материалами: [database/testdata/README.md](../database/testdata/README.md).
+- База открыта только на `127.0.0.1:5432`.
 
-## 2. Промпты и учебные файлы в базу
+Без Docker: примените `database/migrations/*.sql` по порядку, затем
 ```bash
 pip install -r ai-content/load/requirements.txt
 DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python ai-content/load/load.py
+psql "postgresql://lekseradar:lekseradar@localhost:5432/lekseradar" -v ON_ERROR_STOP=1 -f database/testdata/seed.sql
 ```
-Без этого шага чаты отвечают ошибкой «нет промпта» (так и задумано).
 
-## 3. Бэкенд (Java 21)
+## 2. Бэкенд (Java 21)
 ```bash
 cd backend
-cp .env.example .env          # вписать OPENAI_API_KEY и JWT_SECRET
+cp .env.example .env          # вписать OPENAI_API_KEY (Groq бесплатно) и JWT_SECRET
 ./mvnw spring-boot:run        # http://localhost:8080, Swagger: /swagger-ui.html
 ```
-Проверка: `POST /api/v1/auth/login` с демо-учеником → токен, `GET /api/v1/chats` → демо-чат.
+Проверка: `POST /api/v1/auth/login` с тестовым учеником → токен, `GET /api/v1/homework` → 16 заданий.
+Без настоящего ключа всё, кроме ответов ИИ, работает: готовые квизы из тестовых данных ИИ не вызывают.
 
-## 4. Фронтенд
+## 3. Фронтенд
 ```bash
 cd frontend
 pnpm install
 pnpm dev                      # http://localhost:5173
 ```
-Вход, профиль и чат идут на бэкенд через proxy Vite (`/api` → `localhost:8080`), остальные страницы пока демо.
-Тесты: `pnpm test`.
+Все страницы на API бэкенда через proxy Vite (`/api` → `localhost:8080`). Тесты: `pnpm test`.
 
-## 5. Сбор ДЗ (Python)
+## 4. Сбор ДЗ (Python)
 ```bash
 cd homework-collector
 pip install -r requirements.txt
-python -m homework --demo     # демо-ДЗ со всех 4 платформ
+python -m homework --creds creds.json --json   # настоящие платформы; формат creds — в homework-collector/README.md
 python -m pytest -q
 ```
 
