@@ -1,0 +1,52 @@
+# Локальный PostgreSQL для LekseRadar: docker compose up -d (из папки database/)
+# Миграции применяются при первом запуске пустого тома (база пустая, без демо-данных),
+# потом сервис content загружает промпты и учебные файлы из ai-content/, а collector собирает ДЗ для бэкенда.
+# Новая миграция на уже созданном томе сама не применится: ./migrate.sh "$DATABASE_URL" (см. migrate.sh).
+# Сбросить базу: docker compose down -v && docker compose up -d
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: lekseradar
+      POSTGRES_USER: lekseradar
+      POSTGRES_PASSWORD: lekseradar   # только для локальной разработки
+    ports:
+      - "127.0.0.1:5432:5432"   # только с этого компьютера: пароль простой, наружу базу не открываем
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./init.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lekseradar -d lekseradar"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # Промпты ИИ и учебные файлы из ai-content/ → в базу (load.py). Без них чат и квиз отвечают «промпт не загружен».
+  # Запускается сам после db и завершается; повторный запуск ничего не дублирует.
+  content:
+    image: python:3.12-slim
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://lekseradar:lekseradar@db:5432/lekseradar
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    volumes:
+      - ../ai-content:/ai-content:ro
+    command: sh -c "pip install -q -r /ai-content/load/requirements.txt && python -X utf8 /ai-content/load/load.py"
+    restart: "no"
+
+  # Сбор ДЗ для бэкенда: COLLECTOR_URL=http://localhost:8090, ключ COLLECTOR_KEY (COLLECTOR-API.md).
+  # Локально ключ по умолчанию; в облаке свой: openssl rand -hex 32.
+  collector:
+    build: ../homework-collector
+    environment:
+      COLLECTOR_KEY: ${COLLECTOR_KEY:-local-dev-collector-key}
+      TEAMS_CLIENT_ID: ${TEAMS_CLIENT_ID:-}
+    ports:
+      - "127.0.0.1:8090:8090"   # только с этого компьютера
+    restart: unless-stopped
+
+volumes:
+  pgdata:

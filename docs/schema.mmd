@@ -1,0 +1,59 @@
+%%{init: {"theme":"base","flowchart":{"curve":"basis","nodeSpacing":34,"rankSpacing":60},"themeVariables":{"fontFamily":"Inter, Helvetica, Arial","fontSize":"15px","primaryColor":"#eef2ff","primaryBorderColor":"#6366f1","lineColor":"#64748b"}}}%%
+flowchart TB
+    subgraph SRC["① Учебные платформы"]
+        direction LR
+        CV["Canvas<br/><small>личный токен · planner API</small>"]
+        TM["Microsoft Teams<br/><small>Graph · Assignments</small>"]
+        IT["itslearning<br/><small>OAuth · tasks API</small>"]
+        IS["Visma InSchool<br/><small>cookie сессии</small>"]
+    end
+
+    subgraph PY["② homework-collector · Python"]
+        direction LR
+        COL["collect()<br/><small>все платформы параллельно</small>"]
+        NORM["Единый формат задания<br/><small>предмет · название · дедлайн<br/>статус · ссылка</small>"]
+        COL --> NORM
+    end
+
+    subgraph BE["③ Backend · Java"]
+        direction LR
+        API["REST API /api/*<br/><small>JWT · вызов функций БД</small>"]
+        AI["ИИ по API-ключу<br/><small>тьютор · генерация квиза JSON</small>"]
+    end
+
+    FE["④ Frontend · React<br/><small>Дашборд · Домашка · ИИ-чат<br/>Квиз · Карточки · Прогресс</small>"]
+
+    subgraph DB["⑤ PostgreSQL · database/"]
+        direction LR
+        HW["ДЗ<br/><small>assignments · platform_connections</small>"]
+        CH["История ИИ-чата<br/><small>chat_sessions · chat_messages</small>"]
+        QZ["Квизы из JSON<br/><small>subjects · quiz_sets · exercises<br/>import · start · answer · finish</small>"]
+        FC["Флеш-карты = вопросы квиза<br/><small>flashcard_progress · SM-2</small>"]
+        PR["Прогресс и история<br/><small>user_events · дашборд · темы</small>"]
+        RM["Напоминания и ачивки"]
+        QZ -- "ошибка → карточка" --> FC
+        QZ --> PR
+        FC --> PR
+        HW --> RM
+    end
+
+    CV & TM & IT & IS --> COL
+    NORM -- "assignments[] +<br/>обновлённые токены" --> API
+    FE <-- "HTTPS + JWT" --> API
+    API <--> AI
+    API -- "UPSERT ДЗ" --> HW
+    API -- "сообщения" --> CH
+    AI -- "JSON квиза<br/>(один раз на тему)" --> QZ
+    API -- "ответы · оценки 0–5" --> FC
+    API -- "виды прогресса" --> PR
+
+    classDef src fill:#fff7ed,stroke:#f97316,color:#7c2d12
+    classDef py fill:#ecfdf5,stroke:#10b981,color:#064e3b
+    classDef be fill:#eff6ff,stroke:#3b82f6,color:#1e3a8a
+    classDef fe fill:#fdf4ff,stroke:#c026d3,color:#701a75
+    classDef db fill:#f5f3ff,stroke:#7c3aed,color:#3b0764
+    class CV,TM,IT,IS src
+    class COL,NORM py
+    class API,AI be
+    class FE fe
+    class HW,CH,QZ,FC,PR,RM db
