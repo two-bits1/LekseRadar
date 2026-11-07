@@ -166,7 +166,7 @@ Java не умеет вызывать Python-функцию напрямую. О
 2. UPSERT заданий: `SELECT * FROM sync_assignments(:userId, :assignmentsJson)` (V21 от №3, тот же SQL, что в `to_db.py`).
 3. `updated_credentials` → зашифровать и сохранить вместо старых.
 4. По каждой платформе: `needs_reconnect`, `last_error`, `last_synced_at`.
-5. Событие `homework_synced` в `user_events`, ответ `{sources: {...}, added, updated}`.
+5. Событие `homework_synced` в `user_events`, ответ `{sources: [...], added, updated}`.
 
 Плюс:
 - лимит 1 синхронизация в минуту на ученика (`RateLimiter` уже есть);
