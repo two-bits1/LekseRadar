@@ -81,3 +81,63 @@
 
 **Manually verified** against PostgreSQL from `database/`: demo login, profile, chats, archive, delete,
 foreign chat → 404, validation errors, `user_events` rows. AI returns 502 until the OpenAI account has credits.
+
+---
+
+## Часть 4 / Part 4 — коммиты / commits 16–20
+
+### RU
+16. **`docs/API.md`: таблица всех URL** бэкенда одним списком.
+17. **`docs/API.md`: страницы фронтенда** (`/`, `/login`, `/profile`, `/chat`…) и какие API они вызывают.
+18. **Groq** как бесплатный ИИ в `.env.example`: код менять не нужно, только `OPENAI_BASE_URL`, ключ и модель.
+19. **`docs/API.md`: исправлен пример `fetch`**: неверный пароль (401 на `/auth/login`) больше не перекидывает на `/login`.
+20. **Вернул сущности и репозитории** (`git revert 2b943e1`, по `ENTITIES-PLAN.md`): 20 сущностей, 20 репозиториев,
+    9 enum'ов PostgreSQL, интеграционный тест.
+
+### EN
+16. **`docs/API.md`: table of all backend URLs.**
+17. **`docs/API.md`: frontend pages** (`/`, `/login`, `/profile`, `/chat`…) and the API calls each one makes.
+18. **Groq** as a free AI provider in `.env.example`: no code change, only `OPENAI_BASE_URL`, key and model.
+19. **`docs/API.md`: fixed `fetch` example**: wrong password (401 on `/auth/login`) no longer redirects to `/login`.
+20. **Restored entities and repositories** (`git revert 2b943e1`, per `ENTITIES-PLAN.md`): 20 entities, 20 repositories,
+    9 PostgreSQL enums, integration test.
+
+---
+
+## Часть 5 / Part 5 — коммиты / commits 21–26
+
+### RU
+21. **DTO для ДЗ и платформ:** `AssignmentResponse`, `SyncResponse`, `SourceStatusResponse`, `PlatformResponse`.
+22. **DTO для квизов:** `SubjectResponse`, `StartQuizRequest`, `QuizResponse`, `QuestionResponse` (без правильного ответа),
+    `AnswerRequest`, `AnswerResponse`, `FinishResponse`.
+23. **DTO для карточек, дашборда, истории и материалов:** `FlashcardResponse`, `ReviewRequest/Response`,
+    `DashboardResponse` и его части, `EventResponse`, `MaterialResponse`.
+24. **Имена файлов по папке:** сущности `*Entity`, enum'ы в `model/enums`, части DTO `*Response`,
+    ИИ — `AiService`/`OpenAiService`, сообщения ИИ — `dto/ai`, `AppProperties` → `AppConfig`.
+25. **Чат на промптах из базы:** `start_chat`, `chat_system_prompt`, `chat_prompt_vars`, материалы в промпте,
+    выбор языка (`[[LANGUAGE=xx]]` → язык чата), `prompt_id` в ответе, 503 если промпты не загружены.
+    Новые поля чата: `mode`, `subject`, `language`, `level`, `assignmentId`, `quizSetId`. Язык профиля `uk`.
+26. **Документация** под код: `docs/API.md`, `backend/README.md`.
+
+**Проверено** на пустой базе V1–V16 (без пробных данных) и настоящем ИИ (Groq):
+8 из 8 тестов (5 интеграционных, 3 JWT), после тестов в базе 0 пользователей; `ddl-auto: validate` — все 20 сущностей
+совпадают со схемой; вход `demo@…` → 401; регистрация → чат с предметом → тьютор спросил язык → «Русский» →
+язык чата `ru`, ответ по-русски по теме, метки вырезаны, `prompt_id` записан.
+
+### EN
+21. **Homework and platform DTOs:** `AssignmentResponse`, `SyncResponse`, `SourceStatusResponse`, `PlatformResponse`.
+22. **Quiz DTOs:** `SubjectResponse`, `StartQuizRequest`, `QuizResponse`, `QuestionResponse` (no correct answer),
+    `AnswerRequest`, `AnswerResponse`, `FinishResponse`.
+23. **Flashcard, dashboard, history and material DTOs:** `FlashcardResponse`, `ReviewRequest/Response`,
+    `DashboardResponse` and its parts, `EventResponse`, `MaterialResponse`.
+24. **File names match their folder:** entities `*Entity`, enums in `model/enums`, DTO parts `*Response`,
+    AI — `AiService`/`OpenAiService`, AI messages in `dto/ai`, `AppProperties` → `AppConfig`.
+25. **Chat uses prompts from the database:** `start_chat`, `chat_system_prompt`, `chat_prompt_vars`, materials in the prompt,
+    language selection (`[[LANGUAGE=xx]]` → chat language), `prompt_id` on replies, 503 when prompts are not loaded.
+    New chat fields: `mode`, `subject`, `language`, `level`, `assignmentId`, `quizSetId`. Profile locale `uk`.
+26. **Docs** match the code: `docs/API.md`, `backend/README.md`.
+
+**Verified** on an empty V1–V16 database (no demo data) with a real AI (Groq):
+8/8 tests (5 integration, 3 JWT), 0 users left after tests; `ddl-auto: validate` — all 20 entities match the schema;
+`demo@…` login → 401; register → chat with subject → tutor asked for language → "Русский" →
+chat language `ru`, answer in Russian on topic, tags stripped, `prompt_id` stored.
