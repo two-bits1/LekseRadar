@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { matchesFilter, sortHomework } from './Homework';
+import { matchesFilter, sortHomework, syncSummary } from './Homework';
 import type { Assignment } from '../api/types';
 
 const hw = (status: Assignment['status'], id = 1, dueAt: string | null = null): Assignment =>
@@ -23,4 +23,11 @@ it('сортировка: просроченное, несданное по ср
     hw('submitted', 4, '2026-11-01T10:00:00Z'), hw('overdue', 5, '2026-11-06T10:00:00Z'), hw('todo', 6, '2026-11-09T10:00:00Z'),
   ];
   expect(sortHomework(list).map(a => a.id)).toEqual([5, 6, 3, 2, 4, 1]);
+});
+
+it('итог «Oppdater»: без платформ — none, иначе числа и упавшие источники', () => {
+  expect(syncSummary({ sources: [], added: 0, updated: 0, count: 0 })).toEqual({ none: true });
+  const bad = { platform: 'teams' as const, ok: false, count: 0, error: 'expired', needsReconnect: true };
+  expect(syncSummary({ sources: [{ platform: 'canvas', ok: true, count: 3, error: null, needsReconnect: false }, bad], added: 2, updated: 1, count: 3 }))
+    .toEqual({ none: false, added: 2, updated: 1, failed: [bad] });
 });

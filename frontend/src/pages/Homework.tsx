@@ -2,11 +2,13 @@
 // Из задания можно сразу открыть чат с репетитором (POST /chats с assignmentId) или квиз по нему (POST /quizzes).
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronUp, ExternalLink, ListChecks, Sparkles, Undo2, Check } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink, ListChecks, RefreshCw, Sparkles, Undo2, Check } from 'lucide-react';
 import { PATHS } from '../paths';
 import { useAuth } from '../auth';
 import { chatsApi, homeworkApi, quizzesApi } from '../api/endpoints';
-import type { ApiError, Assignment, AssignmentStatus } from '../api/types';
+import type { ApiError, Assignment, AssignmentStatus, SourceStatus, SyncResult } from '../api/types';
+import { isApiError } from '../api/client';
+import { platformError } from '../components/Platforms';
 import { asApiError } from '../forms';
 import { Md } from '../components/Md';
 import { useLang, useT } from '../i18n';
@@ -24,6 +26,12 @@ const time = (a: Assignment) => a.dueAt ? Date.parse(a.dueAt) : Number.POSITIVE_
 export const sortHomework = (list: Assignment[]) => [...list].sort((a, b) =>
   RANK[a.status] - RANK[b.status] || (RANK[a.status] < 2 ? time(a) - time(b) : time(b) - time(a)) || a.id - b.id);
 
+// Итог POST /homework/sync для строки под кнопкой «Oppdater».
+export type SyncSummary = { none: true } | { none: false; added: number; updated: number; failed: SourceStatus[] };
+export const syncSummary = (r: SyncResult): SyncSummary =>
+  r.sources.length ? { none: false, added: r.added, updated: r.updated, failed: r.sources.filter(s => !s.ok) } : { none: true };
+const NAME: Record<string, string> = { canvas: 'Canvas', teams: 'Teams', itslearning: 'itslearning', inschool: 'Visma InSchool', classroom: 'Google Classroom' };
+
 export function Homework() {
   const t = useT(); const h = t.hw; const { tag } = useLang(); const { user } = useAuth(); const navigate = useNavigate();
   const [items, setItems] = useState<Assignment[] | null>(null);
@@ -32,6 +40,7 @@ export function Homework() {
   const [full, setFull] = useState<Record<number, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
+  const [sync, setSync] = useState<SyncSummary | null>(null); const [syncing, setSyncing] = useState(false); const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => { homeworkApi.list().then(setItems).catch(e => { setItems([]); setError(asApiError(e, t.common)); }); }, [t.common]);
 
@@ -61,12 +70,30 @@ export function Homework() {
     navigate(PATHS.quiz(quiz.id));
   });
 
+  // «Oppdater»: сбор может идти до минуты; потом заново GET /homework.
+  const refresh = async () => {
+    setSyncing(true); setSync(null); setSyncError(null);
+    try { setSync(syncSummary(await homeworkApi.sync())); setItems(await homeworkApi.list()); }
+    catch (e) { setSyncError(isApiError(e) && e.status === 429 ? t.platforms.syncRecent : platformError(e, t)); }
+    finally { setSyncing(false); }
+  };
+  const p = t.platforms;
+
   const shown = sortHomework((items ?? []).filter(a => matchesFilter(a, filter)));
   const count = (f: Filter) => (items ?? []).filter(a => matchesFilter(a, f)).length;
   const pillClass = (s: AssignmentStatus) => `pill hw-${s}`;
 
   return <section className="page narrow app-page">
-    <header className="page-head"><h1>{h.title}</h1><p>{h.intro}</p></header>
+    <header className="page-head hw-head"><div><h1>{h.title}</h1><p>{h.intro}</p></div>
+      <button type="button" className="btn btn-sm" disabled={syncing} onClick={refresh}><RefreshCw size={15} className={syncing ? 'spin' : undefined} />{syncing ? p.syncing : p.sync}</button>
+    </header>
+    <div aria-live="polite">
+      {sync?.none && <p className="feedback warning">{p.noPlatforms} <Link to={PATHS.platforms}>{p.toPlatforms}</Link></p>}
+      {sync && !sync.none && <p className="feedback success"><Check size={16} />{p.syncDone(sync.added, sync.updated)}</p>}
+      {sync && !sync.none && sync.failed.map(s => <p key={s.platform} role="alert" className="feedback danger">
+        <strong>{NAME[s.platform] ?? s.platform}:</strong> {s.error ?? p.failing}{s.needsReconnect && <> <Link to={PATHS.platforms}>{p.reconnectLink}</Link></>}</p>)}
+      {syncError && <p role="alert" className="feedback danger">{syncError}</p>}
+    </div>
     <div className="seg" role="group" aria-label={h.title}>
       {FILTERS.map(f => <button type="button" key={f} aria-pressed={filter === f} onClick={() => setFilter(f)}>{h.filters[f]}{items ? ` (${count(f)})` : ''}</button>)}
     </div>
