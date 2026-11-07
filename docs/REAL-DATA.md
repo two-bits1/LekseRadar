@@ -22,7 +22,7 @@ docker compose up -d          # миграции V1–V20 и промпты, б�
 Если раньше запускали с `--profile testdata`, тестового ученика можно убрать (его ДЗ, чаты и квизы удалятся каскадом):
 
 ```bash
-psql postgresql://lekseradar:lekseradar@localhost:5432/lekseradar -c "DELETE FROM users WHERE email = 'test@lekseradar.no'"
+psql postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar -c "DELETE FROM users WHERE email = 'test@lekseradar.no'"
 ```
 
 ## 2. Бэкенд и фронт
@@ -103,7 +103,7 @@ refresh_token обновляется сам. itslearning может закрыт
 
 ```bash
 python -m homework --creds creds.json                     # просто показать, что нашлось
-DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar \
+DATABASE_URL=postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar \
   python -m homework.to_db --email <email ученика> --creds creds.json
 ```
 
@@ -126,7 +126,7 @@ inschool: ОШИБКА Сессия InSchool истекла, нужно войт
 До появления `POST /homework/sync` можно запускать по расписанию (`crontab -e`):
 
 ```cron
-*/30 * * * * cd /путь/к/LekseRadar/homework-collector && DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python3 -m homework.to_db --email <email> --creds creds.json >> sync.log 2>&1
+*/30 * * * * cd /путь/к/LekseRadar/homework-collector && DATABASE_URL=postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar python3 -m homework.to_db --email <email> --creds creds.json >> sync.log 2>&1
 ```
 
 Для InSchool ставьте `*/4` вместо `*/30`, иначе cookie успеют истечь.
