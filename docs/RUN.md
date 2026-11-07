@@ -3,7 +3,7 @@
 ## 1. База, промпты и тестовые данные (Docker)
 ```bash
 cd database
-docker compose --profile testdata up -d   # миграции V1–V20 → промпты из ai-content → тестовые данные
+docker compose --profile testdata up -d   # миграции V1–V21 → промпты из ai-content → тестовые данные
 # без тестовых данных: docker compose up -d
 # сброс: docker compose --profile testdata down -v && docker compose --profile testdata up -d
 ```
@@ -11,6 +11,8 @@ docker compose --profile testdata up -d   # миграции V1–V20 → про
 - Сервис `testdata` создаёт ученика `test@lekseradar.no` / `LekseRadar2026` с 16 ДЗ по 10 предметам, 5 готовыми квизами
   и материалами: [database/testdata/README.md](../database/testdata/README.md).
 - База открыта только на `127.0.0.1:5432`.
+- Сервис `collector` (сбор ДЗ для бэкенда) на `127.0.0.1:8090`: [homework-collector/COLLECTOR-API.md](../homework-collector/COLLECTOR-API.md).
+- Том базы уже был создан раньше? Новые миграции сами не применятся: `psql "postgresql://lekseradar:lekseradar@localhost:5432/lekseradar" -f database/migrations/V21__sync_assignments.sql`.
 
 Без Docker: примените `database/migrations/*.sql` по порядку, затем
 ```bash

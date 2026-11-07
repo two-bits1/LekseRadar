@@ -27,6 +27,18 @@ result.model_dump(mode="json")   # готовый JSON для ответа бэ�
 (нужен `DATABASE_URL`). Войти в Teams или itslearning и записать токены: `python -m homework.login teams|itslearning --creds creds.json`.
 Пошагово: [docs/REAL-DATA.md](../docs/REAL-DATA.md).
 
+## HTTP-сервис для бэкенда (`collector`)
+
+Java вызывает сборщик по HTTP: `homework/server.py` (FastAPI). Контракт и примеры: [COLLECTOR-API.md](COLLECTOR-API.md).
+
+```bash
+COLLECTOR_KEY=$(openssl rand -hex 32) uvicorn homework.server:app --port 8090   # или сервис collector в database/docker-compose.yml
+```
+
+- Все запросы, кроме `/health`, с заголовком `X-Internal-Key`. Без ключа (≥ 16 символов) сервис не стартует.
+- Ничего не хранит, тела запросов не логирует. Наружу не публиковать: только сеть бэкенда.
+- Задания из ответа бэкенд пишет в базу функцией `sync_assignments()` (миграция V21).
+
 ## Единый формат задания
 
 | поле | значение |
@@ -63,6 +75,9 @@ result.model_dump(mode="json")   # готовый JSON для ответа бэ�
 ```
 homework/
 ├── collect.py        collect(): все платформы параллельно → один список
+├── server.py         HTTP-сервис collector для бэкенда (COLLECTOR-API.md)
+├── to_db.py          CLI: собрать ДЗ ученика и записать в базу (sync_assignments)
+├── login.py          CLI: вход в Teams и itslearning, токены → creds.json
 ├── models.py         Assignment, Credentials, CollectResult
 └── sources/          по файлу на платформу: fetch() + normalize() + функции входа
 tests/                тесты на подменённых ответах платформ (pytest)
