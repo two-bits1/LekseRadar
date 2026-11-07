@@ -33,6 +33,10 @@ public class UserEntity {
     @Column(nullable = false)
     private String timezone = DEFAULT_TIMEZONE;
 
+    /** Напоминать о ДЗ письмом за 24 часа до срока (V25). */
+    @Column(name = "email_reminders", nullable = false)
+    private boolean emailReminders = true;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -53,6 +57,7 @@ public class UserEntity {
     public String getDisplayName() { return displayName; }
     public String getLocale() { return locale; }
     public String getTimezone() { return timezone; }
+    public boolean isEmailReminders() { return emailReminders; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getLastLoginAt() { return lastLoginAt; }
 
@@ -60,5 +65,6 @@ public class UserEntity {
     public void setDisplayName(String displayName) { this.displayName = displayName; }
     public void setLocale(String locale) { this.locale = locale; }
     public void setTimezone(String timezone) { this.timezone = timezone; }
+    public void setEmailReminders(boolean emailReminders) { this.emailReminders = emailReminders; }
     public void markLoggedIn() { this.lastLoginAt = Instant.now(); }
 }

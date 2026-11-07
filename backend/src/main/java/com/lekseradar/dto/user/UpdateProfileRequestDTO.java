@@ -8,8 +8,10 @@ import jakarta.validation.constraints.Size;
  *
  * @param locale   язык интерфейса и тьютора: nb, nn, en, ru, uk
  * @param timezone часовой пояс, например Europe/Oslo
+ * @param emailReminders напоминать о ДЗ письмом за 24 часа до срока
  */
 public record UpdateProfileRequestDTO(
         @Size(min = 1, max = 100) String displayName,
         @Pattern(regexp = "nb|nn|en|ru|uk", message = "Допустимо: nb, nn, en, ru, uk") String locale,
-        @Size(max = 64) String timezone) {}
+        @Size(max = 64) String timezone,
+        Boolean emailReminders) {}
