@@ -3,7 +3,6 @@ import type { Dict } from './nb';
 export const en: Dict = {
   nav: { main: 'Main menu', calendar: 'Calendar', flashcards: 'Flashcards', tutor: 'AI tutor', profile: 'Profile', settings: 'Settings' },
   header: { home: 'LekseRadar — overview', login: 'Log in', skip: 'Skip to content' },
-  demoBar: { text: 'A small taste of an easier school day.', link: 'Explore the demo' },
   footer: { tagline: 'Learn a little. Understand more.', status: 'Prototype · See development status' },
   settings: {
     eyebrow: 'YOUR OWN LITTLE CORNER', title: 'Just the way you like it.', intro: 'Make LekseRadar a little more you.',

@@ -44,7 +44,6 @@ function App(){
  return <div className={landing?'app is-landing':'app'} data-theme={landing?'dark':resolved}>
   <a className="skip" href="#main">{t.header.skip}</a>
   <AppHeader/>
-  {token&&<div className="demo-bar"><span className="live-dot"/>{t.demoBar.text}<Link to={PATHS.status}>{t.demoBar.link} <ArrowUpRight size={13}/></Link></div>}
   <main id="main"><Routes>
    {/* «/»: гость — лендинг с регистрацией, вошедший — главная (адрес тот же, как в API.md) */}
    <Route path={PATHS.home} element={token?<Dashboard/>:<Landing/>}/>
