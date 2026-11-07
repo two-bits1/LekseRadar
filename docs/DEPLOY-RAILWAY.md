@@ -51,9 +51,10 @@ python database/migrate.py "$DATABASE_URL" --status          # все ✓
 
 ## 3. Бэкенд (№2, 20 мин)
 
-1. **+ Create → GitHub Repo** → тот же репозиторий, Name `backend`, Root Directory `backend`, ветка как выше.
-   Сборка Java 21 через Railpack/Nixpacks по `pom.xml`. Если не взлетит: Start Command
-   `java -jar target/lekseradar-backend-0.1.0.jar`, Build Command `./mvnw -q package -DskipTests`.
+1. **+ Create → GitHub Repo** → тот же репозиторий, Name `backend`, Root Directory `backend`,
+   ветка `main-test-3.0` (там готовый бэкенд MVP; после переноса — `JavaAPI-setup`).
+   Сборка по `backend/Dockerfile` (Java 21), health-check `/actuator/health` из `backend/railway.json`.
+   Первая сборка идёт 3–5 минут.
 2. **Variables** (ссылки `${{…}}` Railway подставит сам):
 
 | Переменная | Значение |
