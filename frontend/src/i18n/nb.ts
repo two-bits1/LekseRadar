@@ -57,6 +57,16 @@ export const nb = {
     about: 'Om deg', timezone: 'Tidssone', save: 'Lagre endringer',
     changePassword: 'Bytt passord', currentPassword: 'Nåværende passord', newPassword: 'Nytt passord', passwordChanged: 'Passordet er endret.',
     logoutText: 'Du logges ut på denne enheten.',
+    memberSince: (d: string) => `Med siden ${d}`, statQuizzes: 'quizer fullført', statLearned: 'kort lært', statDays: 'aktive dager (30 d)', statAsked: 'spørsmål til veilederen',
+    achCount: (n: number, m: number) => `${n} av ${m}`, achDone: 'Oppnådd', achLoading: 'Henter fremgangen …',
+    ach: {
+      firstDay: ['Første dag', 'Logg inn og lær noe i dag'], firstQuestion: ['Første spørsmål', 'Spør AI-veilederen om noe'],
+      firstQuiz: ['Første quiz', 'Fullfør en quiz'], firstReview: ['Kortstart', 'Repeter ditt første læringskort'],
+      firstHomework: ['Levert!', 'Merk en lekse som levert'], weekRhythm: ['I rytme', 'Vær aktiv 7 dager i løpet av en måned'],
+      curious: ['Nysgjerrig', 'Still veilederen 10 spørsmål'], quizFive: ['Quizmaraton', 'Fullfør 5 quizer'],
+      perfect: ['Feilfri', 'Få 100 % på en quiz'], learnedTen: ['Sitter som spikret', 'Lær 10 kort'],
+      answersFifty: ['Flittig', 'Svar på 50 oppgaver'], noDebts: ['Ingen etterslep', 'Lever 3 lekser uten noe for sent'],
+    } as Record<string, [string, string]>,
     demoNote: 'Oppgavene og fremgangen over er fortsatt demodata og nullstilles når siden lastes på nytt.',
   },
   dashboard: {

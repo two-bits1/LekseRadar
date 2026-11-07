@@ -1,14 +1,15 @@
 // Страницы аккаунта на настоящем API: /login, /register, /profile (API.md).
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { Check, LogOut } from 'lucide-react';
+import { Award, Brain, CalendarCheck, Check, CircleCheckBig, Layers, Lightbulb, ListChecks, Lock, LogOut, MessageCircleQuestion, PenLine, ShieldCheck, Star, Sunrise, Trophy, type LucideIcon } from 'lucide-react';
 import { PATHS } from '../paths';
 import { useAuth, initialOf } from '../auth';
-import { usersApi } from '../api/endpoints';
-import type { ApiError, User } from '../api/types';
+import { dashboardApi, quizzesApi, usersApi } from '../api/endpoints';
+import type { ApiError, Dashboard, User } from '../api/types';
+import { type AchievementId, achievements, bestQuizScore } from '../components/achievements';
 import { Field, asApiError, fieldError, generalError } from '../forms';
 import { Radar } from 'lucide-react';
-import { useT } from '../i18n';
+import { useLang, useT } from '../i18n';
 
 // POST /auth/login | /auth/register → токен → на «/».
 // Ошибки: 400 → fields под полями, 409 → message у поля email, остальное → над кнопкой.
@@ -64,13 +65,57 @@ function VerifyEmailForm({email,resend,back}:{email:string;resend:()=>Promise<un
  </form>;
 }
 
-// /profile: GET/PATCH /users/me, PUT /users/me/password, «Logg ut» (= удалить токен).
+// /profile: GET/PATCH /users/me, PUT /users/me/password, ачивки (из GET /dashboard), «Logg ut» (= удалить токен).
+const ACH_ICONS: Record<AchievementId, LucideIcon> = {
+ firstDay: Sunrise, firstQuestion: MessageCircleQuestion, firstQuiz: ListChecks, firstReview: Layers, firstHomework: CircleCheckBig,
+ weekRhythm: CalendarCheck, curious: Lightbulb, quizFive: Trophy, perfect: Star, learnedTen: Brain, answersFifty: PenLine, noDebts: ShieldCheck,
+};
+
 export function Profile(){
- const {user,logout}=useAuth();const t=useT();const p=t.profile;
- return <section className="page narrow"><div className="page-intro"><span className="avatar large">{initialOf(user)}</span><div className="eyebrow">{p.eyebrow}</div><h1>{user?p.titleNamed(user.displayName):p.title}</h1><p>{user?user.email:p.loading}</p></div>
-  {user&&<ProfileForm key={user.id} user={user}/>}
-  <PasswordForm/>
-  <article className="lesson-card"><h2>{t.settings.logout}</h2><p>{p.logoutText}</p><button className="button" onClick={logout}><LogOut size={16}/>{t.settings.logout}</button></article>
+ const {user,logout}=useAuth();const t=useT();const p=t.profile;const {tag}=useLang();
+ const [dash,setDash]=useState<Dashboard|null>(null);const [best,setBest]=useState(0);const [failed,setFailed]=useState(false);
+ useEffect(()=>{
+  let off=false;
+  dashboardApi.get().then(d=>{if(!off)setDash(d)}).catch(()=>{if(!off)setFailed(true)});
+  quizzesApi.progress().then(x=>{if(!off)setBest(bestQuizScore(x))}).catch(()=>{});
+  return()=>{off=true};
+ },[]);
+ const list=dash?achievements(dash,best):null;const got=list?list.filter(a=>a.done).length:0;
+ const since=user?.createdAt?new Intl.DateTimeFormat(tag,{month:'long',year:'numeric'}).format(new Date(user.createdAt)):null;
+ return <section className="page narrow app-page profile">
+  <header className="profile-hero">
+   <span className="profile-avatar" aria-hidden="true"><span>{initialOf(user)}</span></span>
+   <div className="profile-id"><div className="eyebrow">{p.eyebrow}</div><h1>{user?p.titleNamed(user.displayName):p.title}</h1>
+    <p>{user?user.email:p.loading}{since&&<span className="profile-since">{p.memberSince(since)}</span>}</p></div>
+  </header>
+  {dash&&<div className="profile-stats">
+   <div className="stat"><strong>{dash.quizzesCompleted}</strong><span>{p.statQuizzes}</span></div>
+   <div className="stat"><strong>{dash.flashcards.learned}</strong><span>{p.statLearned}</span></div>
+   <div className="stat"><strong>{dash.activeDays30}</strong><span>{p.statDays}</span></div>
+   <div className="stat"><strong>{dash.questionsAsked}</strong><span>{p.statAsked}</span></div>
+  </div>}
+
+  {!failed&&<section className="ach" aria-labelledby="ach-title">
+   <div className="ach-head"><h2 id="ach-title" className="section-label">{p.achievements}</h2>{list&&<span className="ach-count"><Award size={14}/>{p.achCount(got,list.length)}</span>}</div>
+   {!list?<p className="panel-empty">{p.achLoading}</p>
+    :<ul className="ach-grid">{list.map(a=>{const Icon=ACH_ICONS[a.id];const [title,text]=p.ach[a.id];
+      return <li key={a.id} className={a.done?'ach-item done':'ach-item'}>
+       <span className="ach-icon" aria-hidden="true">{a.done?<Icon size={20}/>:<Lock size={17}/>}</span>
+       <span className="ach-body"><strong>{title}</strong><small>{text}</small>
+        {a.done?<span className="ach-badge"><Check size={12}/>{p.achDone}</span>
+         :<span className="ach-meter"><span className="meter"><span style={{width:`${Math.round(a.value/a.target*100)}%`}}/></span><em>{a.value}/{a.target}</em></span>}</span>
+      </li>})}</ul>}
+  </section>}
+
+  <div className="profile-forms">
+   {user&&<ProfileForm key={user.id} user={user}/>}
+   <PasswordForm/>
+  </div>
+  <article className="account-row">
+   <span className="account-icon" aria-hidden="true"><LogOut size={18}/></span>
+   <div><strong>{t.settings.account}</strong><small>{user?t.settings.loggedInAs(user.email):'…'} {p.logoutText}</small></div>
+   <button className="btn btn-sm btn-logout" onClick={logout}><LogOut size={15}/>{t.settings.logout}</button>
+  </article>
  </section>;
 }
 

@@ -58,6 +58,16 @@ export const en: Dict = {
     about: 'About you', timezone: 'Time zone', save: 'Save changes',
     changePassword: 'Change password', currentPassword: 'Current password', newPassword: 'New password', passwordChanged: 'Password changed.',
     logoutText: 'You’ll be logged out on this device.',
+    memberSince: (d: string) => `Member since ${d}`, statQuizzes: 'quizzes finished', statLearned: 'cards learned', statDays: 'active days (30 d)', statAsked: 'questions to the tutor',
+    achCount: (n: number, m: number) => `${n} of ${m}`, achDone: 'Unlocked', achLoading: 'Loading your progress …',
+    ach: {
+      firstDay: ['First day', 'Log in and learn something today'], firstQuestion: ['First question', 'Ask the AI tutor anything'],
+      firstQuiz: ['First quiz', 'Finish a quiz'], firstReview: ['Card starter', 'Review your first flashcard'],
+      firstHomework: ['Handed in!', 'Mark homework as submitted'], weekRhythm: ['In rhythm', 'Be active 7 days in a month'],
+      curious: ['Curious mind', 'Ask the tutor 10 questions'], quizFive: ['Quiz marathon', 'Finish 5 quizzes'],
+      perfect: ['Flawless', 'Score 100 % on a quiz'], learnedTen: ['Locked in', 'Learn 10 cards'],
+      answersFifty: ['Hard worker', 'Answer 50 questions'], noDebts: ['No backlog', 'Submit 3 assignments with nothing overdue'],
+    },
     demoNote: 'The tasks and progress above are still demo data and reset when the page reloads.',
   },
   dashboard: {
