@@ -7,6 +7,7 @@ import { Flashcards } from './pages/Flashcards';
 import { QuizStart, QuizRun } from './pages/Quiz';
 import { ChatList, ChatView } from './pages/Chats';
 import { Settings, Status, Soon } from './pages/Other';
+import { Homework } from './pages/Homework';
 import { Auth, Profile } from './pages/Account';
 import { type ThemeChoice, loadThemeChoice, saveThemeChoice, resolveTheme, themeColor } from './theme';
 import { PATHS } from './paths';
@@ -54,7 +55,7 @@ function App(){
     <Route path={PATHS.profile} element={<Profile/>}/>
     <Route path={PATHS.chats} element={<ChatList/>}/>
     <Route path={PATHS.chat(':chatId')} element={<ChatView/>}/>
-    <Route path={PATHS.homework} element={<Soon title={t.soon.homeworkTitle} text={t.soon.homeworkText}/>}/>
+    <Route path={PATHS.homework} element={<Homework/>}/>
     <Route path={PATHS.quizzes} element={<QuizStart/>}/>
     <Route path={PATHS.quiz(':quizId')} element={<QuizRun/>}/>
     <Route path={PATHS.flashcards} element={<Flashcards/>}/>

@@ -170,3 +170,5 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .tb-side{min-width:0}.tb-link{min-width:0}.tb-link span{overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .settings-row{flex-wrap:wrap}.settings-row .actions{flex-wrap:wrap}
 @media(max-width:360px){.tb-link{padding:6px 2px;font-size:9.5px}.tb-nav{gap:2px}}
+/* Домашка */
+.hw-row{width:100%;background:none;border:0;border-top:1px solid var(--glass-border);text-align:left;cursor:pointer;color:inherit}.hw-body{padding:4px 18px 18px}.hw-body .md{margin-bottom:12px}.hw-overdue{background:rgba(229,72,77,.18);color:#ff8a8f}.hw-submitted,.hw-graded{background:rgba(116,212,196,.18)}

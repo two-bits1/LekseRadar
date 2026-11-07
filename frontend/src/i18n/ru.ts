@@ -95,6 +95,28 @@ export const ru: Dict = {
     generateTitle: 'Карточки от ИИ', generateIntro: 'Выбери предмет и тему — ИИ сделает карточки.', generate: 'Создать карточки', generating: 'ИИ создаёт карточки …',
     generated: (n: number) => `Добавлено карточек: ${n}.`,
   },
+  hw: {
+    title: 'Домашка', intro: 'Все задания со школьных платформ, сначала ближайший срок.',
+    filters: { all: 'Все', todo: 'Сделать', overdue: 'Просрочено', submitted: 'Сдано' },
+    status: { todo: 'Сделать', overdue: 'Просрочено', submitted: 'Сдано', graded: 'Оценено' },
+    none: 'Здесь заданий нет.', noneAll: 'Заданий пока нет. Они появятся, когда подключишь школьную платформу.', connect: 'Подключить платформу',
+    due: (d: string) => `Срок ${d}`, noDue: 'Без срока', open: 'Открыть на платформе',
+    markDone: 'Отметить сданным', markTodo: 'Всё-таки не сдано', askTutor: 'Разобрать с ИИ-репетитором', makeQuiz: 'Потренироваться в квизе',
+    starting: 'Запускаю …', loadFull: 'Загружаю текст задания …',
+  },
+  prog: {
+    title: 'Прогресс', intro: 'Как идут дела по темам и насколько ты был активен за 30 дней.',
+    homework: 'Домашка', todo: 'сделать', overdue: 'просрочено', done: 'сдано', quizzes: 'Квизов пройдено', avg: 'Средний балл',
+    answered: 'Ответов на вопросы', asked: 'Вопросов репетитору', activeDays: 'Активных дней (30 д)', cards: 'Карточки',
+    topics: 'Темы', noTopics: 'Ответь на вопросы квиза, чтобы увидеть освоение по темам.', mastery: (n: number) => `освоено ${n} %`,
+    attempts: (n: number) => `ответов: ${n}`, days: 'Активность по дням', noDays: 'Активности пока нет.',
+  },
+  hist: {
+    title: 'История', intro: 'Что ты делал в LekseRadar, сначала новое.', none: 'Пока пусто.',
+    types: { login: 'Вход', chat_started: 'Начал чат', quiz_started: 'Начал квиз', quiz_completed: 'Прошёл квиз',
+      exercise_answered: 'Ответил на вопрос', flashcard_reviewed: 'Повторил карточку', homework_done: 'Сдал домашку', material_added: 'Добавил учебный материал' } as Record<string, string>,
+    other: 'Событие',
+  },
   soon: {
     homeworkTitle: 'Домашка и календарь', homeworkText: 'Здесь будут домашние задания и дедлайны из Canvas, Teams, itslearning и Visma InSchool. Скоро.',
     eyebrow: 'СКОРО', text: 'Адрес у страницы уже есть, а содержимое ждёт API.', toOverview: 'К обзору',

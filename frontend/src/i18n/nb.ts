@@ -94,6 +94,28 @@ export const nb = {
     generateTitle: 'Kort fra AI', generateIntro: 'Velg fag og tema, så lager AI kort til deg.', generate: 'Lag kort', generating: 'AI lager kort …',
     generated: (n: number) => `${n} nye kort lagt til.`,
   },
+  hw: {
+    title: 'Lekser', intro: 'Alle lekser fra skoleplattformene dine, med nærmeste frist først.',
+    filters: { all: 'Alle', todo: 'Å gjøre', overdue: 'For sent', submitted: 'Levert' },
+    status: { todo: 'Å gjøre', overdue: 'For sent', submitted: 'Levert', graded: 'Vurdert' },
+    none: 'Ingen lekser her.', noneAll: 'Ingen lekser ennå. De dukker opp når en skoleplattform er koblet til.', connect: 'Koble til plattform',
+    due: (d: string) => `Frist ${d}`, noDue: 'Uten frist', open: 'Åpne på plattformen',
+    markDone: 'Merk som levert', markTodo: 'Ikke levert likevel', askTutor: 'Få hjelp av AI-veilederen', makeQuiz: 'Øv med quiz',
+    starting: 'Starter …', loadFull: 'Henter oppgaveteksten …',
+  },
+  prog: {
+    title: 'Fremgang', intro: 'Hvordan det går per tema, og hvor aktiv du har vært de siste 30 dagene.',
+    homework: 'Lekser', todo: 'å gjøre', overdue: 'for sent', done: 'levert', quizzes: 'Quizer fullført', avg: 'Snittscore',
+    answered: 'Oppgaver besvart', asked: 'Spørsmål til veilederen', activeDays: 'Aktive dager (30 d)', cards: 'Læringskort',
+    topics: 'Temaer', noTopics: 'Svar på noen quizspørsmål for å se mestring per tema.', mastery: (n: number) => `${n} % mestret`,
+    attempts: (n: number) => `${n} svar`, days: 'Aktivitet per dag', noDays: 'Ingen aktivitet ennå.',
+  },
+  hist: {
+    title: 'Historikk', intro: 'Det du har gjort i LekseRadar, nyeste først.', none: 'Ingenting her ennå.',
+    types: { login: 'Logget inn', chat_started: 'Startet en samtale', quiz_started: 'Startet en quiz', quiz_completed: 'Fullførte en quiz',
+      exercise_answered: 'Svarte på et spørsmål', flashcard_reviewed: 'Repeterte et kort', homework_done: 'Leverte en lekse', material_added: 'La til læringsmateriell' } as Record<string, string>,
+    other: 'Hendelse',
+  },
   soon: {
     homeworkTitle: 'Lekser og kalender', homeworkText: 'Lekser og frister fra Canvas, Teams, itslearning og Visma InSchool samles her. Kommer snart.',
     eyebrow: 'KOMMER SNART', text: 'Denne siden er klar i adressen, men innholdet venter på API-et.', toOverview: 'Til oversikten',

@@ -95,6 +95,28 @@ export const en: Dict = {
     generateTitle: 'Cards from AI', generateIntro: 'Pick a subject and topic, and AI makes cards for you.', generate: 'Make cards', generating: 'AI is making cards …',
     generated: (n: number) => `${n} new cards added.`,
   },
+  hw: {
+    title: 'Homework', intro: 'All homework from your school platforms, nearest deadline first.',
+    filters: { all: 'All', todo: 'To do', overdue: 'Overdue', submitted: 'Done' },
+    status: { todo: 'To do', overdue: 'Overdue', submitted: 'Done', graded: 'Graded' },
+    none: 'No homework here.', noneAll: 'No homework yet. It shows up once a school platform is connected.', connect: 'Connect a platform',
+    due: (d: string) => `Due ${d}`, noDue: 'No deadline', open: 'Open on the platform',
+    markDone: 'Mark as done', markTodo: 'Not done after all', askTutor: 'Get help from the AI tutor', makeQuiz: 'Practise with a quiz',
+    starting: 'Starting …', loadFull: 'Loading the assignment text …',
+  },
+  prog: {
+    title: 'Progress', intro: 'How you are doing per topic, and how active you have been over the last 30 days.',
+    homework: 'Homework', todo: 'to do', overdue: 'overdue', done: 'done', quizzes: 'Quizzes completed', avg: 'Average score',
+    answered: 'Questions answered', asked: 'Questions to the tutor', activeDays: 'Active days (30 d)', cards: 'Flashcards',
+    topics: 'Topics', noTopics: 'Answer some quiz questions to see mastery per topic.', mastery: (n: number) => `${n} % mastered`,
+    attempts: (n: number) => `${n} answers`, days: 'Activity per day', noDays: 'No activity yet.',
+  },
+  hist: {
+    title: 'History', intro: 'What you have done in LekseRadar, newest first.', none: 'Nothing here yet.',
+    types: { login: 'Logged in', chat_started: 'Started a conversation', quiz_started: 'Started a quiz', quiz_completed: 'Completed a quiz',
+      exercise_answered: 'Answered a question', flashcard_reviewed: 'Reviewed a card', homework_done: 'Handed in homework', material_added: 'Added study material' } as Record<string, string>,
+    other: 'Event',
+  },
   soon: {
     homeworkTitle: 'Homework and calendar', homeworkText: 'Homework and deadlines from Canvas, Teams, itslearning and Visma InSchool will be collected here. Coming soon.',
     eyebrow: 'COMING SOON', text: 'This page already has its address, but the content is waiting for the API.', toOverview: 'Back to overview',
