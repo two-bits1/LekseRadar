@@ -24,6 +24,7 @@ docker compose up -d        # Postgres на localhost:5432, база/логин/
 ./migrate.sh "$DATABASE_URL" --baseline 20    # один раз для базы, созданной до учёта миграций (была V20)
 ./migrate.sh "$DATABASE_URL" --status
 ```
+Без `psql` и Docker то же самое: `python migrate.py "$DATABASE_URL" [--baseline 20 | --status]` (нужен `pip install 'psycopg[binary]'`).
 
 Бэкенд таблицы не создаёт (`ddl-auto: none`): схема только здесь. Новые изменения — новой миграцией `V17__...sql`,
 старые файлы не править.
