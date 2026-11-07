@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.Assignment;
+import com.lekseradar.model.AssignmentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,13 +11,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
+public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Long> {
 
     /** Список ДЗ: сначала с дедлайном по возрастанию, без дедлайна в конце. */
-    @Query("SELECT a FROM Assignment a WHERE a.userId = :userId ORDER BY a.dueAt ASC NULLS LAST, a.id")
-    List<Assignment> findForUser(@Param("userId") Long userId);
+    @Query("SELECT a FROM AssignmentEntity a WHERE a.userId = :userId ORDER BY a.dueAt ASC NULLS LAST, a.id")
+    List<AssignmentEntity> findForUser(@Param("userId") Long userId);
 
-    Optional<Assignment> findByIdAndUserId(Long id, Long userId);
+    Optional<AssignmentEntity> findByIdAndUserId(Long id, Long userId);
 
     /**
      * Одно задание из ответа collect(): новое добавляется, уже известное обновляется.

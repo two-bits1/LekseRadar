@@ -6,7 +6,7 @@ import com.lekseradar.dto.auth.RegisterRequest;
 import com.lekseradar.dto.user.UserResponse;
 import com.lekseradar.exception.ConflictException;
 import com.lekseradar.exception.UnauthorizedException;
-import com.lekseradar.model.User;
+import com.lekseradar.model.UserEntity;
 import com.lekseradar.repository.UserEventRepository;
 import com.lekseradar.repository.UserRepository;
 import com.lekseradar.security.JwtService;
@@ -36,7 +36,7 @@ public class AuthService {
         if (users.existsByEmailIgnoreCase(email)) {
             throw new ConflictException("Пользователь с таким email уже существует");
         }
-        User user = new User(email, encoder.encode(req.password()), req.displayName().trim());
+        UserEntity user = new UserEntity(email, encoder.encode(req.password()), req.displayName().trim());
         user.markLoggedIn();
         users.save(user);
         events.add(user.getId(), "login", null, null);
@@ -45,7 +45,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest req) {
-        User user = users.findByEmailIgnoreCase(normalizeEmail(req.email()))
+        UserEntity user = users.findByEmailIgnoreCase(normalizeEmail(req.email()))
                 .filter(u -> encoder.matches(req.password(), u.getPasswordHash()))
                 .orElseThrow(() -> new UnauthorizedException("Неверный email или пароль"));
         user.markLoggedIn();
@@ -53,7 +53,7 @@ public class AuthService {
         return toResponse(user);
     }
 
-    private AuthResponse toResponse(User user) {
+    private AuthResponse toResponse(UserEntity user) {
         return new AuthResponse(jwt.issue(user.getId()), UserResponse.from(user));
     }
 

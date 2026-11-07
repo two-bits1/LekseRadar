@@ -1,7 +1,7 @@
 package com.lekseradar.dto.quiz;
 
-import com.lekseradar.model.DbEnum;
-import com.lekseradar.model.QuestionType;
+import com.lekseradar.model.enums.DbEnum;
+import com.lekseradar.model.enums.QuestionType;
 import com.lekseradar.repository.QuizRepository;
 
 import java.util.List;

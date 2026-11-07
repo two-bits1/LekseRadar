@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.DbEnum;
+import com.lekseradar.model.enums.DbEnum;
 import jakarta.persistence.AttributeConverter;
 
 /**

@@ -5,8 +5,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.lang.annotation.*;
 
 /**
- * Подставляет в параметр контроллера текущего пользователя ({@link com.lekseradar.model.User}):
- * {@code public UserResponse me(@CurrentUser User user)}.
+ * Подставляет в параметр контроллера текущего пользователя ({@link com.lekseradar.model.UserEntity}):
+ * {@code public UserResponse me(@CurrentUser UserEntity user)}.
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

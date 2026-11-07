@@ -1,8 +1,8 @@
 package com.lekseradar.dto.homework;
 
-import com.lekseradar.model.Assignment;
-import com.lekseradar.model.AssignmentStatus;
-import com.lekseradar.model.Platform;
+import com.lekseradar.model.AssignmentEntity;
+import com.lekseradar.model.enums.AssignmentStatus;
+import com.lekseradar.model.enums.Platform;
 
 import java.time.Instant;
 
@@ -14,7 +14,7 @@ import java.time.Instant;
 public record AssignmentResponse(Long id, Platform source, String title, String course, Instant dueAt,
                                  AssignmentStatus status, String url, String kind) {
 
-    public static AssignmentResponse from(Assignment a) {
+    public static AssignmentResponse from(AssignmentEntity a) {
         return new AssignmentResponse(a.getId(), a.getSource(), a.getTitle(), a.getCourse(), a.getDueAt(),
                 a.getStatus(), a.getUrl(), a.getKind());
     }

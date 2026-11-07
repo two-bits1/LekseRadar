@@ -1,8 +1,8 @@
 package com.lekseradar.dto.quiz;
 
-import com.lekseradar.model.ExerciseLevel;
-import com.lekseradar.model.Quiz;
-import com.lekseradar.model.QuizStatus;
+import com.lekseradar.model.enums.ExerciseLevel;
+import com.lekseradar.model.QuizEntity;
+import com.lekseradar.model.enums.QuizStatus;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public record QuizResponse(Long id, Long quizSetId, String title, String subject
                            List<QuestionResponse> questions) {
 
     /** @param subject название предмета (subjects.name) */
-    public static QuizResponse from(Quiz q, String subject, List<QuestionResponse> questions) {
+    public static QuizResponse from(QuizEntity q, String subject, List<QuestionResponse> questions) {
         return new QuizResponse(q.getId(), q.getQuizSetId(), q.getTitle(), subject, q.getTopic(), q.getLevel(),
                 q.getStatus(), q.getCurrentPosition() == null ? 1 : q.getCurrentPosition(), questions);
     }

@@ -13,7 +13,7 @@ import java.util.List;
 public class CorsConfig {
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource(AppProperties props) {
+    CorsConfigurationSource corsConfigurationSource(AppConfig props) {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(props.cors().allowedOrigins());
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

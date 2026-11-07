@@ -7,4 +7,4 @@ import java.util.List;
  *
  * @param count сколько ДЗ сохранено всего
  */
-public record SyncResponse(List<SourceStatus> sources, int count) {}
+public record SyncResponse(List<SourceStatusResponse> sources, int count) {}

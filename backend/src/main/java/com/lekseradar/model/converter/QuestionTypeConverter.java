@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.QuestionType;
+import com.lekseradar.model.enums.QuestionType;
 import jakarta.persistence.Converter;
 
 /** QuestionType ↔ TEXT exercises.question_type. */

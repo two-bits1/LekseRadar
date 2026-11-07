@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.Quiz;
+import com.lekseradar.model.QuizEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,11 +11,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-public interface QuizRepository extends JpaRepository<Quiz, Long> {
+public interface QuizRepository extends JpaRepository<QuizEntity, Long> {
 
-    List<Quiz> findByUserIdOrderByStartedAtDesc(Long userId);
+    List<QuizEntity> findByUserIdOrderByStartedAtDesc(Long userId);
 
-    Optional<Quiz> findByIdAndUserId(Long id, Long userId);
+    Optional<QuizEntity> findByIdAndUserId(Long id, Long userId);
 
     /** Начать квиз по набору или продолжить незаконченный: id прохождения. */
     @Transactional

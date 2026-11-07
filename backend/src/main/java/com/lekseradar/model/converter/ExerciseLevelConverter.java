@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.ExerciseLevel;
+import com.lekseradar.model.enums.ExerciseLevel;
 import jakarta.persistence.Converter;
 
 /** ExerciseLevel ↔ PostgreSQL-enum exercise_level. */

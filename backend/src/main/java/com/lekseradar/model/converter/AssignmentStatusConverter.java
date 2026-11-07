@@ -1,6 +1,6 @@
 package com.lekseradar.model.converter;
 
-import com.lekseradar.model.AssignmentStatus;
+import com.lekseradar.model.enums.AssignmentStatus;
 import jakarta.persistence.Converter;
 
 /** AssignmentStatus ↔ PostgreSQL-enum assignment_status. */

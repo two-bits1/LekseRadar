@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.Material;
+import com.lekseradar.model.MaterialEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,15 +10,15 @@ import java.util.List;
 import java.util.Optional;
 
 /** Учебные материалы для ИИ-репетитора: таблицы materials / material_chunks и функции V11. */
-public interface MaterialRepository extends JpaRepository<Material, Long> {
+public interface MaterialRepository extends JpaRepository<MaterialEntity, Long> {
 
     /** Экран «Материалы»: свои и общие (owner_id IS NULL). */
-    @Query("SELECT m FROM Material m WHERE m.ownerId = :userId OR m.ownerId IS NULL ORDER BY m.createdAt DESC")
-    List<Material> findVisible(@Param("userId") Long userId);
+    @Query("SELECT m FROM MaterialEntity m WHERE m.ownerId = :userId OR m.ownerId IS NULL ORDER BY m.createdAt DESC")
+    List<MaterialEntity> findVisible(@Param("userId") Long userId);
 
     /** Свой или общий материал; чужой не отдаётся. */
-    @Query("SELECT m FROM Material m WHERE m.id = :id AND (m.ownerId = :userId OR m.ownerId IS NULL)")
-    Optional<Material> findVisible(@Param("id") Long id, @Param("userId") Long userId);
+    @Query("SELECT m FROM MaterialEntity m WHERE m.id = :id AND (m.ownerId = :userId OR m.ownerId IS NULL)")
+    Optional<MaterialEntity> findVisible(@Param("id") Long id, @Param("userId") Long userId);
 
     /** Файл, загруженный пользователем (текст уже извлечён бэкендом): id материала. */
     @Transactional

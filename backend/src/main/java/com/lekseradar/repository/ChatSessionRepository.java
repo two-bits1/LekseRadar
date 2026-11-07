@@ -1,6 +1,6 @@
 package com.lekseradar.repository;
 
-import com.lekseradar.model.ChatSession;
+import com.lekseradar.model.ChatSessionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,12 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-public interface ChatSessionRepository extends JpaRepository<ChatSession, Long> {
-    List<ChatSession> findByUserIdOrderByUpdatedAtDesc(Long userId);
+public interface ChatSessionRepository extends JpaRepository<ChatSessionEntity, Long> {
+    List<ChatSessionEntity> findByUserIdOrderByUpdatedAtDesc(Long userId);
 
-    List<ChatSession> findByUserIdAndArchivedOrderByUpdatedAtDesc(Long userId, boolean archived);
+    List<ChatSessionEntity> findByUserIdAndArchivedOrderByUpdatedAtDesc(Long userId, boolean archived);
 
-    Optional<ChatSession> findByIdAndUserId(Long id, Long userId);
+    Optional<ChatSessionEntity> findByIdAndUserId(Long id, Long userId);
 
     /**
      * Новый чат через функцию базы: mode = "tutor" или "quiz", предмет создаётся сам по названию.
