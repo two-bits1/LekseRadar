@@ -13,7 +13,9 @@ pnpm dev          # http://localhost:5173
 Бэкенд должен работать на `http://localhost:8080` (как запустить — `docs/RUN.md`).
 Vite проксирует `/api` и `/actuator` на `:8080`, поэтому CORS в dev настраивать не нужно.
 
-Пробных пользователей нет: аккаунт создаётся регистрацией прямо на главной (`/`) или на `/register`. Без бэкенда регистрация и вход не работают.
+Пробных пользователей нет: аккаунт создаётся регистрацией прямо на главной (`/`) или на `/register`.
+Регистрация в два шага: после формы на почту приходит код из 6 цифр, аккаунт появляется только после ввода кода.
+Без бэкенда (и без настроенной почты на нём) регистрация и вход не работают.
 
 ## Скрипты
 
@@ -38,12 +40,14 @@ CI (`.github/workflows/frontend.yml`) запускает `pnpm test` и `pnpm bu
 | Файл | Что внутри |
 |---|---|
 | `src/paths.ts` | адреса страниц — как в API.md, меняются только здесь |
-| `src/api/endpoints.ts` | все URL бэкенда (#1–#27 из API.md): вход, профиль, чат, предметы, квизы, флеш-карты |
+| `src/api/endpoints.ts` | все URL бэкенда: вход и код из письма (#1, #2, #44), профиль, чат, квизы, карточки, ДЗ и обновление (#30–#32, #43), дашборд, платформы (#35–#42) |
 | `src/api/client.ts` | fetch-обёртка: `/api/v1`, Bearer-токен, 401 → `/login` |
 | `src/api/types.ts` | типы из API.md: `User`, `Chat`, `Quiz`, `Question`, `Flashcard`, `ApiError` и тела запросов |
 | `src/auth.tsx` | вход/выход, токен, `RequireAuth` для 🔒-страниц |
 | `src/forms.tsx` | поле формы с ошибкой; ошибки бэкенда (по-русски) → свой текст по коду ответа для nb/en |
-| `src/pages/` | `Landing` (гость на «/»), `Account` (вход, регистрация, профиль), `Dashboard`, `Chats` (тьютор), `Quiz`, `Flashcards`, `Other` (настройки, «скоро», /status) |
+| `src/pages/` | `Landing` (гость на «/»), `Account` (вход, регистрация с кодом, профиль), `Dashboard`, `Homework` (ДЗ, «Oppdater»), `Progress` (прогресс, история), `Chats` (тьютор), `Quiz`, `Flashcards`, `Other` (настройки, /status) |
+| `src/components/Platforms.tsx` | `/settings/platforms`: Canvas, Teams (код Microsoft), itslearning (вход на сайте школы), InSchool, Google Classroom (вход Google) |
+| `src/components/platformLogic.ts` | тело запроса платформы, обязательные поля, состояние карточки, возврат от Google |
 | `src/pages/quizLogic.ts` | правила API.md: ответ multiple_choice — JSON-строкой, оценки карточек 1/3/4/5 |
 | `src/components/AppHeader.tsx` | шапка-капсула: гость / вошедший по настоящему токену, шар по центру |
 | `src/components/Md.tsx` | Markdown + формулы (remark-math, rehype-katex) |
@@ -52,7 +56,7 @@ CI (`.github/workflows/frontend.yml`) запускает `pnpm test` и `pnpm bu
 | `src/i18n/` | язык интерфейса: словари `nb` (эталон), `en`, `ru`; `useT()`, `useLang()` |
 | `src/theme.ts` | светлая / тёмная / авто-тема (тёмная вечером) |
 | `COLORS.md` | палитра и почему она такая |
-| `docs/` | описание редизайна «Северное сияние» и план |
+| `docs/` | редизайн и план; `backend-changes.md` — что нужно сделать в Java-бэкенде (Google Classroom, ачивки) |
 
 ## Язык интерфейса
 
@@ -66,7 +70,7 @@ Norsk (по умолчанию), English, Русский — выбираетс�
 
 | Страница | Статус |
 |---|---|
-| `/login`, `/register` | API |
+| `/login`, `/register` — вход; регистрация → код из письма → вход | API |
 | `/profile` — имя, часовой пояс, пароль, выход | API |
 | `/settings` — язык (сохраняется в профиль) и тема | API + локально |
 | `/chat`, `/chat/:chatId` — ИИ-чат, архив, удаление | API |
@@ -75,11 +79,17 @@ Norsk (по умолчанию), English, Русский — выбираетс�
 | `/chat/:chatId` — выбор языка, «Forklar enklere / Et annet eksempel / Lag øvingsoppgaver», квиз-чат | API |
 | `/quiz`, `/quiz/:quizId` — новый квиз, вопросы, вердикт, балл, «Lær med kort» | API |
 | `/flashcards` — повторение с оценками, «Kort fra AI» | API |
-| `/homework`, `/progress`, `/history`, `/settings/platforms` | «Kommer snart» — эндпоинтов ещё нет |
+| `/homework` — ДЗ со всех платформ, фильтры, «сдано», тьютор и квиз по заданию, «Oppdater» | API |
+| `/progress`, `/history` — сводка и лента действий | API |
+| `/settings/platforms` — подключение Canvas / Teams / itslearning / InSchool | API |
+| `/settings/platforms` — Google Classroom | фронт готов, бэкенду нужна доработка (`docs/backend-changes.md`) |
 
 Демо-данных нет: всё, что видно после входа, приходит с бэкенда.
 
 ## Известные ограничения (нужен бэкенд)
+
+- **Google Classroom** и **ачивки в профиле**: эндпоинтов нет, см. `docs/backend-changes.md`.
+- **Teams-вход по коду** работает, только если у сервиса сбора задан `TEAMS_CLIENT_ID`; иначе можно вставить токен вручную.
 
 - **Повтор после 502 дублирует вопрос.** API.md предлагает «Повторить» = тот же `POST /chats/{id}/messages`, а вопрос к этому моменту уже сохранён. Нужен эндпоинт повтора или идемпотентность на бэкенде.
 - **«Выйти» только удаляет токен в браузере.** Отозвать JWT на сервере нельзя, он живёт 72 часа.
