@@ -525,3 +525,125 @@ erDiagram
 | триггер `touch_chat_session` | новое сообщение поднимает чат наверх (`updated_at`) |
 | триггер `attempt_to_flashcard` | неверный или частичный ответ в квизе → карточка в колоду, повтор сразу |
 | триггер `chat_mode_locked` | запрещает менять режим чата |
+
+## Бэкенд: что уже есть
+
+Пакет `com.lekseradar` в `backend/src/main/java`.
+
+| Слой | Класс | Таблица / вид | Заметки |
+|---|---|---|---|
+| model | `User` | `users` | все колонки |
+| model | `ChatSession` | `chat_sessions` | нет `assignment_id`, `mode`, `subject_id`, `quiz_set_id`, `language`, `level` (V13–V14) |
+| model | `ChatMessage` | `chat_messages` | нет `prompt_id` (V13); роль через `MessageRoleConverter` |
+| model | `MessageRole` + `converter/MessageRoleConverter` | enum `chat_role` | образец для остальных enum |
+| repository | `UserRepository` | `users` | `findByEmailIgnoreCase` |
+| repository | `ChatSessionRepository` | `chat_sessions` | список по `updated_at`, `findByIdAndUserId` (чужой чат → 404) |
+| repository | `ChatMessageRepository` | `chat_messages`, вид `chat_context` | `findContext` — native-запрос к виду |
+| repository | `UserEventRepository` | `user_events` | `add(userId, type, refTable, refId)` через JDBC |
+
+DTO (JSON для фронта, поля в camelCase):
+
+| Пакет | Record | Поля |
+|---|---|---|
+| `dto.auth` | `RegisterRequest` | `email`, `password` (8–100), `displayName` |
+| `dto.auth` | `LoginRequest` | `email`, `password` |
+| `dto.auth` | `AuthResponse` | `token`, `user: UserResponse` |
+| `dto.user` | `UserResponse` | `id`, `email`, `displayName`, `locale`, `timezone`, `createdAt`, `lastLoginAt` |
+| `dto.user` | `UpdateProfileRequest` | `displayName`, `locale` (`nb\|nn\|en\|ru`), `timezone` |
+| `dto.user` | `ChangePasswordRequest` | `currentPassword`, `newPassword` |
+| `dto.chat` | `CreateChatRequest` | `title`, `topic` |
+| `dto.chat` | `UpdateChatRequest` | `title`, `topic`, `archived` |
+| `dto.chat` | `ChatResponse` | `id`, `title`, `topic`, `archived`, `createdAt`, `updatedAt` |
+| `dto.chat` | `SendMessageRequest` | `content` (1–8000) |
+| `dto.chat` | `MessageResponse` | `id`, `role`, `content`, `model`, `createdAt` |
+| `dto.chat` | `ChatReplyResponse` | `chat`, `userMessage`, `assistantMessage` |
+| `dto.common` | `ErrorResponse` | `status`, `message`, `fields`, `timestamp` |
+
+## Бэкенд: что добавить
+
+### Поля в существующие сущности
+
+```java
+// ChatSession
+@Column(name = "assignment_id") private Long assignmentId;
+@Convert(converter = ChatModeConverter.class) @ColumnTransformer(write = "?::chat_mode")
+@Column(nullable = false, updatable = false) private ChatMode mode = ChatMode.TUTOR;
+@Column(name = "subject_id") private Long subjectId;
+@Column(name = "quiz_set_id") private Long quizSetId;
+private String language;                                   // null = ещё не выбран
+@Convert(converter = ExerciseLevelConverter.class) @ColumnTransformer(write = "?::exercise_level")
+@Column(nullable = false) private ExerciseLevel level = ExerciseLevel.INTERMEDIATE;
+
+// ChatMessage
+@Column(name = "prompt_id") private Long promptId;
+```
+
+DTO: в `CreateChatRequest` добавить `mode` (`tutor` | `quiz`), `subject`, `assignmentId`, `level`;
+в `ChatResponse` — `mode`, `subject`, `language`, `assignmentId`, `quizSetId`.
+`UpdateProfileRequest.locale` разрешает `nb|nn|en|ru`, а репетитор предлагает ещё `uk` — стоит добавить `uk`.
+
+### Новые сущности (JPA)
+
+| Сущность | Таблица | Только чтение? | Как писать |
+|---|---|---|---|
+| `PlatformConnection` | `platform_connections` | нет | обычный `save`; `credentialsEnc` шифровать AES-GCM ключом из `.env` |
+| `Assignment` | `assignments` | нет | UPSERT native-запросом `ON CONFLICT (user_id, source, external_id)` (SQL в README.md) |
+| `Subject` | `subjects` | да | создаются функциями |
+| `QuizSet` | `quiz_sets` | да | `import_quiz_json()` |
+| `Exercise` | `exercises` | да | `import_quiz_json()`; фронту отдавать только вид `quiz_questions_public` |
+| `Quiz` | `quizzes` | да | `start_quiz()`, `finish_quiz()` |
+| `ExerciseAttempt` | `exercise_attempts` | да | `save_quiz_answer()` |
+| `Material` | `materials` | да (+ удаление) | `add_material()`, `attach_homework_file()` |
+| `Reminder` | `reminders` | нет | обычный `save` |
+| `Achievement`, `UserAchievement` | `achievements`, `user_achievements` | да | выдаёт бэкенд по `user_events` |
+
+Без сущностей (только функции и виды): `quiz_questions`, `flashcard_progress`, `material_chunks`, `ai_prompts`, `chat_mode_prompts`.
+
+### Новые DTO для API
+
+```java
+// ДЗ                                         GET /homework, POST /homework/sync
+record AssignmentResponse(Long id, Platform source, String title, String course, Instant dueAt,
+                          AssignmentStatus status, String url, String kind, boolean demo) {}
+record SyncResponse(List<SourceStatus> sources, int count) {}
+record SourceStatus(Platform platform, boolean ok, int count, String error, boolean needsReconnect) {}
+
+// Платформы                                  GET /platforms, POST/DELETE /platforms/{platform}
+record PlatformResponse(Platform platform, boolean connected, boolean needsReconnect,
+                        Instant lastSyncedAt, String lastError) {}
+
+// Квизы                                      GET /subjects, POST /quizzes, GET /quizzes/{id}
+record SubjectResponse(Long id, String name) {}
+record StartQuizRequest(@NotBlank String subject, @NotBlank String topic, ExerciseLevel level,
+                        Long assignmentId) {}
+record QuizResponse(Long id, Long quizSetId, String title, String subject, String topic,
+                    ExerciseLevel level, QuizStatus status, int currentPosition,
+                    List<QuestionResponse> questions) {}
+record QuestionResponse(int position, Long exerciseId, QuestionType type, String question,
+                        List<String> options) {}          // без правильного ответа!
+// POST /quizzes/{id}/answers, POST /quizzes/{id}/finish
+record AnswerRequest(@Min(1) int position, @NotBlank String answer) {}     // multiple_choice: JSON-массив строкой
+record AnswerResponse(Verdict verdict, String explanation, String correctAnswer) {}
+record FinishResponse(BigDecimal score) {}
+
+// Флеш-карты                                 GET /flashcards/due, POST /flashcards/{exerciseId}/review
+record FlashcardResponse(Long exerciseId, String subject, String topic, String front, String back,
+                         String explanation, Instant nextReviewAt) {}
+record ReviewRequest(@Min(0) @Max(5) int grade) {}
+record ReviewResponse(Instant nextReviewAt, int intervalDays) {}
+
+// Дашборд и история                          GET /dashboard, GET /history
+record DashboardResponse(long homeworkTodo, long homeworkOverdue, long homeworkDone,
+                         long quizzesCompleted, BigDecimal avgQuizScore, long exercisesAnswered,
+                         long questionsAsked, long activeDays30, FlashcardStats flashcards,
+                         List<TopicProgress> topics, List<DayActivity> days) {}
+record FlashcardStats(long cards, long dueNow, long learned, long reviews) {}
+record TopicProgress(String topic, long attempts, BigDecimal masteryPct) {}
+record DayActivity(LocalDate day, long events, long exercises, long quizzes) {}
+record EventResponse(Long id, String type, String refTable, Long refId, JsonNode payload, Instant createdAt) {}
+
+// Материалы                                  GET /materials, POST /materials (multipart)
+record MaterialResponse(Long id, String title, String subject, String topic, String fileName,
+                        String mimeType, Long fileSize, MaterialSource source, int chunkCount,
+                        boolean shared, Instant createdAt) {}
+```
