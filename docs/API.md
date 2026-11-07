@@ -7,6 +7,32 @@
 
 ---
 
+## Все URL бэкенда
+
+🔓 — без токена, 🔒 — нужен `Authorization: Bearer <token>`
+
+| # | Метод | URL | Что делает | Ответ |
+|---|---|---|---|---|
+| 1 | POST | 🔓 `/api/v1/auth/register` | регистрация | 201 `AuthResponse` |
+| 2 | POST | 🔓 `/api/v1/auth/login` | вход | 200 `AuthResponse` |
+| 3 | GET | 🔒 `/api/v1/users/me` | мой профиль | 200 `User` |
+| 4 | PATCH | 🔒 `/api/v1/users/me` | изменить имя / язык / часовой пояс | 200 `User` |
+| 5 | PUT | 🔒 `/api/v1/users/me/password` | сменить пароль | 204 |
+| 6 | GET | 🔒 `/api/v1/chats?archived=` | список чатов | 200 `Chat[]` |
+| 7 | POST | 🔒 `/api/v1/chats` | создать чат | 201 `Chat` |
+| 8 | GET | 🔒 `/api/v1/chats/{chatId}` | один чат | 200 `Chat` |
+| 9 | PATCH | 🔒 `/api/v1/chats/{chatId}` | переименовать / тема / архив | 200 `Chat` |
+| 10 | DELETE | 🔒 `/api/v1/chats/{chatId}` | удалить чат | 204 |
+| 11 | GET | 🔒 `/api/v1/chats/{chatId}/messages` | история сообщений | 200 `Message[]` |
+| 12 | POST | 🔒 `/api/v1/chats/{chatId}/messages` | вопрос ИИ-тьютору | 201 `ChatReply` |
+| 13 | GET | 🔓 `/actuator/health` | сервер и база живы? | 200 `{"status":"UP"}` |
+| 14 | GET | 🔓 `/swagger-ui.html` | интерактивная документация | страница |
+| 15 | GET | 🔓 `/v3/api-docs` | OpenAPI-схема (для генерации клиента) | JSON |
+
+Подробности по каждому URL — ниже.
+
+---
+
 ## Как работает вход
 
 1. `POST /auth/login` (или `/auth/register`) → в ответе `token`.
