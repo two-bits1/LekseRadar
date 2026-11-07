@@ -6,7 +6,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-Source = Literal["canvas", "teams", "itslearning", "inschool"]
+Source = Literal["canvas", "teams", "itslearning", "inschool", "classroom"]
 Status = Literal["todo", "overdue", "submitted", "graded"]
 
 
@@ -43,6 +43,10 @@ class ItslearningCreds(OAuthCreds):
     base_url: str = Field(examples=["https://sms.itslearning.com"])
 
 
+class ClassroomCreds(OAuthCreds):
+    """Google Classroom: access_token получает и обновляет бэкенд (у него секрет клиента Google)."""
+
+
 class InschoolCreds(BaseModel):
     host: str = Field(examples=["ohg-vgs.inschool.visma.no"])
     cookies: dict[str, str] = Field(description="cookie сессии InSchool (JSESSIONID, Authorization и др.)")
@@ -53,6 +57,7 @@ class Credentials(BaseModel):
     teams: Optional[TeamsCreds] = None
     itslearning: Optional[ItslearningCreds] = None
     inschool: Optional[InschoolCreds] = None
+    classroom: Optional[ClassroomCreds] = None
 
 
 class SourceResult(BaseModel):
