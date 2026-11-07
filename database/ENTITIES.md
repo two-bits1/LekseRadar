@@ -1,6 +1,7 @@
 # Сущности LekseRadar (PostgreSQL 16 + Spring Boot)
 
-Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO).
+Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO)
+и во фронтенде (TypeScript-типы). Состояние ветки `main-test-2.0`.
 Источник правды — миграции `database/migrations/V1–V15`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
 поэтому поля сущностей должны совпадать с колонками ниже.
 
@@ -647,3 +648,25 @@ record MaterialResponse(Long id, String title, String subject, String topic, Str
                         String mimeType, Long fileSize, MaterialSource source, int chunkCount,
                         boolean shared, Instant createdAt) {}
 ```
+
+## Фронтенд: TypeScript-типы (`frontend/src/api/types.ts`)
+
+Одна сущность проходит три слоя: таблица → DTO бэкенда → тип фронта. Поля в JSON — camelCase.
+
+| TypeScript | DTO бэкенда | Таблица / вид | Расхождения |
+|---|---|---|---|
+| `User` | `UserResponse` | `users` | `Locale = nb\|nn\|en\|ru` — нет `uk`, который предлагает репетитор |
+| `AuthResponse` | `AuthResponse` | — | — |
+| `Chat` | `ChatResponse` | `chat_sessions` | нет `mode`, `subject`, `language`, `assignmentId`, `quizSetId` (появятся с V13–V14 в DTO) |
+| `Message` | `MessageResponse` | `chat_messages` | `role` только `student \| tutor` (`system` фронту не отдаётся — так и нужно) |
+| `ChatReply` | `ChatReplyResponse` | — | — |
+| `ApiError` | `ErrorResponse` | — | `message` приходит по-русски, интерфейс по-норвежски |
+| `Health` | actuator | — | — |
+| `RegisterRequest`, `LoginRequest` | те же | `users` | — |
+| `UpdateUserRequest` | `UpdateProfileRequest` | `users` | — |
+| `ChangePasswordRequest` | тот же | `users.password_hash` | — |
+| `CreateChatRequest`, `UpdateChatRequest` | те же | `chat_sessions` | нет `mode`, `subject`, `assignmentId` |
+
+Когда бэкенд добавит DTO из раздела [«Новые DTO для API»](#новые-dto-для-api), во фронт добавляются такие же типы:
+`Assignment`, `Platform`, `Subject`, `Quiz`, `Question`, `AnswerResult`, `Flashcard`, `Dashboard`, `Material`.
+Тест контракта во фронте (`pnpm test`) сверяет URL с `docs/API.md`, поэтому новые эндпоинты сначала вносятся в API.md.
