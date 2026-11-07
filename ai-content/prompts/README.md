@@ -1,0 +1,46 @@
+# Промпты
+
+Грузятся в базу скриптом `python ../load/load.py`. Имя файла без `.md` = ключ в `ai_prompts`.
+Изменил файл и запустил загрузку снова — в базе новая версия (откат: `SELECT activate_prompt('tutor', 1)`).
+Правила в промптах основаны на [../research/metody-obucheniya.md](../research/metody-obucheniya.md).
+
+| Файл | Чат | Что возвращает ИИ |
+|---|---|---|
+| `tutor.md` | режим `tutor`: помогает понять тему ДЗ, не делает ДЗ за ученика | текст; служебные метки `[[LANGUAGE_QUESTION]]`, `[[LANGUAGE=xx]]` |
+| `quiz_generator.md` | режим `quiz`: квиз по ДЗ | JSON по `database/quiz/quiz.schema.json` |
+| `answer_checker.md` | ответ на вопрос `text` в квизе | `{"verdict","explanation"}` |
+
+## Как бэкенд собирает запрос к ИИ
+
+```sql
+SELECT content, prompt_id FROM chat_system_prompt(:chat_id);  -- промпт режима чата
+SELECT chat_prompt_vars(:chat_id);                            -- JSON: language, subject, topic, level,
+                                                              -- homework_title, homework_due, homework_text, weak_topics
+SELECT materials_for_prompt(:user_id, :вопрос_или_тема, :subject_id, 5);  -- {{materials}}
+```
+Бэкенд заменяет каждое `{{ключ}}` значением. Для квиза ещё `{{count}}` (по умолчанию 8).
+Для `answer_checker`: `{{question}}`, `{{correct_answer}}`, `{{explanation}}` из `exercises`, `{{answer}}`, `{{language}}`.
+
+## Чат-репетитор: выбор языка
+
+1. Новый чат: `start_chat(user, 'tutor', предмет, тема, p_assignment => id ДЗ)`. Язык чата пустой.
+2. Бэкенд сразу вызывает ИИ (без сообщения ученика). `{{language}}` = «не выбран», и ИИ спрашивает язык.
+   В конце ответа будет `[[LANGUAGE_QUESTION]]`: бэкенд убирает метку, фронт может показать кнопки
+   Norsk / English / Русский / Українська.
+3. Ученик выбрал язык. В ответе ИИ будет `[[LANGUAGE=ru]]`: бэкенд вызывает
+   `set_chat_language(chat_id, 'ru')` и убирает метку перед показом и сохранением.
+   Если фронт показал кнопки, можно сразу вызвать `set_chat_language` по нажатию.
+
+## Файл ДЗ
+
+Текст задания из PDF/DOCX (или описание с платформы) сохраняется так:
+`SELECT attach_homework_file(:assignment_id, :text, 'oppgave.pdf', 'application/pdf');`
+Потом он попадает в `{{homework_text}}` у любого чата, созданного с этим заданием.
+
+## Чат квизов
+
+`start_chat(user, 'quiz', предмет, тема, p_assignment => id ДЗ)` → ИИ возвращает JSON →
+проверить по схеме → `import_quiz_json(json, user)` → `UPDATE chat_sessions SET quiz_set_id = ...` →
+`start_quiz(user, quiz_set_id)`. Если JSON не прошёл проверку — один повтор запроса.
+
+Образцы с пояснениями лежат в `examples/` (в базу не грузятся).
