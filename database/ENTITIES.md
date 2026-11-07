@@ -469,3 +469,59 @@ erDiagram
 | `user_materials` | `id`, `owner_id`, `title`, `subject`, `topic`, `file_name`, `mime_type`, `file_size`, `source` material_source, `language`, `chunk_count`, `created_at` | список учебных материалов (свои + общие, где `owner_id IS NULL`) | `GET /materials` 🕓 |
 
 Числа `bigint` из `count(*)` → `Long`, `numeric` → `BigDecimal` (или `Double` в DTO).
+
+## Функции базы (вызывать из Java)
+
+Логику квизов, карточек, промптов и материалов держит база: правила одни для всех, бэкенду достаточно вызвать
+функцию. В Java — `@Query(value = "SELECT ...", nativeQuery = true)` в репозитории или `JdbcTemplate`.
+Функции, которые возвращают `TABLE(...)`, вызываются как `SELECT * FROM f(...)`.
+
+### Чат и промпты
+
+| Функция | Аргументы | Возвращает | Что делает | Эндпоинт |
+|---|---|---|---|---|
+| `start_chat` | `p_user` bigint, `p_mode` chat_mode, `p_subject` text, `p_topic` text, `p_title` text, `p_assignment` bigint | `bigint` id чата | создаёт чат нужного режима, предмет при необходимости, событие `chat_started` | `POST /chats` |
+| `chat_system_prompt` | `p_session` bigint | `TABLE(prompt_id, prompt_key, version, content, mode, user_id, subject_id, subject, topic, language)` | активный промпт режима чата; ошибка, если промпт не загружен | `POST /chats/{id}/messages` |
+| `chat_prompt_vars` | `p_session` bigint | `jsonb` | значения `{{language}}`, `{{subject}}`, `{{topic}}`, `{{level}}`, `{{homework_title}}`, `{{homework_due}}`, `{{homework_text}}`, `{{weak_topics}}` | `POST /chats/{id}/messages` |
+| `set_chat_language` | `p_session` bigint, `p_language` text | — | сохранить язык, когда ИИ вернул метку `[[LANGUAGE=xx]]` | `POST /chats/{id}/messages` |
+| `get_prompt` | `p_key` text | `text` | активная версия промпта (`answer_checker` и др.) | проверка ответа квиза |
+| `save_prompt` | `p_key`, `p_content`, `p_note` text | `int` версия | новая версия промпта, если текст изменился | `load.py` |
+| `activate_prompt` | `p_key` text, `p_version` int | — | откат на старую версию | вручную |
+
+### Учебные материалы и файл ДЗ
+
+| Функция | Аргументы | Возвращает | Что делает | Эндпоинт |
+|---|---|---|---|---|
+| `add_material` | `p_owner` bigint (NULL — общий), `p_subject`, `p_topic`, `p_title`, `p_content` text, `p_file_name`, `p_mime_type`, `p_source` material_source, `p_language`, `p_storage_key`, `p_source_url`, `p_chunk_size` int = 1200 | `bigint` id | сохраняет текст файла и режет на фрагменты; повтор того же текста не дублирует | `POST /materials` |
+| `attach_homework_file` | `p_assignment` bigint, `p_text` text, `p_file_name`, `p_mime_type`, `p_storage_key` | `bigint` id материала | текст файла ДЗ → материал, привязанный к заданию; попадает в `{{homework_text}}` | `POST /homework/{id}/file` |
+| `search_materials` | `p_user` bigint, `p_query` text, `p_subject_id` bigint, `p_limit` int = 5, `p_topic` text | `TABLE(chunk_id, material_id, title, topic, chunk_pos, content, score)` | полнотекстовый поиск фрагментов (свои + общие материалы) | ссылки `[M<id>]` на фронте |
+| `materials_for_prompt` | те же | `text` | готовый текст для `{{materials}}` | `POST /chats/{id}/messages` |
+| `clip_text` | `p_text` text, `p_max` int = 12000 | `text` | обрезает длинный текст для промпта | внутри `chat_prompt_vars` |
+
+### Квизы
+
+| Функция | Аргументы | Возвращает | Что делает | Эндпоинт |
+|---|---|---|---|---|
+| `find_quiz_set` | `p_subject` text, `p_topic` text, `p_level` exercise_level, `p_language` text = 'nb' | `bigint` или NULL | есть ли готовый квиз по теме — тогда ИИ не вызываем | `POST /quizzes` |
+| `import_quiz_json` | `p_json` jsonb (формат `quiz/quiz.schema.json`), `p_user` bigint | `bigint` id набора | проверяет JSON от ИИ, сохраняет квиз и вопросы; тот же JSON второй раз не импортируется | `POST /quizzes` |
+| `start_quiz` | `p_user` bigint, `p_set` bigint | `bigint` id попытки | начинает попытку или продолжает незаконченную | `POST /quizzes` |
+| `save_quiz_answer` | `p_quiz` bigint, `p_position` int, `p_answer` text, `p_verdict` verdict, `p_explanation` text | `TABLE(attempt_id, verdict, explanation, correct_answer)` | выбор проверяет сам; для `text` нужен `p_verdict` от ИИ (`answer_checker`) | `POST /quizzes/{id}/answers` |
+| `finish_quiz` | `p_quiz` bigint | `numeric` балл 0–100 | завершает попытку, считает балл (partial = 0,5) | `POST /quizzes/{id}/finish` |
+
+### Флеш-карты
+
+| Функция | Аргументы | Возвращает | Что делает | Эндпоинт |
+|---|---|---|---|---|
+| `add_quiz_set_to_flashcards` | `p_user` bigint, `p_set` bigint | `int` сколько добавлено | все вопросы квиза в колоду | `POST /flashcards/from-quiz/{setId}` |
+| `review_flashcard` | `p_user` bigint, `p_exercise` bigint, `p_grade` int 0–5 | `TABLE(next_review_at, interval_days)` | оценка карточки, следующий повтор по SM-2 | `POST /flashcards/{id}/review` |
+
+### Служебные и триггеры (сами не вызывать)
+
+| Имя | Что делает |
+|---|---|
+| `norm_key(text)` | нормализует предмет и тему для поиска: нижний регистр, одинарные пробелы |
+| `split_text(text, int)` | режет текст на фрагменты для `add_material` |
+| `question_tsquery(text)` | вопрос ученика → поисковый запрос (слова через ИЛИ, длинные по началу) |
+| триггер `touch_chat_session` | новое сообщение поднимает чат наверх (`updated_at`) |
+| триггер `attempt_to_flashcard` | неверный или частичный ответ в квизе → карточка в колоду, повтор сразу |
+| триггер `chat_mode_locked` | запрещает менять режим чата |
