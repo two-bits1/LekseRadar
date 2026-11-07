@@ -4,7 +4,7 @@
 BEGIN;
 
 INSERT INTO users (id, email, password_hash, display_name)
-VALUES (1, 'demo@lekseradar.no', '$2a$10$7EqJtq98hPqEX7fNZaFWoOHi5BWX4sQn0jHq7QKZ0u3ZJdT1lH0yK', 'Demo Elev');
+VALUES (1, 'demo@lekseradar.no', '$2a$10$05xlxQCtj63XqgqBM/82NOB/154Pb07HMsEfC5QyQ4WiJLPcyz6Aq', 'Demo Elev');
 SELECT setval('users_id_seq', 1);
 
 INSERT INTO assignments (user_id, source, external_id, title, course, due_at, status, url, kind, is_demo) VALUES
