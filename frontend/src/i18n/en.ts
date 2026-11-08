@@ -3,7 +3,14 @@ import type { Dict } from './nb';
 export const en: Dict = {
   nav: { main: 'Main menu', calendar: 'Calendar', flashcards: 'Flashcards', tutor: 'AI tutor', profile: 'Profile', settings: 'Settings' },
   header: { home: 'LekseRadar — overview', login: 'Log in', skip: 'Skip to content' },
-  footer: { tagline: 'Learn a little. Understand more.', status: 'Prototype · See development status' },
+  footer: {
+    tagline: 'Learn a little. Understand more.',
+    about: 'All your homework from Canvas, Teams, itslearning, Visma InSchool and Google Classroom in one place — with an AI tutor that helps you understand it.',
+    nav: 'Footer', project: 'Project', legal: 'Privacy and terms',
+    status: 'Development status', source: 'Source code on GitHub', feedback: 'Give feedback',
+    privacy: 'Privacy policy', terms: 'Terms of use', security: 'Report a security issue',
+    made: 'Built at Oslo Sprint Hackathon 2026', demo: 'Prototype — do not use real student data.', external: '(opens in a new tab)',
+  },
   settings: {
     eyebrow: 'YOUR OWN LITTLE CORNER', title: 'Just the way you like it.', intro: 'Make LekseRadar a little more you.',
     appearance: 'Appearance and language', theme: 'Theme',

@@ -39,6 +39,8 @@
 | `/settings/platforms` | 🔒 | подключение Canvas / Teams / itslearning / InSchool | 🕓 `GET /platforms`, 🕓 `POST/DELETE /platforms/{platform}` |
 | `/settings` | 🔒 | настройки (только фронтенд) | — |
 | `/status` | 🔓 | карта сайта: что уже работает (только фронтенд) | — |
+| `/privacy` | 🔓 | политика конфиденциальности (только фронтенд, тексты `frontend/src/legal/`) | — |
+| `/terms` | 🔓 | условия использования (только фронтенд, тексты `frontend/src/legal/`) | — |
 | `*` | 🔓 | «Страница не найдена» | — |
 
 ---
@@ -158,5 +160,7 @@ export const PAGES = {
   // только фронтенд, своего API нет
   settings: "/settings",
   status: "/status",
+  privacy: "/privacy",
+  terms: "/terms",
 } as const;
 ```

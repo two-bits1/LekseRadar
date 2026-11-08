@@ -2,7 +2,14 @@
 export const nb = {
   nav: { main: 'Hovedmeny', calendar: 'Kalender', flashcards: 'Læringskort', tutor: 'AI-veileder', profile: 'Profil', settings: 'Innstillinger' },
   header: { home: 'LekseRadar — oversikt', login: 'Logg inn', skip: 'Hopp til innhold' },
-  footer: { tagline: 'Lær litt. Forstå mer.', status: 'Prototype · Se utviklingsstatus' },
+  footer: {
+    tagline: 'Lær litt. Forstå mer.',
+    about: 'Alle leksene fra Canvas, Teams, itslearning, Visma InSchool og Google Classroom på ett sted – med en AI-veileder som hjelper deg å forstå dem.',
+    nav: 'Bunntekst', project: 'Prosjektet', legal: 'Personvern og vilkår',
+    status: 'Utviklingsstatus', source: 'Kildekode på GitHub', feedback: 'Gi tilbakemelding',
+    privacy: 'Personvernerklæring', terms: 'Brukervilkår', security: 'Meld fra om sikkerhetsproblem',
+    made: 'Laget på Oslo Sprint Hackathon 2026', demo: 'Prototype – ikke bruk ekte elevdata.', external: '(åpnes i ny fane)',
+  },
   settings: {
     eyebrow: 'DITT EGET LILLE HJØRNE', title: 'Akkurat slik du liker det.', intro: 'Gjør LekseRadar litt mer deg.',
     appearance: 'Utseende og språk', theme: 'Tema',
