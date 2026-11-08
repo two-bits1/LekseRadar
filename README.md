@@ -208,6 +208,10 @@ assistant (commit author "Claude"); those are counted for the team member whose 
 
 | Document | What it covers |
 |---|---|
+| [SECURITY.md](SECURITY.md) | How to report a vulnerability, what is protected and what is missing before production |
+| [PRIVACY.md](PRIVACY.md) | What personal data is stored, why, who receives it, retention (also on the site at `/privacy`) |
+| [TERMS.md](TERMS.md) | Terms of use (also on the site at `/terms`) |
+| [COMPLIANCE.md](COMPLIANCE.md) | GDPR, children's data, AI, platform terms and licenses: open questions for review |
 | [TECHNICAL_CHALLENGES.md](TECHNICAL_CHALLENGES.md) | Problems the team hit during development and how they were solved |
 | [CHANGES.md](CHANGES.md) | Fixes made after the team checked the integrated build (in Russian) |
 | [README-TEST.md](README-TEST.md) | Test results and known weak points (in Russian) |
