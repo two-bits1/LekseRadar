@@ -29,7 +29,8 @@ services:
       - ./database/migrations:/docker-entrypoint-initdb.d/migrations:ro
       - ./database/init.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lekseradar -d lekseradar"]
+      # По TCP: во время первой инициализации (миграции) Postgres слушает только unix-сокет, потом перезапускается
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U lekseradar -d lekseradar"]
       interval: 2s
       timeout: 3s
       retries: 30

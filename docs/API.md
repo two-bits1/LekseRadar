@@ -218,6 +218,11 @@ type Flashcard = {
   back: string;                  // правильный ответ
   explanation: string | null;
   nextReviewAt: string;
+  intervalDays: number;          // SM-2 progress: >= 1 means learned
+  reviews: number;               // 0 = new card
+  lapses: number;                // times forgotten after it was remembered
+  ease: number;                  // 2.5 for a new card, lower = harder to remember
+  due: boolean;                  // due for review now
 };
 
 type FlashcardStats = { cards: number; dueNow: number; learned: number; reviews: number };

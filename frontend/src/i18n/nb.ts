@@ -142,6 +142,23 @@ export const nb = {
     sessionEyebrow: 'Økta er ferdig', sessionTitle: (n: number) => `Du repeterte ${n} kort`, remembered: 'husket',
     sessionText: (learned: number) => `${learned} kort er lært totalt. Kortene du strevde med, kommer tilbake snart.`,
     more: 'Sjekk om flere kort venter', toHome: 'Til oversikten',
+    practice: 'Hva vil du øve på?', topic: 'Tema', allTopics: 'Alle temaer', shuffle: 'Bland',
+    modes: { due: 'Til repetisjon', hard: 'Vanskelige', learned: 'Kan allerede', new: 'Nye', all: 'Alle kort' },
+    modeHints: {
+      due: 'Repetisjon med mellomrom: kortene som skal repeteres i dag.',
+      hard: 'Kort du har glemt eller merket «Vanskelig», de vanskeligste først.',
+      learned: 'Kort du allerede husker – sjekk at de sitter.',
+      new: 'Kort du ikke har sett ennå.',
+      all: 'Alle kortene i kortstokken.',
+    },
+    modeEmpty: {
+      due: 'Ingenting å repetere nå. Øv på vanskelige kort eller de du allerede kan.',
+      hard: 'Ingen vanskelige kort. Kort du glemmer eller merker «Vanskelig», havner her.',
+      learned: 'Ingen lærte kort ennå. Et kort er lært når du svarer «Husket».',
+      new: 'Ingen nye kort. Lag kort med AI nedenfor.',
+      all: 'Ingen kort i dette temaet.',
+    },
+    again: 'Øv igjen',
   },
   hw: {
     title: 'Lekser', intro: 'Alle lekser fra skoleplattformene dine, med nærmeste frist først.',
