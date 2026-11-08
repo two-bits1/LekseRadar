@@ -3,7 +3,6 @@ import { ISSUES_URL, SECURITY_URL, type LegalTexts } from './types';
 export const nb: LegalTexts = {
   updated: 'Sist oppdatert 8. november 2026',
   contents: 'Innhold',
-  demo: 'LekseRadar er en prototype laget på et hackathon. Ikke koble til ekte skolekontoer og ikke legg inn ekte elevdata. Bruk bare testkontoer.',
 
   privacy: {
     eyebrow: 'PERSONVERNERKLÆRING',
@@ -71,7 +70,7 @@ export const nb: LegalTexts = {
         'Du kan også klage til [Datatilsynet](https://www.datatilsynet.no).',
       ] },
       { id: 'security', title: 'Sikkerhet', body: [
-        'Tilgangen til plattformene er kryptert, passord lagres bare som hash, og det er grenser for innloggingsforsøk og AI-forespørsler. LekseRadar er en prototype og har ikke hatt noen sikkerhetsrevisjon. Har du funnet et sikkerhetsproblem? [Meld det fra privat på GitHub](' + SECURITY_URL + ').',
+        'Tilgangen til plattformene er kryptert, passord lagres bare som hash, og det er grenser for innloggingsforsøk og AI-forespørsler. LekseRadar har ennå ikke hatt en uavhengig sikkerhetsrevisjon. Har du funnet et sikkerhetsproblem? [Meld det fra privat på GitHub](' + SECURITY_URL + ').',
       ] },
       { id: 'changes', title: 'Endringer', body: [
         'Hvis vi endrer erklæringen, oppdaterer vi datoen øverst på siden.',
@@ -89,10 +88,7 @@ export const nb: LegalTexts = {
     sections: [
       { id: 'about', title: 'Hva LekseRadar er', body: [
         'LekseRadar samler leksene fra skoleplattformene dine på ett sted og hjelper deg å lære med en AI-veileder, quizer og læringskort. Det er gratis.',
-        'LekseRadar er en prototype laget av et elevteam på hackathonet Oslo Sprint (6.–8. november 2026). Den kan endres, settes på pause eller legges ned når som helst, og data kan gå tapt, for eksempel når databasen nullstilles.',
-      ] },
-      { id: 'demo', title: 'Bare testdata', body: [
-        'Fordi LekseRadar er en prototype, ber vi deg bruke den bare med testkontoer. Ikke koble til ekte skolekontoer og ikke legg inn ekte elevdata.',
+        'LekseRadar ble startet av et elevteam på hackathonet Oslo Sprint (6.–8. november 2026) og utvikles fortsatt. Funksjoner kan endres, og tjenesten kan settes på pause eller legges ned.',
       ] },
       { id: 'account', title: 'Kontoen din', body: [{ list: [
         'Bruk din egen e-postadresse og hold passordet for deg selv.',

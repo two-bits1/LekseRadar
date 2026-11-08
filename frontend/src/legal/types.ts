@@ -4,7 +4,7 @@ export type LegalBlock = string | { list: string[] };
 export type LegalSection = { id: string; title: string; body: LegalBlock[] };
 export type LegalDoc = { eyebrow: string; title: string; intro: string; sections: LegalSection[] };
 export type LegalTexts = {
-  updated: string; contents: string; demo: string;
+  updated: string; contents: string;
   privacy: LegalDoc; terms: LegalDoc;
 };
 

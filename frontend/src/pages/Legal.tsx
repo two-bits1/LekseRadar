@@ -2,7 +2,7 @@
 // Тексты — src/legal/{nb,en,ru}.ts; страница грузится отдельным чанком (React.lazy в main.tsx).
 import { useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, TriangleAlert } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useLang } from '../i18n';
 import type { Lang } from '../i18n';
 import type { LegalBlock, LegalTexts } from '../legal/types';
@@ -49,7 +49,6 @@ export default function Legal({ doc }: { doc: 'privacy' | 'terms' }) {
     <h1>{d.title}</h1>
     <p className="legal-intro">{inline(d.intro)}</p>
     <p className="legal-updated">{texts.updated}</p>
-    <p role="note" className="feedback warning legal-demo"><TriangleAlert size={17} aria-hidden="true" />{texts.demo}</p>
     <nav className="legal-toc" aria-label={texts.contents}>
       <h2>{texts.contents}</h2>
       <ol>{d.sections.map(s => <li key={s.id}><a href={`#${s.id}`}>{s.title}</a></li>)}</ol>

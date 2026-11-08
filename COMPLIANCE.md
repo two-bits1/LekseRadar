@@ -2,10 +2,10 @@
 
 > **This is not legal advice.** These notes were written by the development team from the code in this
 > repository. They list questions that **should be reviewed** by a qualified person (for example the school's
-> data protection officer or a lawyer) before LekseRadar is used with real students. Nothing here is a promise
+> data protection officer or a lawyer), because LekseRadar processes real students' data. Nothing here is a promise
 > that the project complies with any law or contract.
 
-LekseRadar is a hackathon prototype (Oslo Sprint, 6–8 November 2026) aimed at school students in Norway.
+LekseRadar was started at the Oslo Sprint hackathon (6–8 November 2026) and is aimed at school students in Norway.
 What data it processes is described in [PRIVACY.md](PRIVACY.md); technical measures and gaps are in
 [SECURITY.md](SECURITY.md).
 
@@ -42,7 +42,7 @@ history. Consent is not the only possible basis, and for a school it may not be 
 ### Data protection impact assessment
 
 The processing combines data about children, an AI service, and access to several school platforms. A DPIA
-(GDPR Art. 35) is likely to be needed before real use. This needs review.
+(GDPR Art. 35) is likely to be needed. This needs review.
 
 ### Transfers outside the EU/EEA
 
@@ -61,7 +61,7 @@ GDPR Chapter V) and the hosting regions should be checked for each of them.
 | Portability (Art. 20) | **Missing**: no export. |
 | Objection / withdrawal | Email reminders can be turned off. Other processing has no opt-out. |
 
-Account deletion and export should be implemented before real use.
+Account deletion and export should be implemented as soon as possible, because real users' data is stored.
 
 ### Data minimisation and retention
 

@@ -39,9 +39,5 @@ export function SiteFooter() {
         </div>
       </nav>
     </div>
-    <div className="footer-bottom">
-      <span>© 2026 LekseRadar · {f.made}</span>
-      <span>{f.demo}</span>
-    </div>
   </footer>;
 }

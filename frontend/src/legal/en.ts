@@ -3,7 +3,6 @@ import { ISSUES_URL, SECURITY_URL, type LegalTexts } from './types';
 export const en: LegalTexts = {
   updated: 'Last updated 8 November 2026',
   contents: 'Contents',
-  demo: 'LekseRadar is a prototype built at a hackathon. Please do not connect real school accounts or enter real student data. Use test accounts only.',
 
   privacy: {
     eyebrow: 'PRIVACY POLICY',
@@ -71,7 +70,7 @@ export const en: LegalTexts = {
         'You can also complain to the Norwegian Data Protection Authority, [Datatilsynet](https://www.datatilsynet.no).',
       ] },
       { id: 'security', title: 'Security', body: [
-        'Platform access is encrypted, passwords are stored only as hashes, and there are limits on login attempts and AI requests. LekseRadar is a prototype and has not had a security audit. Found a security problem? [Report it privately on GitHub](' + SECURITY_URL + ').',
+        'Platform access is encrypted, passwords are stored only as hashes, and there are limits on login attempts and AI requests. LekseRadar has not yet had an independent security audit. Found a security problem? [Report it privately on GitHub](' + SECURITY_URL + ').',
       ] },
       { id: 'changes', title: 'Changes', body: [
         'If we change this policy, we update the date at the top of the page.',
@@ -89,10 +88,7 @@ export const en: LegalTexts = {
     sections: [
       { id: 'about', title: 'What LekseRadar is', body: [
         'LekseRadar collects your homework from your school platforms in one place and helps you learn with an AI tutor, quizzes and flashcards. It is free.',
-        'LekseRadar is a prototype built by a student team at the Oslo Sprint hackathon (6–8 November 2026). It can be changed, paused or shut down at any time, and data can be lost, for example when the database is reset.',
-      ] },
-      { id: 'demo', title: 'Test data only', body: [
-        'Because LekseRadar is a prototype, please use it only with test accounts. Do not connect real school accounts and do not enter real student data.',
+        'LekseRadar was started by a student team at the Oslo Sprint hackathon (6–8 November 2026) and is still being developed. Features can change, and the service can be paused or shut down.',
       ] },
       { id: 'account', title: 'Your account', body: [{ list: [
         'Use your own email address and keep your password to yourself.',

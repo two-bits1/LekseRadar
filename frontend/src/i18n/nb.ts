@@ -8,7 +8,7 @@ export const nb = {
     nav: 'Bunntekst', project: 'Prosjektet', legal: 'Personvern og vilkår',
     status: 'Utviklingsstatus', source: 'Kildekode på GitHub', feedback: 'Gi tilbakemelding',
     privacy: 'Personvernerklæring', terms: 'Brukervilkår', security: 'Meld fra om sikkerhetsproblem',
-    made: 'Laget på Oslo Sprint Hackathon 2026', demo: 'Prototype – ikke bruk ekte elevdata.', external: '(åpnes i ny fane)',
+    external: '(åpnes i ny fane)',
   },
   settings: {
     eyebrow: 'DITT EGET LILLE HJØRNE', title: 'Akkurat slik du liker det.', intro: 'Gjør LekseRadar litt mer deg.',
