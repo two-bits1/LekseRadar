@@ -56,7 +56,7 @@ export const en: LegalTexts = {
       ] },
       { id: 'keep', title: 'How long we keep data', body: [{ list: [
         'We keep your data until it is deleted. There are no automatic deletion periods yet.',
-        'Disconnecting a platform deletes its access and all its assignments. Chats and quizzes about those assignments are kept.',
+        'Disconnecting a platform deletes its access, all its assignments and everything you made for those assignments: chats, quizzes, flashcards, answers and history.',
         'Deleting a chat deletes all its messages.',
         'You can turn email reminders off in Settings.',
         'Deleting your account is not possible on the site yet; it is planned. Until then, ask us as described under Contact.',
@@ -99,7 +99,7 @@ export const en: LegalTexts = {
       { id: 'platforms', title: 'Connecting school platforms', body: [{ list: [
         'Connect only your own accounts, and follow your school’s rules and the platform’s rules.',
         'The connections to itslearning and Visma InSchool are unofficial. They can stop working at any time.',
-        'You can disconnect a platform at any time. This deletes its access and all its assignments from LekseRadar.',
+        'You can disconnect a platform at any time. This deletes its access, its assignments and the chats, quizzes and flashcards you made for them.',
         'Assignments belong to your school and teachers. LekseRadar only shows you a copy.',
       ] }] },
       { id: 'ai', title: 'The AI tutor, quizzes and flashcards', body: [{ list: [

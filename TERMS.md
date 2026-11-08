@@ -25,7 +25,7 @@ developed. Features can change, and the service can be paused or shut down.
 
 - Connect only your own accounts, and follow your school's rules and the platform's rules.
 - The connections to itslearning and Visma InSchool are unofficial. They can stop working at any time.
-- You can disconnect a platform at any time. This deletes its access and all its assignments from LekseRadar.
+- You can disconnect a platform at any time. This deletes its access, its assignments and the chats, quizzes and flashcards you made for them.
 - Assignments belong to your school and teachers. LekseRadar only shows you a copy.
 
 ## The AI tutor, quizzes and flashcards

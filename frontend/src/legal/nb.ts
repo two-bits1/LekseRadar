@@ -56,7 +56,7 @@ export const nb: LegalTexts = {
       ] },
       { id: 'keep', title: 'Hvor lenge vi lagrer data', body: [{ list: [
         'Vi lagrer dataene til de slettes. Det finnes ingen automatiske slettefrister ennå.',
-        'Når du kobler fra en plattform, slettes tilgangen og alle oppgavene fra den. Samtaler og quizer om oppgavene beholdes.',
+        'Når du kobler fra en plattform, slettes tilgangen, alle oppgavene fra den og alt du har laget til disse oppgavene: samtaler, quizer, læringskort, svar og historikk.',
         'Når du sletter en samtale, slettes alle meldingene i den.',
         'Du kan slå av påminnelser på e-post i Innstillinger.',
         'Du kan ikke slette kontoen på nettsiden ennå; det er planlagt. Til da kan du spørre oss, se Kontakt.',
@@ -99,7 +99,7 @@ export const nb: LegalTexts = {
       { id: 'platforms', title: 'Tilkobling av skoleplattformer', body: [{ list: [
         'Koble bare til dine egne kontoer, og følg reglene til skolen og plattformen.',
         'Tilkoblingene til itslearning og Visma InSchool er uoffisielle. De kan slutte å virke når som helst.',
-        'Du kan koble fra en plattform når som helst. Da slettes tilgangen og alle oppgavene fra den i LekseRadar.',
+        'Du kan koble fra en plattform når som helst. Da slettes tilgangen, oppgavene og samtalene, quizene og læringskortene du har laget til dem.',
         'Oppgavene tilhører skolen og lærerne dine. LekseRadar viser deg bare en kopi.',
       ] }] },
       { id: 'ai', title: 'AI-veilederen, quizer og læringskort', body: [{ list: [
