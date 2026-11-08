@@ -116,7 +116,7 @@ $$;
 
 ## Шаг 5. Деплой базы и `collector` (1 ч) 🔗 №2
 
-**База**: Neon или Railway PostgreSQL 16.
+**База**: PostgreSQL 16.
 ```bash
 for f in database/migrations/V*.sql; do echo $f; done | sort -V   # порядок: V1, V2, … V21
 for f in $(ls database/migrations/V*.sql | sort -V); do psql "$PROD_URL" -v ON_ERROR_STOP=1 -f "$f"; done
@@ -124,8 +124,7 @@ DATABASE_URL="$PROD_URL" python ai-content/load/load.py
 ```
 `testdata` **не** загружать. Строку подключения передать №2 лично, не в общий чат и не в git.
 
-**collector**: Railway или Render из `homework-collector/Dockerfile`, рядом с бэкендом, во внутренней сети
-(на Railway: private networking, без публичного домена). Переменные `COLLECTOR_KEY` (`openssl rand -hex 32`), `TEAMS_CLIENT_ID`.
+**collector**: из `homework-collector/Dockerfile`, рядом с бэкендом, во внутренней сети (без публичного адреса). Переменные `COLLECTOR_KEY` (`openssl rand -hex 32`), `TEAMS_CLIENT_ID`.
 Передать №2 `COLLECTOR_URL` и `COLLECTOR_KEY`.
 
 **Teams** (если нужен): приложение в Entra ID по шагам из [REAL-DATA.md](REAL-DATA.md#microsoft-teams-официальный-api-graph).

@@ -14,7 +14,6 @@
 | 3 | `.gitattributes` (на Windows база создаётся пустой) | да |
 | 4 | `127.0.0.1` вместо `localhost` в примерах для Python | да, для Windows |
 | 5 | `COLLECTOR-API.md` | желательно |
-| 6 | Railway: миграции и пересборка collector | при деплое |
 
 > В `frontend/docs/backend-changes.md` раздел 2.3 предлагает обмен кода и ключи Google в collector
 > (`/login/classroom/*`, `GOOGLE_CLIENT_ID` у collector). **Это делать не нужно**: всё это уже делает Java.
@@ -260,14 +259,9 @@ postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar
 
 и строку: «classroom — токен выдаёт и обновляет бэкенд; collector только читает Classroom API».
 
-## 6. Railway
-
-1. Облачная база: `python database/migrate.py "<DATABASE_URL>"` — должна дойти до V22.
-2. Collector: пересобрать после пунктов 1–2. Новых переменных не нужно.
-
 ## Как проверить всё вместе
 
-1. `cd database && docker compose up -d` (база с V22 + collector), бэкенд из `JavaAPI-setup`
+1. `docker compose up -d db content collector` from the repo root (база с V22 + collector), бэкенд из `JavaAPI-setup`
    с `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` в `backend/.env`, фронт из `Frontend-setup` (`pnpm dev`).
 2. Сайт → настройки → «Plattformer» → Google Classroom → «Logg inn med Google» → аккаунт из Test users.
 3. Через ~6 с карточка «Tilkoblet», на «Lekser» задания с подписью «Google Classroom».

@@ -191,7 +191,7 @@ Each item uses the same structure: **Problem**, **Why It Happened**, **Solution*
 - **Problem:** The collector receives platform credentials, so it must not be open to anyone.
 - **Why It Happened:** It runs as a separate service next to the backend.
 - **Solution:** The FastAPI service (`homework/server.py`) requires an `X-Internal-Key` header, binds to
-  `127.0.0.1` in Docker Compose, and runs as a private service on Railway. The contract is documented in
+  `127.0.0.1` in Docker Compose and is reached by the backend inside the Compose network. The contract is documented in
   [homework-collector/COLLECTOR-API.md](homework-collector/COLLECTOR-API.md).
 - **Result:** Only the backend can call the collector.
 

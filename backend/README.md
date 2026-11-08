@@ -21,8 +21,7 @@ Maven ставить не нужно: `mvnw` скачает его сам. По�
 ### 1. База (один раз, дальше она работает в фоне)
 
 ```bash
-cd database
-docker compose up -d
+docker compose up -d db content collector   # from the repo root: database, AI prompts, collector
 ```
 
 При первом запуске создаются все таблицы. База пустая, пробных данных нет: ученик появляется только через регистрацию.

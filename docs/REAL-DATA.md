@@ -15,8 +15,7 @@
 ## 1. База без тестовых данных
 
 ```bash
-cd database
-docker compose up -d          # миграции V1–V20 и промпты, без тестового ученика
+docker compose up -d db content   # from the repo root: migrations and prompts, no test student
 ```
 
 Если раньше запускали с `--profile testdata`, тестового ученика можно убрать (его ДЗ, чаты и квизы удалятся каскадом):

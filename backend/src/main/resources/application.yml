@@ -79,7 +79,7 @@ app:
     secret: ${JWT_SECRET}
     ttl-hours: ${JWT_TTL_HOURS:72}
   cors:
-    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   openai:
     # Обязательно
     api-key: ${OPENAI_API_KEY:}
@@ -93,7 +93,7 @@ app:
   collector:
     # Сервис сбора ДЗ (homework-collector), только во внутренней сети
     url: ${COLLECTOR_URL:http://localhost:8090}
-    # По умолчанию тот же ключ, что у сервиса collector в database/docker-compose.yml (только для своего компьютера).
+    # По умолчанию тот же ключ, что у сервиса collector в docker-compose.yml (только для своего компьютера).
     # В облаке задать свой: openssl rand -hex 32, одинаковый у бэкенда и collector
     key: ${COLLECTOR_KEY:local-dev-collector-key}
     # collect ходит на 4 платформы

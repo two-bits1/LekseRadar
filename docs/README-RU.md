@@ -9,8 +9,6 @@ Google Classroom) в одном месте и помогает их сделат
 Тестовых данных нет: ученик создаётся регистрацией. Результаты проверки: [README-TEST.md](../README-TEST.md),
 что осталось: [TODO.md](../TODO.md), все правки после проверки командой: [CHANGES.md](../CHANGES.md).
 
-**Railway собран, но пока требует дополнительной настройки:** [RAILWAY-STATUS.md](../RAILWAY-STATUS.md).
-
 ```
 браузер ──► frontend (React + Vite) ──/api/v1──► backend (Spring Boot, Java 21) ──► PostgreSQL 16
                                                    │                                  ▲
@@ -22,26 +20,21 @@ Google Classroom) в одном месте и помогает их сделат
 |---|---|---|
 | `frontend/` | №1 | сайт: вход с кодом из письма, ДЗ, платформы, тьютор, квизы, карточки, прогресс |
 | `backend/` | №2 | API `/api/v1`, вход (JWT), шифрование доступов платформ, синхронизация ДЗ, вызов ИИ |
-| `database/` | №3 | миграции V1–V22, `migrate.py`, `docker-compose.yml` (база + collector) |
+| `database/` | №3 | миграции V1–V26, `migrate.py` (Docker Compose — в корне) |
 | `homework-collector/` | №3 | сбор ДЗ с платформ, HTTP-сервис для бэкенда ([COLLECTOR-API.md](../homework-collector/COLLECTOR-API.md)) |
 | `ai-content/` | №3 | промпты ИИ, учебные материалы, `load.py`, проверка ИИ `check_ai.py` |
 | `docs/` | все | API, архитектура, деплой, планы |
 
 ## Запуск на своём компьютере
 
-Нужны Docker, Java 21, Node 20+ и pnpm, Python 3.12+.
+Нужен только Docker.
 
 ```bash
-# 1. База и collector (миграции и промпты применятся сами)
-cd database && docker compose up -d && cd ..
-
-# 2. Бэкенд: скопировать backend/.env.example → backend/.env, вписать JWT_SECRET, CREDENTIALS_KEY,
-#    OPENAI_API_KEY; для писем с кодом MAIL_USERNAME/MAIL_PASSWORD или MAIL_DEV_LOG_CODES=true
-cd backend && ./mvnw spring-boot:run          # http://localhost:8080, Swagger: /swagger-ui.html
-
-# 3. Фронт
-cd frontend && pnpm install && pnpm dev       # http://localhost:5173
+cp .env.example .env          # once; add OPENAI_API_KEY for the AI tutor
+docker compose up --build     # site http://localhost:5173, API http://localhost:8080
 ```
+
+See [README.md](../README.md#getting-started) for details.
 
 Подробнее: [backend/README.md](../backend/README.md), [frontend/README.md](../frontend/README.md),
 [database/README.md](../database/README.md), [homework-collector/README.md](../homework-collector/README.md).
@@ -50,7 +43,6 @@ cd frontend && pnpm install && pnpm dev       # http://localhost:5173
 
 | Что | Где | Инструкция |
 |---|---|---|
-| База, collector, бэкенд | Railway | [docs/DEPLOY-RAILWAY.md](../docs/DEPLOY-RAILWAY.md), [backend/RAILWAY.md](../backend/RAILWAY.md) |
 | Фронт | Vercel (`frontend/vercel.json`) | `VITE_API_URL=https://<бэкенд>/api/v1`, адрес Vercel в `CORS_ORIGINS` бэкенда |
 
 ## Документы

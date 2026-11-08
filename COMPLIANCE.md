@@ -20,7 +20,7 @@ The GDPR applies in Norway through the EEA Agreement, together with the Norwegia
   whoever runs LekseRadar is likely a **processor**. A data processing agreement (*databehandleravtale*,
   GDPR Art. 28) would then be needed. This needs review.
 - If LekseRadar is offered **directly to students**, the operator would likely be the controller. This needs review.
-- The services that receive data (AI provider, Railway, Vercel, Gmail, Google; see [PRIVACY.md](PRIVACY.md#who-receives-data))
+- The services that receive data (AI provider, the server hosting, Vercel, Gmail, Google; see [PRIVACY.md](PRIVACY.md#who-receives-data))
   would likely be sub-processors or independent recipients. Their terms and data processing agreements should be
   reviewed.
 
@@ -47,9 +47,9 @@ The processing combines data about children, an AI service, and access to severa
 ### Transfers outside the EU/EEA
 
 Several recipients are companies based in the USA: the example AI provider Groq (`OPENAI_BASE_URL` in
-`backend/.env.example`), Railway, Vercel and Google (Gmail, Google Fonts, Google Classroom). The transfer mechanism
+`backend/.env.example`), Vercel and Google (Gmail, Google Fonts, Google Classroom). The transfer mechanism
 (adequacy decision such as the EU–US Data Privacy Framework, standard contractual clauses, or another basis under
-GDPR Chapter V) and the hosting regions should be checked for each of them.
+GDPR Chapter V) and the hosting regions (including where the backend and database run) should be checked for each of them.
 
 ### Data subject rights
 

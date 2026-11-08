@@ -1,46 +1,32 @@
-# Что осталось до показа (main-test-4.0)
+# What is left (main-test-4.0)
 
-Код готов, остальное — настройка окружения. Результаты проверки: [README-TEST.md](README-TEST.md).
+Run everything locally: `cp .env.example .env && docker compose up --build` (see [README.md](README.md#getting-started)).
+Test results: [README-TEST.md](README-TEST.md), change log: [CHANGES.md](CHANGES.md).
 
-## Срочно
+## Urgent
 
-- [ ] **№2**: отозвать пароль приложения Gmail, вписанный в `backend/.env.example`
-      (https://myaccount.google.com/apppasswords), в файле оставить `MAIL_PASSWORD=`.
+- [ ] Revoke the Gmail app password that was committed to the git history (https://myaccount.google.com/apppasswords).
+  It is no longer in the files, but it stays in the history.
 
-## Railway (база, collector, бэкенд)
+## Local setup (optional)
 
-Проект `distinguished-radiance`, бэкенд `https://backend-production-22b1.up.railway.app`.
+- [ ] `OPENAI_API_KEY` in `.env` for the AI tutor, quizzes and AI flashcards (free key: https://console.groq.com/keys).
+- [ ] `MAIL_USERNAME`, `MAIL_PASSWORD` in `.env` to send real emails; without them the sign-up code is in
+  `docker compose logs backend`.
+- [ ] `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` for Google Classroom; redirect URI
+  `http://localhost:5173/settings/platforms` in Google Cloud.
+- [ ] `TEAMS_CLIENT_ID` for the Teams device-code sign-in.
 
-- [x] **№3**: V22 на облачной базе (сделано 7 ноября, 20:22). Postgres → Networking → Add Public Access (порт 5432) →
-      `python3 database/setup_cloud_db.py` → удалить Public Access. Если `ConnectionTimeout`, попробовать другую сеть Wi-Fi.
-- [ ] **№2**: переменные бэкенда:
-  - `MAIL_USERNAME`, `MAIL_PASSWORD`: без них регистрация отвечает 503;
-  - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: без них Classroom отвечает 503. В Google Cloud Console добавить
-    redirect URI `https://lekseradar-eight.vercel.app/settings/platforms`;
-  - `CORS_ORIGINS=https://lekseradar-eight.vercel.app,http://localhost:5173`;
-- [ ] **Чтобы исправления из main-test-4.0 попали на сайт** (квизы, карточки, чат, профиль, вход):
-  1. Railway → `backend` → Settings → Source → Branch: `main-test-4.0` (Root Directory `backend` тот же);
-  2. Railway → `collector` → Branch: `main-test-4.0` (Root Directory `homework-collector`);
-  3. **№3**: V23–V26 и новый промпт квиза на облачную базу (V25 — напоминания на почту): `git switch main-test-4.0 && git pull`, временно Public Access,
-     `python3 database/setup_cloud_db.py`, Public Access убрать;
-  4. Vercel → Settings → Git → Production Branch: `main-test-4.0` → Redeploy.
-- [ ] По желанию: `TEAMS_CLIENT_ID` у collector (вход в Teams по коду).
+## Check after `docker compose up`
 
-## Vercel (фронт), №1
+- [ ] Sign up → code from the log → logged in.
+- [ ] Platforms: Canvas (token), Google Classroom → homework shows up, *Refresh* adds no duplicates;
+  disconnecting removes the homework, chats, quizzes and flashcards made for it.
+- [ ] AI: `python3 ai-content/check/check_ai.py --api http://localhost:8080/api/v1 --email … --password …`.
 
-- [x] Сайт: https://lekseradar-eight.vercel.app (7 ноября, 20:23). Проект из `two-bits1/LekseRadar`, Root Directory `frontend`, Production Branch `Frontend-setup` (или `main-test-4.0`).
-- [ ] `VITE_API_URL=https://backend-production-22b1.up.railway.app/api/v1`, Redeploy.
-- [ ] Адрес Vercel передать №2 для redirect URI Google.
+## Nice to have
 
-## Проверка после деплоя
-
-- [ ] Сайт: регистрация → письмо с кодом → вход.
-- [ ] Платформы: Canvas (токен), Google Classroom (вход Google) → «Lekser» показывает задания, «Oppdater» без дублей.
-- [ ] ИИ (№3): `python3 ai-content/check/check_ai.py --api https://backend-production-22b1.up.railway.app/api/v1 --email … --password …`.
-
-## Желательно
-
-- [ ] **№3**: учебные материалы в `ai-content/materials/<Предмет>/<Тема>/` и загрузка через `setup_cloud_db.py`.
-- [ ] **№2**: `GET /achievements` для профиля (`frontend/docs/backend-changes.md`, раздел 3).
-- [ ] **№1**: разбить бандл фронта (`import()` для страниц).
-- [ ] Все: убрать упоминания `main-test-3.0` из документов после выбора финальной ветки.
+- [ ] Study materials in `ai-content/materials/<Subject>/<Topic>/` (loaded by the `content` service on start).
+- [ ] `GET /achievements` for the profile (`frontend/docs/backend-changes.md`, section 3).
+- [ ] Split the frontend bundle (`import()` for pages).
+- [ ] Account deletion and data export (see [PRIVACY.md](PRIVACY.md), [COMPLIANCE.md](COMPLIANCE.md)).

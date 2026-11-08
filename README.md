@@ -129,23 +129,34 @@ Database entities: [database/ENTITIES.md](database/ENTITIES.md).
 
 ## Getting Started
 
-Requirements: Docker, Java 21, Node 20+ with pnpm, Python 3.12+.
+Everything runs locally with Docker. The only requirement is Docker (Docker Desktop on macOS and Windows).
 
 ```bash
-# 1. Database and collector (migrations and prompts are applied automatically)
-cd database && docker compose up -d && cd ..
-
-# 2. Backend: copy backend/.env.example to backend/.env and fill in your own values
-#    (JWT_SECRET, CREDENTIALS_KEY, OPENAI_API_KEY; for sign-up emails MAIL_* or MAIL_DEV_LOG_CODES=true)
-cd backend && ./mvnw spring-boot:run          # http://localhost:8080, Swagger: /swagger-ui.html
-
-# 3. Frontend
-cd frontend && pnpm install && pnpm dev       # http://localhost:5173
+cp .env.example .env          # once; add OPENAI_API_KEY for the AI tutor, everything else is optional
+docker compose up --build     # first start takes a few minutes
 ```
 
-Keep real keys in local `.env` files only and never commit them. More: [backend/README.md](backend/README.md),
-[frontend/README.md](frontend/README.md), [homework-collector/COLLECTOR-API.md](homework-collector/COLLECTOR-API.md),
-[docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md).
+| What | Address |
+|---|---|
+| Website | http://localhost:5173 |
+| API and Swagger UI | http://localhost:8080/swagger-ui.html |
+| Database | `postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar` |
+
+- **Sign-up code:** without `MAIL_USERNAME`/`MAIL_PASSWORD` in `.env`, the code is printed in the backend log:
+  `docker compose logs backend | grep "verification code"`.
+- **AI:** without `OPENAI_API_KEY` the site works, and the AI tutor, quizzes and AI flashcards answer
+  "AI is not set up". A free key: https://console.groq.com/keys.
+- **Google Classroom** (optional): `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` in `.env`, redirect URI
+  `http://localhost:5173/settings/platforms`.
+- **Stop:** `docker compose down`. **Reset the database:** `docker compose down -v`.
+- **New migration on an existing database:** `python3 database/migrate.py postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar`
+  (or reset the database).
+- **Working on the backend in an IDE:** start only the rest with `docker compose up -d db content collector`, then
+  run the backend from `backend/` (`./mvnw spring-boot:run`, with `backend/.env` from `backend/.env.example`).
+  The frontend alone: `cd frontend && pnpm install && pnpm dev`.
+
+Keep real keys in `.env` files only and never commit them. More: [backend/README.md](backend/README.md),
+[frontend/README.md](frontend/README.md), [homework-collector/COLLECTOR-API.md](homework-collector/COLLECTOR-API.md).
 
 ## Development Team & Contributions
 
@@ -176,7 +187,7 @@ assistant (commit author "Claude"); those are counted for the team member whose 
 - PostgreSQL schema and migrations V1–V26 with stored functions: quiz import and scoring, spaced repetition,
   progress and dashboard views, `sync_assignments`, `chat_prompt_vars`, reminders.
 - AI prompts, study materials and the loader script.
-- Built the integrated test branches (`main-test-1.0` to `main-test-4.0`), ran the checks and deployed to Railway.
+- Built the integrated test branches (`main-test-1.0` to `main-test-4.0`) and ran the checks.
 - Fixes reported by the team in the integrated build, including in frontend and backend code: quiz answer colours,
   fixed chat input, profile redesign and achievements, result screens, email reminders.
 
@@ -215,6 +226,5 @@ assistant (commit author "Claude"); those are counted for the team member whose 
 | [TECHNICAL_CHALLENGES.md](TECHNICAL_CHALLENGES.md) | Problems the team hit during development and how they were solved |
 | [CHANGES.md](CHANGES.md) | Fixes made after the team checked the integrated build (in Russian) |
 | [README-TEST.md](README-TEST.md) | Test results and known weak points (in Russian) |
-| [TODO.md](TODO.md) | Remaining deploy setup (in Russian) |
-| [RAILWAY-STATUS.md](RAILWAY-STATUS.md) | Status of the Railway deploy (in Russian) |
+| [TODO.md](TODO.md) | What is left to do |
 | [docs/README-RU.md](docs/README-RU.md) | Previous README in Russian |

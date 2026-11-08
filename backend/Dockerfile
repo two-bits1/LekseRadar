@@ -1,4 +1,4 @@
-# Сборка и запуск бэкенда (Railway, Render, любой Docker-хостинг)
+# Сборка и запуск бэкенда (docker compose в корне репозитория или любой Docker-хостинг)
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /src
 COPY pom.xml .
@@ -13,5 +13,5 @@ COPY --from=build /src/target/lekseradar-backend-0.1.0.jar app.jar
 USER app
 ENV PORT=8080
 EXPOSE 8080
-# Память под небольшой контейнер; PORT задаёт хостинг
+# Память под небольшой контейнер; порт можно сменить переменной PORT
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar"]

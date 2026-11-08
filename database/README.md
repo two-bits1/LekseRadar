@@ -10,8 +10,7 @@
 ## Запуск
 
 ```
-cd database
-docker compose up -d        # Postgres на 127.0.0.1:5432, база/логин/пароль: lekseradar
+docker compose up -d db     # from the repo root; Postgres on 127.0.0.1:5432, db/user/password: lekseradar
 ```
 
 При первом старте применяются все миграции. База стартует пустой, без демо-данных: ученика создаёт регистрация.

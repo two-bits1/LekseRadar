@@ -1,7 +1,7 @@
 # collector: HTTP API для бэкенда
 
 Внутренний сервис над `homework`: бэкенд (Java) передаёт расшифрованные доступы и получает ДЗ.
-Наружу не открывается. Запуск: `uvicorn homework.server:app --port 8090` (или сервис `collector` в `database/docker-compose.yml`).
+Наружу не открывается. Запуск: `uvicorn homework.server:app --port 8090` (или сервис `collector` в `docker-compose.yml`).
 
 - Базовый адрес: `COLLECTOR_URL`, локально `http://localhost:8090`.
 - Каждый запрос, кроме `/health`, с заголовком `X-Internal-Key: <COLLECTOR_KEY>`. Нет или неверный → `401`.

@@ -46,7 +46,7 @@ export const nb: LegalTexts = {
           'E-post (Gmail): e-postadressen og navnet ditt, registreringskoden, og i påminnelser titler, frister og lenker til oppgavene dine.',
           'Google: hvis du kobler til Google Classroom, logger du inn hos Google, og vi får lesetilgang til fagene og oppgavene dine. Når du kobler fra, trekker vi tilbake tilgangen hos Google.',
           'Skoleplattformene dine (Canvas, Microsoft Teams, itslearning, Visma InSchool, Google Classroom): serveren vår henter oppgavene dine fra dem med din tilgang.',
-          'Drift (Railway for server og database, Vercel for nettsiden): dataene lagres på eller går gjennom serverne deres. De kan lagre tekniske logger, for eksempel IP-adresser.',
+          'Drift (serverne som kjører LekseRadars backend og database, og Vercel for nettsiden): dataene lagres på eller går gjennom disse serverne. Driftsleverandører kan lagre tekniske logger, for eksempel IP-adresser.',
           'Google Fonts: når siden laster skrifttypen, ser Google IP-adressen din.',
         ] },
         'Flere av disse selskapene holder til utenfor EU/EØS, de fleste i USA.',
