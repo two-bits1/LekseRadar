@@ -6,10 +6,6 @@ It is written from the code in this repository: the database schema in `database
 `backend/src/main/java/com/lekseradar/`. The same information is shown to users on the site at `/privacy`
 (`frontend/src/pages/Legal.tsx`).
 
-> **This is a demo.** LekseRadar is a hackathon prototype (Oslo Sprint, 6–8 November 2026). **Do not upload or
-> connect real student data.** Use test accounts and test courses only. See [SECURITY.md](SECURITY.md) and
-> [COMPLIANCE.md](COMPLIANCE.md) for what is missing before real use.
-
 ## What data is stored
 
 All data is stored in one PostgreSQL database run by the backend. The homework collector

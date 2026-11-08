@@ -9,7 +9,7 @@ export const en: Dict = {
     nav: 'Footer', project: 'Project', legal: 'Privacy and terms',
     status: 'Development status', source: 'Source code on GitHub', feedback: 'Give feedback',
     privacy: 'Privacy policy', terms: 'Terms of use', security: 'Report a security issue',
-    made: 'Built at Oslo Sprint Hackathon 2026', demo: 'Prototype — do not use real student data.', external: '(opens in a new tab)',
+    external: '(opens in a new tab)',
   },
   settings: {
     eyebrow: 'YOUR OWN LITTLE CORNER', title: 'Just the way you like it.', intro: 'Make LekseRadar a little more you.',

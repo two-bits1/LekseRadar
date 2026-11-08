@@ -348,14 +348,12 @@ a.row:hover{background:rgba(255,255,255,.03)}.app[data-theme=light] a.row:hover{
 .footer-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .footer-nav a{display:inline-flex;align-items:center;gap:4px;min-height:28px;font-size:13px;color:var(--text)}
 .footer-nav a:hover{color:var(--primary)}
-.footer-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px 20px;border-top:1px solid var(--border);margin-top:28px;padding-top:18px;font-size:11px}
 @media(max-width:720px){.footer-main{grid-template-columns:1fr;gap:28px}}
-@media(max-width:480px){.site-footer{padding-top:28px}.footer-bottom{flex-direction:column}}
+@media(max-width:480px){.site-footer{padding-top:28px}}
 /* Политика конфиденциальности и условия (pages/Legal.tsx) */
 .legal h1{margin-bottom:12px}
 .legal .legal-intro{font-size:15px;color:var(--text);max-width:640px}
 .legal .legal-updated{font-size:11px;margin-top:10px}
-.legal .legal-demo{margin:22px 0 0}
 .legal-toc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin:24px 0 8px}
 .legal-toc h2{font-size:10px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
 .legal-toc ol{margin:0;padding-left:20px;list-style:decimal;columns:2;column-gap:32px;font-size:13px;line-height:1.9}

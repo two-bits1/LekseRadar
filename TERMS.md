@@ -4,9 +4,6 @@
 Russian (`frontend/src/legal/`). If you change one, change the other. Read these terms together with
 [PRIVACY.md](PRIVACY.md).
 
-> **This is a demo.** LekseRadar is a hackathon prototype. Do not connect real school accounts and do not enter
-> real student data. Use test accounts only.
-
 By creating an account or using LekseRadar you agree to these terms.
 
 ## What LekseRadar is
@@ -14,13 +11,8 @@ By creating an account or using LekseRadar you agree to these terms.
 LekseRadar collects your homework from your school platforms in one place and helps you learn with an AI tutor,
 quizzes and flashcards. It is free.
 
-LekseRadar is a prototype built by a student team at the Oslo Sprint hackathon (6–8 November 2026). It can be
-changed, paused or shut down at any time, and data can be lost, for example when the database is reset.
-
-## Test data only
-
-Because LekseRadar is a prototype, please use it only with test accounts. Do not connect real school accounts and
-do not enter real student data.
+LekseRadar was started by a student team at the Oslo Sprint hackathon (6–8 November 2026) and is still being
+developed. Features can change, and the service can be paused or shut down.
 
 ## Your account
 

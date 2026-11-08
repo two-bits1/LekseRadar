@@ -16,13 +16,14 @@ open the repository on GitHub → **Security** tab → **Report a vulnerability*
 
 ## Project status and supported versions
 
-LekseRadar is a **prototype built during the Oslo Sprint hackathon (6–8 November 2026)**.
+LekseRadar was started at the **Oslo Sprint hackathon (6–8 November 2026)** and handles real users' data,
+including data about students.
 
 - The code has **not had a security audit** or a penetration test.
 - **No versions are supported.** There are no releases, no security updates and no response-time commitment.
-- Do not run it with real student data without the work listed under
-  [Known limitations](#known-limitations-and-recommendations-before-production). See also [PRIVACY.md](PRIVACY.md)
-  and [COMPLIANCE.md](COMPLIANCE.md).
+- Because real data is stored, the items under
+  [Known limitations](#known-limitations-and-recommendations-before-production) should be closed as soon as
+  possible. See also [PRIVACY.md](PRIVACY.md) and [COMPLIANCE.md](COMPLIANCE.md).
 
 ## What is already implemented
 
