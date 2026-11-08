@@ -20,7 +20,7 @@ export const en: Dict = {
     reminders: 'Email reminders', remindersHint: (email: string) => `24 hours before the deadline, to ${email}`, soon: 'Coming',
     on: 'On', off: 'Off', testReminder: 'Send a test', testSending: 'Sending …',
     testSent: (email: string, n: number) => n ? `Sent to ${email}: ${n} assignments due soon.` : `Sent to ${email}. Nothing due in the next 7 days.`,
-    platformsTitle: 'Everything in one place. Eventually.',
+    platformsTitle: 'All your platforms in one place',
     platformsIntro: 'Connect your school platforms and your homework is collected here.',
     seeSetup: 'See setup', notYet: 'Not available yet',
     preview: 'This is a preview. No information is sent or stored.',

@@ -20,7 +20,7 @@ export const ru: Dict = {
     reminders: 'Напоминания на почту', remindersHint: (email: string) => `За 24 часа до срока, на ${email}`, soon: 'Скоро',
     on: 'Вкл', off: 'Выкл', testReminder: 'Отправить пробное', testSending: 'Отправляю …',
     testSent: (email: string, n: number) => n ? `Отправлено на ${email}: заданий со скорым сроком — ${n}.` : `Отправлено на ${email}. В ближайшие 7 дней сдавать нечего.`,
-    platformsTitle: 'Всё в одном месте. Скоро.',
+    platformsTitle: 'Все платформы в одном месте',
     platformsIntro: 'Подключи школьные платформы — и домашка соберётся здесь.',
     seeSetup: 'Настройка', notYet: 'Пока недоступно',
     preview: 'Это предпросмотр. Никакие данные не отправляются и не сохраняются.',

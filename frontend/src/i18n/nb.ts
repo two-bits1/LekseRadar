@@ -19,7 +19,7 @@ export const nb = {
     reminders: 'Påminnelser på e-post', remindersHint: (email: string) => `24 timer før fristen, til ${email}`, soon: 'Kommer',
     on: 'På', off: 'Av', testReminder: 'Send en prøve', testSending: 'Sender …',
     testSent: (email: string, n: number) => n ? `Sendt til ${email}: ${n} lekser med frist snart.` : `Sendt til ${email}. Ingen lekser med frist de neste 7 dagene.`,
-    platformsTitle: 'Alt på ett sted. Etter hvert.',
+    platformsTitle: 'Alle plattformene dine på ett sted',
     platformsIntro: 'Koble til skoleplattformene dine, så samles leksene her.',
     seeSetup: 'Se oppsett', notYet: 'Ikke tilgjengelig ennå',
     preview: 'Dette er en forhåndsvisning. Ingen opplysninger sendes eller lagres.',
