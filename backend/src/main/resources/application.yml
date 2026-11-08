@@ -10,7 +10,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/lekseradar}
     username: ${DB_USER:lekseradar}
-    password: ${DB_PASSWORD:lekseradar}
+    password: ${DB_PASSWORD:}
     hikari:
       data-source-properties:
         # Строковые параметры уходят в PostgreSQL без типа, и он сам приводит их к своим ENUM
@@ -67,7 +67,11 @@ management:
       show-details: never
 
 springdoc:
+  # Swagger UI и /v3/api-docs выключены, если не задано API_DOCS_ENABLED=true (docker compose включает их локально)
+  api-docs:
+    enabled: ${API_DOCS_ENABLED:false}
   swagger-ui:
+    enabled: ${API_DOCS_ENABLED:false}
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: method
@@ -77,7 +81,7 @@ app:
   jwt:
     # Обязательно, минимум 32 символа
     secret: ${JWT_SECRET}
-    ttl-hours: ${JWT_TTL_HOURS:72}
+    ttl-hours: ${JWT_TTL_HOURS:24}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   openai:
@@ -93,9 +97,8 @@ app:
   collector:
     # Сервис сбора ДЗ (homework-collector), только во внутренней сети
     url: ${COLLECTOR_URL:http://localhost:8090}
-    # По умолчанию тот же ключ, что у сервиса collector в docker-compose.yml (только для своего компьютера).
-    # В облаке задать свой: openssl rand -hex 32, одинаковый у бэкенда и collector
-    key: ${COLLECTOR_KEY:local-dev-collector-key}
+    # Обязательно, одинаковый у бэкенда и collector: openssl rand -hex 32 (docker compose создаёт его сам)
+    key: ${COLLECTOR_KEY:}
     # collect ходит на 4 платформы
     timeout-seconds: ${COLLECTOR_TIMEOUT_SECONDS:60}
   platforms:
@@ -104,6 +107,9 @@ app:
   sync:
     # Обновлять ДЗ раз в 30 минут для учеников, заходивших за 7 дней
     schedule-enabled: ${SYNC_SCHEDULE_ENABLED:true}
+  retention:
+    # Удалять аккаунты без входа столько месяцев, со всеми данными (раз в сутки). 0 — не удалять
+    inactive-months: ${RETENTION_INACTIVE_MONTHS:24}
   reminders:
     # Раз в 15 минут письмо ученику о несданном ДЗ со сроком в ближайшие 24 часа (выключить: REMINDERS_ENABLED=false)
     enabled: ${REMINDERS_ENABLED:true}

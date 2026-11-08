@@ -26,6 +26,12 @@ export const ru: Dict = {
     preview: 'Это предпросмотр. Никакие данные не отправляются и не сохраняются.',
     calendarUrl: 'Адрес календаря', schoolUrl: 'Адрес школы', connectLater: 'Подключение — позже',
     account: 'Аккаунт', loggedInAs: (email: string) => `Вход выполнен: ${email}.`, logout: 'Выйти',
+    dataTitle: 'Ваши данные', dataIntro: 'Скачайте всё, что LekseRadar хранит о вас, или удалите аккаунт.', dataPolicy: 'Политика конфиденциальности',
+    exportTitle: 'Скачать мои данные', exportHint: 'Один JSON-файл: профиль, платформы (без ключей доступа), задания, чаты, квизы, карточки и история.',
+    export: 'Скачать', exporting: 'Готовлю …', exported: 'Данные скачаны.',
+    deleteTitle: 'Удалить аккаунт', deleteHint: 'Удаляет аккаунт и все ваши данные. Отменить нельзя.', deleteStart: 'Удалить аккаунт …',
+    deleteWarning: 'Всё удалится навсегда: профиль, подключённые платформы, задания, чаты, квизы, карточки и история. Доступ Google Classroom будет отозван.',
+    deletePassword: 'Ваш пароль', deleteConfirm: 'Удалить мой аккаунт', deleting: 'Удаляю …',
   },
   platforms: {
     connect: 'Подключить', connecting: 'Подключаю …', connected: 'Подключено', disconnect: 'Отключить', confirmDisconnect: 'Да, отключить', cancel: 'Отмена',
@@ -60,6 +66,8 @@ export const ru: Dict = {
     name: 'Имя', namePlaceholder: 'Имя', email: 'Эл. почта', emailPlaceholder: 'ty@skole.no',
     password: 'Пароль', passwordHint: 'Минимум 8 символов', loggingIn: 'Вхожу …', registering: 'Создаю аккаунт …',
     toLogin: 'Уже есть аккаунт? Войти', toRegister: 'Впервые здесь? Создать аккаунт',
+    consentBefore: 'Мне 13 лет или больше (или родитель либо опекун согласен), и я принимаю ', consentTerms: 'условия использования',
+    consentAnd: ' и ', consentPrivacy: 'политику конфиденциальности', consentAfter: '.',
   },
   profile: {
     eyebrow: 'ТВОЙ ПРОФИЛЬ', title: 'Ты на верном пути.', titleNamed: (name: string) => `${name}, ты на верном пути.`, loading: 'Загружаю профиль …',

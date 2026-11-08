@@ -1,85 +1,119 @@
-# Privacy
+# Privacy Policy
 
-This document describes what personal data LekseRadar stores, why, who receives it and how long it is kept.
-It is written from the code in this repository: the database schema in `database/migrations` (V1–V26) and
-`database/ENTITIES.md`, and the backend. Paths to Java files are relative to
-`backend/src/main/java/com/lekseradar/`. The same information is shown to users on the site at `/privacy`
-(`frontend/src/pages/Legal.tsx`).
+*Version of 8 November 2026* (`TERMS_VERSION` in `backend/src/main/java/com/lekseradar/service/AuthService.java`).
+The same policy is shown on the site at `/privacy` in Norwegian (bokmål), English and Russian
+(`frontend/src/legal/`). If you change one, change the other and the version date.
 
-## What data is stored
+This policy explains what personal data LekseRadar processes, why, on which legal basis under the GDPR, who
+receives it, how long it is kept and what your rights are. Paths to Java files are relative to
+`backend/src/main/java/com/lekseradar/`.
 
-All data is stored in one PostgreSQL database run by the backend. The homework collector
-(`homework-collector/`) stores nothing (`homework-collector/homework/server.py`).
+## The short version
 
-| Group | Data | Table (migration) |
-|---|---|---|
-| Account | name, email, password hash (BCrypt, never the password itself), interface and tutor language, time zone, email reminder setting, sign-up time, last login time | `users` (V1, V25) |
-| Platform access | which platforms are connected; tokens or session cookies for each platform, **encrypted** with AES-256-GCM; last sync time and last sync error | `platform_connections` (V2) |
-| Assignments | title, course, deadline, status, link, description and type of each assignment collected from the connected platforms; your own "done" mark | `assignments` (V2, V21) |
-| AI tutor chats | chat title, topic, subject, language, level, archive flag; every message you and the AI tutor write, with the model name and token count of each answer | `chat_sessions`, `chat_messages` (V3, V13, V14) |
-| Quizzes, flashcards and progress | quizzes and questions generated for you, your answers with the verdict and explanation, flashcard review progress (spaced repetition), an activity history (for example: logged in, homework synced, quiz completed), achievements | `quizzes`, `quiz_questions`, `exercises`, `exercise_attempts`, `quiz_sets`, `flashcard_progress`, `user_events`, `user_achievements` (V4–V9) |
-| Reminders | which assignments you were reminded about by email and when | `reminders` (V6, V25) |
-| Homework files | text of a homework file attached to an assignment (the schema supports it; the current site does not upload files) | `materials`, `material_chunks` (V10, V14) |
+- We process only what LekseRadar needs to work: your account, connected platforms, homework, chats with the AI
+  tutor and learning progress.
+- Access to school platforms is stored encrypted. Passwords are stored only as hashes.
+- The AI service receives the text of your chats and of the assignment you ask about — not your name or email.
+- No advertising, no tracking, no selling of data.
+- You can download all your data and delete your account yourself in Settings.
+- An account without a login for 24 months is deleted automatically with all its data.
 
-Not stored in the database:
+## Who is responsible
 
-- **Pending sign-ups.** Until you enter the email code, your name, password hash and a SHA-256 hash of the code are
-  kept only in the backend's memory, for at most 15 minutes (`service/AuthService.java`).
-- **IP addresses** are used only in memory, to limit how many sign-up emails are sent from one address
-  (`service/AuthService.java`, `security/RateLimiter.java`). The hosting providers may log them (see below).
-- **In your browser** (`localStorage`): your login token (`token`), theme (`lekseradar-theme`) and language
-  (`lekseradar-lang`) (`frontend/src/api/client.ts`, `frontend/src/theme.ts`, `frontend/src/i18n/lang.ts`).
-  The site uses no advertising, analytics or tracking scripts.
+LekseRadar is run by the LekseRadar team, which started the project at the Oslo Sprint hackathon
+(6–8 November 2026). The team is the data controller for accounts that students create themselves.
 
-## Why the data is needed
+If a school gives LekseRadar to its students, the school is the data controller and the team processes the data on
+the school's behalf under a data processing agreement (GDPR Art. 28).
 
-| Group | Purpose |
+## What we process
+
+| Data | Table (migration) |
 |---|---|
-| Account | to log you in, show your name, use your language and time zone for deadlines, and send the emails you asked for |
-| Platform access | to fetch your assignments from Canvas, Microsoft Teams, itslearning, Visma InSchool and Google Classroom, automatically every 30 minutes and when you press *Refresh* |
-| Assignments | to show all homework in one list sorted by deadline, and to give the AI tutor and quizzes the context of the task |
-| AI tutor chats | to continue a conversation: the chat history is sent to the AI with each new question |
-| Quizzes, flashcards and progress | to check answers, schedule flashcard reviews, and show progress by topic, the activity history and achievements |
-| Reminders | to send at most one email per assignment, 24 hours before the deadline (you can turn this off in Settings) |
-| Homework files | to give the AI tutor the full text of a task |
+| Account: name, email, password hash (BCrypt), language, time zone, reminder setting, sign-up and last login time, when and which version of the terms was accepted | `users` (V1, V25, V27) |
+| Connected platforms: which platforms, access tokens or session cookies (encrypted, AES-256-GCM), last update time and result | `platform_connections` (V2) |
+| Homework: title, course, deadline, status, link, description, own "done" mark | `assignments` (V2, V21) |
+| AI tutor chats: title, topic, all messages | `chat_sessions`, `chat_messages` (V3, V13, V14) |
+| Learning: quizzes, answers and verdicts, flashcard progress, activity history, achievements | `quizzes`, `exercise_attempts`, `flashcard_progress`, `user_events`, `user_achievements` (V4–V9) |
+| Email reminders already sent | `reminders` (V6, V25) |
+
+Not stored: the plain password; the sign-up code (only a SHA-256 hash in memory for at most 15 minutes,
+`service/AuthService.java`); IP addresses (only in memory to limit sign-up emails and login attempts,
+`security/RateLimiter.java`).
+
+## Why, and on which legal basis
+
+| Purpose | Legal basis |
+|---|---|
+| Providing LekseRadar as described in the [terms of use](TERMS.md): account, homework collection, AI tutor, quizzes, flashcards, progress | Performance of a contract (GDPR Art. 6(1)(b)) |
+| Email reminders 24 hours before a deadline (on by default, can be turned off) | Legitimate interest (Art. 6(1)(f)); right to object by turning them off |
+| Security and abuse prevention (rate limits, technical logs) | Legitimate interest (Art. 6(1)(f)) |
+| Record of accepting the terms | Demonstrating what was agreed (Art. 7(1)) |
+
+Data is not used for advertising, profiling or training AI models.
 
 ## Who receives data
 
-| Recipient | What they receive | Why |
+| Recipient | What | Code |
 |---|---|---|
-| **AI provider** with an OpenAI-compatible API, set by `OPENAI_BASE_URL` (`backend/.env.example` uses **Groq**, a company in the USA) | the text of your chat messages and the chat history; the title, deadline, course and text of the assignment the chat is about; subject, topic, level, language and your weakest topics with percentages; quiz questions and your text answers for checking | to answer questions, generate quizzes and flashcards, and check answers (`service/ai/OpenAiService.java`, `chat_prompt_vars()` in `database/migrations/V20__language_code.sql`). Your name and email are not sent. |
-| **Email (SMTP)**, by default **Gmail** (`MAIL_HOST=smtp.gmail.com`) | your email address and name; the sign-up code; in reminders, the titles, courses, deadlines and links of assignments due soon | sign-up confirmation and reminders (`service/MailService.java`, `service/ReminderMail.java`) |
-| **Google** (OAuth and Classroom API) | your Google sign-in happens at Google; LekseRadar receives read-only access to your courses and coursework and uses it to read assignments; the access is revoked at Google when you disconnect | Google Classroom integration (`service/google/GoogleOAuthClient.java`) |
-| **Google Fonts** | your IP address and browser details when the page loads the Inter font | page typography (`frontend/src/styles.css`) |
-| **School platforms**: Canvas (Instructure), Microsoft Teams (Microsoft Graph), itslearning, Visma InSchool, Google Classroom | requests made with your own access, from the collector's server | to read your assignments (`homework-collector/homework/sources/`) |
-| **Hosting**: the servers that run the backend, collector and database, and **Vercel** for the website | all data above passes through or is stored on these servers; hosting providers may keep technical logs such as IP addresses | running the service (`docker-compose.yml`, `frontend/vercel.json`) |
+| AI service (OpenAI-compatible, e.g. Groq, USA) | Chat messages and history; title, deadline and text of the assignment; subject, topic, level, language; weakest topics; text answers to check. Not name or email. | `service/ai/OpenAiService.java`, `chat_prompt_vars()` (V20) |
+| Email service (e.g. Gmail) | Email, name, sign-up code, reminder contents | `service/MailService.java`, `service/ReminderMail.java` |
+| Google (OAuth, Classroom API) | Sign-in at Google; read-only access to courses and coursework; revoked on disconnect and account deletion | `service/google/GoogleOAuthClient.java` |
+| School platforms | Requests with the student's own access to read assignments | `homework-collector/homework/sources/` |
+| Hosting (backend and database servers; Vercel for the website) | All data above is stored on or passes through them; technical logs such as IP addresses | `docker-compose.yml`, `frontend/vercel.json` |
 
-LekseRadar does not sell data and does not share it for advertising. Several recipients are outside the EU/EEA;
-see [COMPLIANCE.md](COMPLIANCE.md).
+Transfers outside the EU/EEA are made under the safeguards in the providers' data processing terms (EU standard
+contractual clauses or the EU–US Data Privacy Framework). The site loads no third-party fonts or scripts
+(`frontend/src/main.tsx` uses a bundled font).
 
-## Retention and deletion
+## Cookies and browser storage
 
-- Data is kept until it is deleted. There are no automatic deletion periods yet.
-- **Disconnecting a platform** deletes the stored access, all assignments from that platform and everything made for
-  them: chats, quizzes, flashcards, answers and activity history. Shared question sets used by other students are kept
-  (`repository/AssignmentRepository.java`, `service/PlatformService.java`, `database/migrations/V26__disconnect_removes_assignments.sql`).
-- **Deleting a chat** deletes it with all its messages (`controller/ChatController.java`).
-- **Email reminders** can be turned off in Settings (`users.email_reminders`).
-- **Deleting an account is not possible yet.** There is no button or API for it. Account deletion and data export
-  are planned. Until then, ask for deletion as described under [Contact](#contact).
+No tracking or advertising cookies. The browser stores only what the site needs: the login token, theme and language
+in `localStorage` (`frontend/src/api/client.ts`, `frontend/src/theme.ts`, `frontend/src/i18n/lang.ts`).
+
+## Retention
+
+| Data | Kept until |
+|---|---|
+| Account and all data | Deleted by the student, or automatically after 24 months without a login (`service/RetentionScheduler.java`, `RETENTION_INACTIVE_MONTHS`) |
+| Platform access and its homework, with chats, quizzes, flashcards and history made for it | Platform disconnected (`service/PlatformService.java`, `repository/AssignmentRepository.java`) |
+| A chat | Chat deleted |
+| Unfinished sign-up | 15 minutes, in memory |
+
+## Your rights
+
+| Right | How |
+|---|---|
+| Access and portability (Art. 15, 20) | Settings → *Download my data*: one JSON file (`GET /api/v1/users/me/export`, `service/AccountService.java`) |
+| Rectification (Art. 16) | Profile and Settings: name, language, time zone, password |
+| Erasure (Art. 17) | Settings → *Delete account*, confirmed with the password (`DELETE /api/v1/users/me`) |
+| Restriction and objection (Art. 18, 21) | Turn off reminders in Settings, or contact us |
+| Complaint | [Datatilsynet](https://www.datatilsynet.no) |
+
+Requests are answered within one month.
+
+## AI and automated decisions
+
+AI generates tutor answers, quizzes and flashcards and checks text answers in quizzes. These are for practice only.
+LekseRadar makes no decisions with legal or similarly significant effects (Art. 22).
 
 ## Children and young people
 
-LekseRadar is meant for school students, many of whom are under 18.
+To create an account, the student confirms being at least 13 years old or that a parent or guardian agrees; the
+backend refuses sign-up without this confirmation (`dto/auth/RegisterRequestDTO.java`) and stores when it was given
+(V27). In Norway the age limit for one's own consent to online services is 13 (Personal Data Act § 5).
 
-- In Norway, a child can give their own consent to the processing of personal data for online services from the
-  age of **13** (Personal Data Act, *personopplysningsloven* § 5). For younger children, a parent or guardian has to
-  consent.
-- When a school uses LekseRadar with its students, the **school is normally the data controller**. The school must
-  take the age limit into account, choose the legal basis for the processing, and inform students and parents.
+## Security
+
+See [SECURITY.md](SECURITY.md). A personal data breach is reported to Datatilsynet within 72 hours, and to the
+people affected without undue delay when the law requires it (Art. 33, 34).
+
+## Changes
+
+The version date at the top changes with every update. Important changes are announced on the site before they
+apply.
 
 ## Contact
 
-Questions, or a request to delete data: **open a GitHub issue without personal data** in this repository.
-Do not write your name, email, school or any student data in the issue. Report security problems privately as
-described in [SECURITY.md](SECURITY.md).
+Most requests can be done in Settings. Other questions: open a GitHub issue in this repository without personal
+data. Security problems: report privately as described in [SECURITY.md](SECURITY.md).

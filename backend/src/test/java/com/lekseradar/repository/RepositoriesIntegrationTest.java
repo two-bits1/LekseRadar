@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(properties = {
         "spring.datasource.url=${TEST_DB_URL}",
         "spring.datasource.username=${TEST_DB_USER:lekseradar}",
-        "spring.datasource.password=${TEST_DB_PASSWORD:lekseradar}",
+        "spring.datasource.password=${TEST_DB_PASSWORD:}",
         "app.jwt.secret=integration-test-secret-integration-test",
         "app.openai.api-key=sk-not-used",
         "app.credentials.key=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",

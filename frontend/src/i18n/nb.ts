@@ -25,6 +25,12 @@ export const nb = {
     preview: 'Dette er en forhåndsvisning. Ingen opplysninger sendes eller lagres.',
     calendarUrl: 'Kalender-URL', schoolUrl: 'Skolens URL', connectLater: 'Koble til — kommer senere',
     account: 'Konto', loggedInAs: (email: string) => `Logget inn som ${email}.`, logout: 'Logg ut',
+    dataTitle: 'Dataene dine', dataIntro: 'Last ned alt LekseRadar lagrer om deg, eller slett kontoen din.', dataPolicy: 'Personvernerklæring',
+    exportTitle: 'Last ned dataene mine', exportHint: 'Én JSON-fil: profil, plattformer (uten tilgangsnøkler), lekser, samtaler, quizer, læringskort og historikk.',
+    export: 'Last ned', exporting: 'Gjør klar …', exported: 'Dataene dine er lastet ned.',
+    deleteTitle: 'Slett konto', deleteHint: 'Sletter kontoen og alle dataene dine. Dette kan ikke angres.', deleteStart: 'Slett konto …',
+    deleteWarning: 'Alt slettes for godt: profil, tilkoblede plattformer, lekser, samtaler, quizer, læringskort og historikk. Tilgangen til Google Classroom trekkes tilbake.',
+    deletePassword: 'Passordet ditt', deleteConfirm: 'Slett kontoen min', deleting: 'Sletter …',
   },
   platforms: {
     connect: 'Koble til', connecting: 'Kobler til …', connected: 'Tilkoblet', disconnect: 'Koble fra', confirmDisconnect: 'Ja, koble fra', cancel: 'Avbryt',
@@ -59,6 +65,8 @@ export const nb = {
     name: 'Navn', namePlaceholder: 'Fornavn', email: 'E-post', emailPlaceholder: 'deg@skole.no',
     password: 'Passord', passwordHint: 'Minst 8 tegn', loggingIn: 'Logger inn …', registering: 'Oppretter konto …',
     toLogin: 'Har du allerede en konto? Logg inn', toRegister: 'Ny her? Opprett en konto',
+    consentBefore: 'Jeg er 13 år eller eldre (eller forelder eller foresatt samtykker), og jeg godtar ', consentTerms: 'brukervilkårene',
+    consentAnd: ' og ', consentPrivacy: 'personvernerklæringen', consentAfter: '.',
   },
   profile: {
     eyebrow: 'DIN PROFIL', title: 'Du er på vei.', titleNamed: (name: string) => `Du er på vei, ${name}.`, loading: 'Henter profilen …',

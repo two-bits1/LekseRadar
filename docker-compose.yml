@@ -12,20 +12,34 @@
 #   backend    Spring Boot API (backend)
 #   frontend   Vite dev-сервер (frontend), правки в коде видны сразу
 #
-# Все порты открыты только на 127.0.0.1. Пароли и ключи ниже — только для своего компьютера.
+# Все порты открыты только на 127.0.0.1. Паролей и ключей по умолчанию нет: сервис keys при первом запуске
+# создаёт случайные (scripts/keys.sh) в томе keys. Свои можно задать в .env (он в .gitignore).
+# Пароль базы для своих инструментов: docker compose run --rm --entrypoint cat keys /keys/db_password
 # Новая миграция на уже созданной базе сама не применится: python3 database/migrate.py "$DATABASE_URL"
-# (или сбросить базу: docker compose down -v). Секреты — только в .env, он в .gitignore.
+# (или сбросить всё вместе с ключами: docker compose down -v).
 services:
+  keys:
+    image: postgres:16
+    entrypoint: ["sh", "/scripts/keys.sh"]
+    volumes:
+      - keys:/keys
+      - ./scripts/keys.sh:/scripts/keys.sh:ro
+    restart: "no"
+
   db:
     image: postgres:16
+    depends_on:
+      keys:
+        condition: service_completed_successfully
     environment:
       POSTGRES_DB: lekseradar
       POSTGRES_USER: lekseradar
-      POSTGRES_PASSWORD: lekseradar   # только для локальной разработки
+      POSTGRES_PASSWORD_FILE: /keys/db_password
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - keys:/keys:ro
       - ./database/migrations:/docker-entrypoint-initdb.d/migrations:ro
       - ./database/init.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
     healthcheck:
@@ -44,19 +58,29 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://lekseradar:lekseradar@db:5432/lekseradar
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       PIP_ROOT_USER_ACTION: ignore
     volumes:
       - ./ai-content:/ai-content:ro
-    command: sh -c "pip install -q -r /ai-content/load/requirements.txt && python -X utf8 /ai-content/load/load.py"
+      - keys:/keys:ro
+    command: >-
+      sh -c 'export DATABASE_URL="postgresql://lekseradar:$$(cat /keys/db_password)@db:5432/lekseradar"
+      && pip install -q -r /ai-content/load/requirements.txt && python -X utf8 /ai-content/load/load.py'
     restart: "no"
 
   collector:
     build: ./homework-collector
+    depends_on:
+      keys:
+        condition: service_completed_successfully
     environment:
-      COLLECTOR_KEY: ${COLLECTOR_KEY:-local-dev-collector-key}
+      COLLECTOR_KEY: ${COLLECTOR_KEY:-}
       TEAMS_CLIENT_ID: ${TEAMS_CLIENT_ID:-}
+    volumes:
+      - keys:/keys:ro
+    command: >-
+      sh -c 'export COLLECTOR_KEY="$${COLLECTOR_KEY:-$$(cat /keys/collector_key)}"
+      && exec uvicorn homework.server:app --host 0.0.0.0 --port 8090 --no-access-log'
     ports:
       - "127.0.0.1:8090:8090"
     restart: unless-stopped
@@ -73,13 +97,14 @@ services:
     environment:
       DB_URL: jdbc:postgresql://db:5432/lekseradar
       DB_USER: lekseradar
-      DB_PASSWORD: lekseradar
       COLLECTOR_URL: http://collector:8090
-      COLLECTOR_KEY: ${COLLECTOR_KEY:-local-dev-collector-key}
       CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
-      # Локальные ключи по умолчанию. Вне своего компьютера задайте свои: openssl rand -base64 32
-      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-do-not-use-outside-localhost}
-      CREDENTIALS_KEY: ${CREDENTIALS_KEY:-bGVrc2VyYWRhci1sb2NhbC1kZXYta2V5LTMyYnl0ZXM=}
+      # Ключи — из .env, а если там пусто — случайные из тома keys (см. entrypoint ниже)
+      COLLECTOR_KEY: ${COLLECTOR_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-}
+      CREDENTIALS_KEY: ${CREDENTIALS_KEY:-}
+      API_DOCS_ENABLED: ${API_DOCS_ENABLED:-true}   # Swagger UI локально; на сервере по умолчанию выключен
+      RETENTION_INACTIVE_MONTHS: ${RETENTION_INACTIVE_MONTHS:-24}
       # ИИ: любой OpenAI-совместимый сервис (в .env.example — Groq)
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.groq.com/openai/v1}
@@ -92,6 +117,17 @@ services:
       # Google Classroom (по желанию); redirect URI в Google Cloud: http://localhost:5173/settings/platforms
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    volumes:
+      - keys:/keys:ro
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        export DB_PASSWORD="$$(cat /keys/db_password)"
+        JWT_SECRET="$${JWT_SECRET:-$$(cat /keys/jwt_secret)}"
+        CREDENTIALS_KEY="$${CREDENTIALS_KEY:-$$(cat /keys/credentials_key)}"
+        COLLECTOR_KEY="$${COLLECTOR_KEY:-$$(cat /keys/collector_key)}"
+        && exec java -XX:MaxRAMPercentage=75 -jar /app/app.jar
     ports:
       - "127.0.0.1:8080:8080"
     healthcheck:
@@ -120,5 +156,6 @@ services:
     restart: unless-stopped
 
 volumes:
+  keys:
   pgdata:
   frontend-modules:

@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import os
+import hashlib
 import secrets
 from contextlib import asynccontextmanager
 from typing import Optional
@@ -26,11 +27,17 @@ def make_client() -> httpx.Client:
     return httpx.Client(timeout=30, follow_redirects=False)
 
 
+# SHA-256 ключей, которые когда-то были значениями по умолчанию в репозитории (сами значения не храним)
+_PUBLIC_KEYS = {"8b63d14b57a7edb6d8d0da4450297ff3300598f249eab0122349536b1c2dcba4"}
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     key = os.environ.get("COLLECTOR_KEY", "")
     if len(key) < 16:
         raise RuntimeError("COLLECTOR_KEY не задан или короче 16 символов (openssl rand -hex 32)")
+    if hashlib.sha256(key.encode()).hexdigest() in _PUBLIC_KEYS:
+        raise RuntimeError("COLLECTOR_KEY — публичное значение из репозитория, задайте свой (openssl rand -hex 32)")
     app.state.key = key
     yield
 

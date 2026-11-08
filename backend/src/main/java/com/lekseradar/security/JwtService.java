@@ -24,6 +24,7 @@ public class JwtService {
         if (bytes.length < 32) {
             throw new IllegalStateException("app.jwt.secret должен быть не короче 32 байт");
         }
+        InsecureSecrets.reject("JWT_SECRET", props.jwt().secret());
         this.key = Keys.hmacShaKeyFor(bytes);
         this.ttl = Duration.ofHours(props.jwt().ttlHours());
     }

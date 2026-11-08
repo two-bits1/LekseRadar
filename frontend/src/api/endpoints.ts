@@ -19,6 +19,8 @@ export const authApi = {
 export const usersApi = {
   me: () => api<User>('/users/me'),                                                                      // #3
   update: (body: UpdateUserRequest) => api<User>('/users/me', json('PATCH', body)),                      // #4
+  exportData: () => api<unknown>('/users/me/export'),                                                   // GDPR: все мои данные
+  deleteAccount: (password: string) => api<void>('/users/me', json('DELETE', { password })),            // GDPR: удалить аккаунт
   changePassword: (body: ChangePasswordRequest) => api<void>('/users/me/password', json('PUT', body)),   // #5
   testReminder: () => api<ReminderTest>('/users/me/reminders/test', json('POST')),                     // пробное письмо-напоминание
 };

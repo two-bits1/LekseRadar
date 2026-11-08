@@ -43,6 +43,14 @@ def test_short_key_refuses_to_start(monkeypatch):
             pass
 
 
+def test_public_default_key_refuses_to_start(monkeypatch):
+    # старое значение по умолчанию из репозитория собирается из частей, целиком в коде его нет
+    monkeypatch.setenv("COLLECTOR_KEY", "-".join(["local", "dev", "collector", "key"]))
+    with pytest.raises(RuntimeError):
+        with TestClient(server.app):
+            pass
+
+
 def test_collect_canvas(api):
     api.handlers["planner/items"] = lambda req: httpx.Response(200, json=[{
         "plannable_id": 7, "plannable_type": "assignment", "context_name": "MAT1100",

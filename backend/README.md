@@ -32,7 +32,7 @@ docker compose up -d db content collector   # from the repo root: database, AI p
 Промпты лежат в `ai-content/prompts`, база — в `database/` (обе в ветке `PythonAPI`, миграции V1–V20). Без них чат, квизы и карточки от ИИ отвечают `503`.
 ```bash
 pip install -r ai-content/load/requirements.txt
-DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python -X utf8 ai-content/load/load.py
+DATABASE_URL=postgresql://lekseradar:<DB_PASSWORD>@localhost:5432/lekseradar python -X utf8 ai-content/load/load.py
 ```
 
 ### 3. Секреты
@@ -57,7 +57,7 @@ DATABASE_URL=postgresql://lekseradar:lekseradar@localhost:5432/lekseradar python
    3. `POST /api/v1/chats` создаст чат, `POST /api/v1/chats/{id}/messages` задаст вопрос настоящему ИИ.
 3. Unit-тесты (база не нужна): `./mvnw test`.
 4. Все сущности и репозитории на настоящей базе (в транзакции с откатом, в базе ничего не остаётся):
-   `TEST_DB_URL=jdbc:postgresql://localhost:5432/lekseradar TEST_DB_USER=lekseradar TEST_DB_PASSWORD=lekseradar ./mvnw test`.
+   `TEST_DB_URL=jdbc:postgresql://localhost:5432/lekseradar TEST_DB_USER=lekseradar TEST_DB_PASSWORD=<DB_PASSWORD> ./mvnw test`.
    Без `TEST_DB_URL` этот тест пропускается.
 
 При старте Hibernate сверяет все сущности с таблицами (`ddl-auto: validate`). Если миграции в `database/`

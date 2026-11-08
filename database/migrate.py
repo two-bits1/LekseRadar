@@ -5,7 +5,7 @@
     python database/migrate.py "$DATABASE_URL" --baseline 20   # база уже на V20, но без учёта
     python database/migrate.py "$DATABASE_URL" --status
 
-Локальная база из docker compose: postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar
+Локальная база из docker compose: postgresql://lekseradar:<DB_PASSWORD>@127.0.0.1:5432/lekseradar
 (127.0.0.1, а не localhost: на Windows psycopg с localhost зависает на IPv6).
 
 Учёт в schema_migrations (общий с migrate.sh и init.sh). Каждая миграция в своей транзакции.

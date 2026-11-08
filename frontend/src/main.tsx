@@ -16,6 +16,8 @@ import { Landing } from './pages/Landing';
 import { AppHeader } from './components/AppHeader';
 import { SiteFooter } from './components/SiteFooter';
 import { I18nProvider, useT } from './i18n';
+// Шрифт Inter из пакета, а не с Google Fonts: браузер не отправляет IP посетителя в Google
+import '@fontsource-variable/inter';
 import './styles.css';
 const darkQuery='(prefers-color-scheme: dark)';
 function useTheme(){

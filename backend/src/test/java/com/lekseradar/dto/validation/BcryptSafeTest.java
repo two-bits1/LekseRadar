@@ -14,7 +14,7 @@ class BcryptSafeTest {
     private static final Validator V = Validation.buildDefaultValidatorFactory().getValidator();
 
     private static boolean passwordInvalid(String pw) {
-        return V.validate(new RegisterRequestDTO("ola@example.com", pw, "Ola")).stream()
+        return V.validate(new RegisterRequestDTO("ola@example.com", pw, "Ola", true)).stream()
                 .anyMatch(v -> v.getPropertyPath().toString().equals("password"));
     }
 

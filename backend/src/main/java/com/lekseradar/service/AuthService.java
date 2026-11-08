@@ -39,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuthService {
     /** Перебор пароля: после 5 неверных входов на один email за 15 минут вход на него закрыт до конца окна. */
     static final int MAX_FAILED_LOGINS = 5;
+    /** Версия условий и политики конфиденциальности (дата на страницах /terms и /privacy). */
+    public static final String TERMS_VERSION = "2026-11-08";
     static final Duration FAILED_LOGIN_WINDOW = Duration.ofMinutes(15);
 
     static final Duration CODE_TTL = Duration.ofMinutes(15);
@@ -136,6 +138,7 @@ public class AuthService {
             throw new ConflictException("Пользователь с таким email уже существует");
         }
         UserEntity user = new UserEntity(email, p.passwordHash(), p.displayName());
+        user.acceptTerms(TERMS_VERSION);   // register() принимает только с acceptTerms = true
         user.markLoggedIn();
         users.save(user);
         events.add(user.getId(), "login", null, null);

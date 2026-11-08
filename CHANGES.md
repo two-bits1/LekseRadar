@@ -54,4 +54,4 @@
 ## Running it
 
 Locally: `cp .env.example .env && docker compose up --build` (see [README.md](README.md#getting-started)).
-An existing local database gets V23–V26: `python3 database/migrate.py postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar`.
+An existing local database gets V23–V26: `python3 database/migrate.py postgresql://lekseradar:<DB_PASSWORD>@127.0.0.1:5432/lekseradar`.

@@ -140,7 +140,11 @@ docker compose up --build     # first start takes a few minutes
 |---|---|
 | Website | http://localhost:5173 |
 | API and Swagger UI | http://localhost:8080/swagger-ui.html |
-| Database | `postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar` |
+| Database | `postgresql://lekseradar:<DB_PASSWORD>@127.0.0.1:5432/lekseradar` |
+
+- **No default keys or passwords.** On the first start Compose generates a random database password, JWT secret,
+  encryption key and collector key into the `keys` volume (`scripts/keys.sh`). Your own values in `.env` take
+  priority. The database password: `docker compose run --rm --entrypoint cat keys /keys/db_password`.
 
 - **Sign-up code:** without `MAIL_USERNAME`/`MAIL_PASSWORD` in `.env`, the code is printed in the backend log:
   `docker compose logs backend | grep "verification code"`.
@@ -148,8 +152,11 @@ docker compose up --build     # first start takes a few minutes
   "AI is not set up". A free key: https://console.groq.com/keys.
 - **Google Classroom** (optional): `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` in `.env`, redirect URI
   `http://localhost:5173/settings/platforms`.
-- **Stop:** `docker compose down`. **Reset the database:** `docker compose down -v`.
-- **New migration on an existing database:** `python3 database/migrate.py postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar`
+- **Stop:** `docker compose down`. **Reset the database and keys:** `docker compose down -v`.
+- **Privacy:** students accept the terms at sign-up, can download all their data and delete their account in
+  Settings; inactive accounts are deleted after 24 months. See [PRIVACY.md](PRIVACY.md), [SECURITY.md](SECURITY.md),
+  [COMPLIANCE.md](COMPLIANCE.md).
+- **New migration on an existing database:** `python3 database/migrate.py postgresql://lekseradar:<DB_PASSWORD>@127.0.0.1:5432/lekseradar`
   (or reset the database).
 - **Working on the backend in an IDE:** start only the rest with `docker compose up -d db content collector`, then
   run the backend from `backend/` (`./mvnw spring-boot:run`, with `backend/.env` from `backend/.env.example`).
@@ -222,7 +229,7 @@ assistant (commit author "Claude"); those are counted for the team member whose 
 | [SECURITY.md](SECURITY.md) | How to report a vulnerability, what is protected and what is missing before production |
 | [PRIVACY.md](PRIVACY.md) | What personal data is stored, why, who receives it, retention (also on the site at `/privacy`) |
 | [TERMS.md](TERMS.md) | Terms of use (also on the site at `/terms`) |
-| [COMPLIANCE.md](COMPLIANCE.md) | GDPR, children's data, AI, platform terms and licenses: open questions for review |
+| [COMPLIANCE.md](COMPLIANCE.md) | GDPR mapping (legal bases, rights, records of processing, processors) and the operator's to-do before launch |
 | [TECHNICAL_CHALLENGES.md](TECHNICAL_CHALLENGES.md) | Problems the team hit during development and how they were solved |
 | [CHANGES.md](CHANGES.md) | Fixes made after the team checked the integrated build (in Russian) |
 | [README-TEST.md](README-TEST.md) | Test results and known weak points (in Russian) |

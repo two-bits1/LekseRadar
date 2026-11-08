@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { usersApi } from '../api/endpoints';
 import { asApiError } from '../forms';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Link2, Sun, Moon, SunMoon, Languages, Bell, BellOff, Send, Check } from 'lucide-react';
+import { ArrowUpRight, Link2, Sun, Moon, SunMoon, Languages, Bell, BellOff, Send, Check, Download, Trash2 } from 'lucide-react';
 import { type ThemeChoice, EVENING_START, MORNING_END } from '../theme';
 import { routes } from '../data';
 import { PATHS } from '../paths';
@@ -18,6 +19,7 @@ export function Settings({theme,setTheme,platformsOnly=false}:{theme:ThemeChoice
    <div className="settings-row"><span>{s.language}<small>{s.languageHint}</small></span><div className="actions" role="group" aria-label={s.language}>{LANGS.map(l=><button key={l} lang={l} aria-pressed={lang===l} onClick={()=>setLang(l)}><Languages size={16}/>{LANG_NAMES[l]}</button>)}</div></div>
    <RemindersRow/>
   </article>}
+  {!platformsOnly&&<DataCard/>}
   {platformsOnly?<PlatformsCard/>:<article className="lesson-card platforms-teaser">
    <span className="teaser-icon" aria-hidden="true"><Link2 size={20}/></span>
    <div className="teaser-copy"><h2>{s.platformsTitle}</h2><p>{s.platformsIntro}</p>
@@ -45,4 +47,32 @@ function RemindersRow(){
   </div>
   {note&&<p role={note.ok?'status':'alert'} className={`feedback ${note.ok?'success':'danger'}`}>{note.ok&&<Check size={17}/>}{note.text}</p>}
  </div>;
+}
+
+// GDPR: скачать все свои данные (GET /users/me/export) и удалить аккаунт (DELETE /users/me, нужен пароль).
+function DataCard(){
+ const t=useT();const s=t.settings;const {logout}=useAuth();const navigate=useNavigate();
+ const [busy,setBusy]=useState<'export'|'delete'|null>(null);const [note,setNote]=useState<{ok:boolean;text:string}|null>(null);
+ const [confirm,setConfirm]=useState(false);const [password,setPassword]=useState('');
+ const download=async()=>{setBusy('export');setNote(null);
+  try{const data=await usersApi.exportData();const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+   const a=document.createElement('a');a.href=url;a.download='lekseradar-data.json';a.click();URL.revokeObjectURL(url);setNote({ok:true,text:s.exported})}
+  catch(e){setNote({ok:false,text:asApiError(e,t.common).message})}finally{setBusy(null)}};
+ const remove=async(e:React.FormEvent)=>{e.preventDefault();setBusy('delete');setNote(null);
+  try{await usersApi.deleteAccount(password);logout();navigate(PATHS.home,{replace:true})}
+  catch(err){setNote({ok:false,text:asApiError(err,t.common).message});setBusy(null)}};
+ return <article className="lesson-card data-card"><h2>{s.dataTitle}</h2><p>{s.dataIntro} <Link className="text-link" to={PATHS.privacy}>{s.dataPolicy}</Link></p>
+  <div className="settings-row"><span>{s.exportTitle}<small>{s.exportHint}</small></span>
+   <div className="actions"><button disabled={busy!==null} onClick={download}><Download size={16}/>{busy==='export'?s.exporting:s.export}</button></div></div>
+  <div className="settings-row data-delete"><span>{s.deleteTitle}<small>{s.deleteHint}</small></span>
+   {!confirm&&<div className="actions"><button className="danger-button" disabled={busy!==null} onClick={()=>{setConfirm(true);setNote(null)}}><Trash2 size={16}/>{s.deleteStart}</button></div>}
+   {confirm&&<form className="delete-form" onSubmit={remove}>
+    <p role="alert" className="feedback danger">{s.deleteWarning}</p>
+    <label className="field">{s.deletePassword}<input type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)}/></label>
+    <div className="actions wrap"><button type="submit" className="danger-button" disabled={busy!==null||!password}><Trash2 size={16}/>{busy==='delete'?s.deleting:s.deleteConfirm}</button>
+     <button type="button" disabled={busy!==null} onClick={()=>{setConfirm(false);setPassword('')}}>{t.platforms.cancel}</button></div>
+   </form>}
+  </div>
+  {note&&<p role={note.ok?'status':'alert'} className={`feedback ${note.ok?'success':'danger'}`}>{note.ok&&<Check size={17}/>}{note.text}</p>}
+ </article>;
 }

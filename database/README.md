@@ -16,7 +16,8 @@ docker compose up -d db     # from the repo root; Postgres on 127.0.0.1:5432, db
 При первом старте применяются все миграции. База стартует пустой, без демо-данных: ученика создаёт регистрация.
 Сбросить: `docker compose down -v && docker compose up -d`.
 
-Адрес для Python-инструментов (`migrate.py`, `load.py`, `to_db`): `postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar`.
+Адрес для Python-инструментов (`migrate.py`, `load.py`, `to_db`): `postgresql://lekseradar:<DB_PASSWORD>@127.0.0.1:5432/lekseradar`.
+`<DB_PASSWORD>` with docker compose: `docker compose run --rm --entrypoint cat keys /keys/db_password`.
 Пишите `127.0.0.1`, не `localhost`: на Windows psycopg с `localhost` зависает (пробует IPv6, а база слушает только IPv4).
 
 Докатить новые миграции на существующую базу (свой том, общая база команды, облако):

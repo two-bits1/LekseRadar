@@ -43,6 +43,13 @@ public class UserEntity {
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
 
+    /** GDPR: когда принял условия и политику конфиденциальности (V27); NULL у аккаунтов до V27. */
+    @Column(name = "terms_accepted_at")
+    private Instant termsAcceptedAt;
+
+    @Column(name = "terms_version")
+    private String termsVersion;
+
     protected UserEntity() {}
 
     public UserEntity(String email, String passwordHash, String displayName) {
@@ -60,6 +67,8 @@ public class UserEntity {
     public boolean isEmailReminders() { return emailReminders; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getLastLoginAt() { return lastLoginAt; }
+    public Instant getTermsAcceptedAt() { return termsAcceptedAt; }
+    public String getTermsVersion() { return termsVersion; }
 
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
@@ -67,4 +76,5 @@ public class UserEntity {
     public void setTimezone(String timezone) { this.timezone = timezone; }
     public void setEmailReminders(boolean emailReminders) { this.emailReminders = emailReminders; }
     public void markLoggedIn() { this.lastLoginAt = Instant.now(); }
+    public void acceptTerms(String version) { this.termsAcceptedAt = Instant.now(); this.termsVersion = version; }
 }

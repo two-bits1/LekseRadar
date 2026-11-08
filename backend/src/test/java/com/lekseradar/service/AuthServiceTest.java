@@ -59,7 +59,7 @@ class AuthServiceTest {
     }
 
     private String register(String ip) {
-        auth.register(new RegisterRequestDTO(" Ola@Example.com ", "password123", " Ola "), ip);
+        auth.register(new RegisterRequestDTO(" Ola@Example.com ", "password123", " Ola ", true), ip);
         ArgumentCaptor<String> code = ArgumentCaptor.forClass(String.class);
         verify(mail, atLeastOnce()).sendVerificationCode(eq(EMAIL), eq("Ola"), code.capture(), eq(15L));
         return code.getValue();
@@ -118,7 +118,7 @@ class AuthServiceTest {
     void existingEmailIs409AndNoMail() {
         when(users.existsByEmailIgnoreCase(EMAIL)).thenReturn(true);
         assertThrows(ConflictException.class,
-                () -> auth.register(new RegisterRequestDTO(EMAIL, "password123", "Ola"), "1.1.1.1"));
+                () -> auth.register(new RegisterRequestDTO(EMAIL, "password123", "Ola", true), "1.1.1.1"));
         verifyNoInteractions(mail);
     }
 
@@ -126,7 +126,7 @@ class AuthServiceTest {
     void mailLimitPerEmail() {
         for (int i = 0; i < AuthService.MAX_CODES_PER_EMAIL; i++) register("ip-" + i);
         assertThrows(TooManyRequestsException.class,
-                () -> auth.register(new RegisterRequestDTO(EMAIL, "password123", "Ola"), "ip-x"));
+                () -> auth.register(new RegisterRequestDTO(EMAIL, "password123", "Ola", true), "ip-x"));
     }
 
     @Test
@@ -134,7 +134,7 @@ class AuthServiceTest {
         doThrow(new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Не удалось отправить письмо"))
                 .when(mail).sendVerificationCode(anyString(), anyString(), anyString(), anyLong());
         assertThrows(ApiException.class,
-                () -> auth.register(new RegisterRequestDTO(EMAIL, "password123", "Ola"), "1.1.1.1"));
+                () -> auth.register(new RegisterRequestDTO(EMAIL, "password123", "Ola", true), "1.1.1.1"));
         assertThrows(BadRequestException.class, () -> auth.verify(new VerifyEmailRequestDTO(EMAIL, "123456")));
     }
 

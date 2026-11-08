@@ -48,6 +48,7 @@ public class CredentialsCipher {
             throw new IllegalStateException("app.credentials.key (CREDENTIALS_KEY) должен быть ровно 32 байта, сейчас "
                     + bytes.length + ": openssl rand -base64 32");
         }
+        InsecureSecrets.reject("CREDENTIALS_KEY", base64Key);
         this.key = new SecretKeySpec(bytes, "AES");
         this.json = json;
     }
