@@ -1,7 +1,7 @@
 # What is left (main-test-4.0)
 
 Run everything locally: `cp .env.example .env && docker compose up --build` (see [README.md](README.md#getting-started)).
-Test results: [README-TEST.md](README-TEST.md), change log: [CHANGES.md](CHANGES.md).
+Test results: [README-TEST.md](docs/ru/README-TEST.md), change log: [CHANGES.md](docs/ru/CHANGES.md).
 
 ## Urgent
 
