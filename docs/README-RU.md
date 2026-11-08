@@ -6,8 +6,8 @@
 Google Classroom) в одном месте и помогает их сделать: ИИ-тьютор в чате, квизы, флеш-карты, дашборд и прогресс.
 
 Ветка `main-test-4.0` — финальная сборка из трёх PR: `PythonAPI` (#9), `JavaAPI-setup` (#2), `Frontend-setup` (#10).
-Тестовых данных нет: ученик создаётся регистрацией. Результаты проверки: [README-TEST.md](../README-TEST.md),
-что осталось: [TODO.md](../TODO.md), все правки после проверки командой: [CHANGES.md](../CHANGES.md).
+Тестовых данных нет: ученик создаётся регистрацией. Результаты проверки: [README-TEST.md](ru/README-TEST.md),
+что осталось: [TODO.md](../TODO.md), все правки после проверки командой: [CHANGES.md](ru/CHANGES.md).
 
 ```
 браузер ──► frontend (React + Vite) ──/api/v1──► backend (Spring Boot, Java 21) ──► PostgreSQL 16

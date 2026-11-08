@@ -1,7 +1,7 @@
 # Правки main-test-4.0 после проверки командой (7 ноября 2026)
 
 Все правки — в ветке `main-test-4.0`, по одному коммиту на правку. Подробности проверки: [README-TEST.md](README-TEST.md),
-что осталось настроить: [TODO.md](TODO.md).
+что осталось настроить: [TODO.md](../../TODO.md).
 
 ## Круг 1: квизы, карточки, чат, профиль
 
@@ -53,5 +53,5 @@
 
 ## Running it
 
-Locally: `cp .env.example .env && docker compose up --build` (see [README.md](README.md#getting-started)).
+Locally: `cp .env.example .env && docker compose up --build` (see [README.md](../../README.md#getting-started)).
 An existing local database gets V23–V26: `python3 database/migrate.py postgresql://lekseradar:<DB_PASSWORD>@127.0.0.1:5432/lekseradar`.
