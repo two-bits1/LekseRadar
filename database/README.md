@@ -60,7 +60,7 @@ docker compose up -d        # Postgres на 127.0.0.1:5432, база/логин/
 | `V23__quiz_options_cleanup.sql` | сохранённые квизы: без пустых и повторяющихся вариантов; single_choice с несколькими верными → multiple_choice |
 | `V24__flashcard_learned.sql` | «выучено» в `user_flashcard_stats`: карточка с последним ответом «помню» (интервал от 1 дня) |
 | `V25__email_reminders.sql` | напоминания о ДЗ на почту: `users.email_reminders`, одно письмо на задание (`reminders`, channel `email`), функция `assignments_to_remind()` |
-| `V26__disconnect_removes_assignments.sql` | отключение платформы удаляет её задания: `remove_platform_assignments(user_id, platform)`; удаляет задания уже отключённых платформ (чаты и квизы остаются без ссылки на задание) |
+| `V26__disconnect_removes_assignments.sql` | один раз удаляет задания платформ, отключённых раньше (теперь отключение само удаляет задания платформы); чаты и квизы остаются без ссылки на задание |
 
 ## Схема
 

@@ -55,7 +55,7 @@
 
 1. Railway → `backend` и `collector`: ветка `main-test-4.0`, Deploy Latest Commit.
 2. Облачная база: временно Public Access у Postgres → `git switch main-test-4.0 && git pull` →
-   `python3 database/setup_cloud_db.py` (накатит V23–V25 и новый промпт квиза) → Public Access убрать.
+   `python3 database/setup_cloud_db.py` (накатит V23–V26 и новый промпт квиза) → Public Access убрать.
 3. Railway → `backend` → Variables: `MAIL_USERNAME`, `MAIL_PASSWORD` (Gmail, пароль приложения) — без них нет ни
    регистрации, ни напоминаний.
 4. Vercel → Production Branch `main-test-4.0` → Redeploy.

@@ -104,8 +104,6 @@ class HomeworkSyncIntegrationTest {
 
     @Test
     void disconnectRemovesAssignmentsButKeepsChats() throws Exception {
-        Boolean v26 = jdbc.queryForObject("SELECT to_regproc('remove_platform_assignments') IS NOT NULL", Boolean.class);
-        assumeTrue(Boolean.TRUE.equals(v26), "нет функции remove_platform_assignments (миграция V26)");
         Long userId = TestUsers.register(auth, mail, "disconnect-" + System.nanoTime() + "@example.com",
                 "password123", "Disconnect Elev").user().id();
         when(collector.collect(anyMap())).thenReturn(new CollectResult(JSON.readTree(ITEMS),
