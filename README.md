@@ -97,7 +97,7 @@ The screenshots were taken from a local run of this branch with demo data.
 | | |
 |---|---|
 | ![Landing page](docs/screenshots/01-landing.png) <br> **1. Landing page** with sign-up | ![Dashboard](docs/screenshots/02-dashboard.png) <br> **2. Dashboard**: upcoming homework and recent chats |
-| ![Homework list](docs/screenshots/03-homework.png) <br> **3. Homework** from all platforms, sorted by deadline | ![AI tutor](docs/screenshots/04-ai-tutor.png) <br> **4. AI tutor** chat with formulas |
+| ![Homework list](docs/screenshots/03-homework.png) <br> **3. Homework** from all platforms, sorted by deadline | ![AI tutor](docs/screenshots/04-ai-tutor.png) <br> **4. AI tutor**: start a chat or continue an old one |
 | ![Quiz feedback](docs/screenshots/05-quiz-feedback.png) <br> **5. Quiz feedback**: wrong answer red, correct answer green | ![Quiz result](docs/screenshots/06-quiz-result.png) <br> **6. Quiz result** screen |
 | ![Flashcards](docs/screenshots/07-flashcards.png) <br> **7. Flashcards** with spaced repetition | ![Profile](docs/screenshots/08-profile.png) <br> **8. Profile** with stats and achievements |
 | ![Platforms](docs/screenshots/09-platforms.png) <br> **9. Platform connections** in settings | ![Light theme](docs/screenshots/10-dashboard-light.png) <br> **10. Light theme** |
