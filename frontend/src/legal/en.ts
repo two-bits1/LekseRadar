@@ -46,7 +46,7 @@ export const en: LegalTexts = {
           'Email (Gmail): your email address and name, the sign-up code, and in reminders the titles, deadlines and links of your assignments.',
           'Google: if you connect Google Classroom, you sign in at Google and we get read-only access to your courses and assignments. When you disconnect, we withdraw that access at Google.',
           'Your school platforms (Canvas, Microsoft Teams, itslearning, Visma InSchool, Google Classroom): our server asks them for your assignments using your access.',
-          'Hosting (Railway for the server and database, Vercel for the website): the data is stored on or passes through their servers. They may keep technical logs, such as IP addresses.',
+          'Hosting (the servers that run LekseRadar’s backend and database, and Vercel for the website): the data is stored on or passes through these servers. Hosting providers may keep technical logs, such as IP addresses.',
           'Google Fonts: when the page loads its font, Google sees your IP address.',
         ] },
         'Several of these companies are based outside the EU/EEA, mostly in the USA.',

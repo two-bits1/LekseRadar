@@ -41,20 +41,22 @@ Every item below was checked in the code. Paths to backend Java files are relati
 | Host allow-lists for platforms (SSRF protection) | The server only calls `https` addresses without a port or user info, inside `CANVAS_DOMAINS` (`instructure.com`), `ITSLEARNING_DOMAINS` (`itslearning.com`) and `INSCHOOL_DOMAINS` (`inschool.visma.no`), plus hosts listed in `CANVAS_HOSTS`. Path and query are dropped. | `service/PlatformService.java` (`allowedUrl`, `hostOf`) |
 | Open-redirect protection for Google sign-in | Google may only send the student back to an exact address: a site from `CORS_ORIGINS` + `/settings/platforms`. The `state` parameter is signed with HMAC-SHA256, bound to the user and valid for 10 minutes. | `service/PlatformService.java` (`classroomRedirect`), `service/google/OAuthStates.java` |
 | Read-only Google scopes | Only `classroom.courses.readonly` and `classroom.coursework.me.readonly` are requested. The Google client secret stays on the backend. When a student disconnects Classroom, the token is revoked at Google. | `service/google/GoogleOAuthClient.java` |
-| Internal-only collector | Every collector endpoint except `/health` requires the `X-Internal-Key` header (compared in constant time; the service will not start with a key shorter than 16 characters). In Docker Compose the collector listens only on `127.0.0.1:8090`; on Railway it runs as a private service reached at `*.railway.internal`. The collector stores nothing and does not log request bodies. | `homework-collector/homework/server.py`, `database/docker-compose.yml`, `docs/DEPLOY-RAILWAY.md` |
+| Internal-only collector | Every collector endpoint except `/health` requires the `X-Internal-Key` header (compared in constant time; the service will not start with a key shorter than 16 characters). In Docker Compose the collector listens only on `127.0.0.1:8090`, and the backend reaches it inside the Compose network. The collector stores nothing and does not log request bodies. | `homework-collector/homework/server.py`, `docker-compose.yml` |
 | Platform errors return 422, not 401 | A rejected platform token gives `422 Unprocessable Entity`, so the frontend does not log the student out. Collector errors are mapped to 502/503. | `service/PlatformService.java`, `service/collector/CollectorClient.java`, `controller/PlatformController.java` |
 | Security headers on the frontend | `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Strict-Transport-Security: max-age=63072000`. | `frontend/vercel.json` |
 | Secrets only in `.env` | Secrets are read from environment variables or a local `.env` file. `.env` files are in `.gitignore`; only `backend/.env.example` (without real values) is committed. | `backend/src/main/resources/application.yml`, `.gitignore`, `backend/.gitignore`, `frontend/.gitignore`, `homework-collector/.gitignore` |
 | Health endpoint without details | `/actuator/health` shows only `UP`/`DOWN`. | `backend/src/main/resources/application.yml` (`show-details: never`) |
-| Local database not exposed | The Docker Compose database listens only on `127.0.0.1:5432`. | `database/docker-compose.yml` |
+| Local database not exposed | The Docker Compose database listens only on `127.0.0.1:5432`. | `docker-compose.yml` |
 
 ## Known limitations and recommendations before production
 
 1. **Change the development defaults.** They are fine on one laptop and unsafe anywhere else:
-   - database password `lekseradar` (`database/docker-compose.yml`, default of `DB_PASSWORD` in
+   - database password `lekseradar` (`docker-compose.yml`, default of `DB_PASSWORD` in
      `backend/src/main/resources/application.yml`);
+   - the local `JWT_SECRET` and `CREDENTIALS_KEY` defaults in `docker-compose.yml` — set your own in `.env`
+     (`openssl rand -base64 48` and `openssl rand -base64 32`);
    - collector key `local-dev-collector-key` (default of `COLLECTOR_KEY` in `application.yml` and
-     `database/docker-compose.yml`) — generate one with `openssl rand -hex 32`;
+     `docker-compose.yml`) — generate one with `openssl rand -hex 32`;
    - the sample `JWT_SECRET` in `backend/.env.example` — generate a random secret of at least 32 bytes.
 2. **No account deletion.** There is no endpoint to delete an account or export one's data
    (`controller/UserController.java` has only read, update, change password and test reminder). The database would

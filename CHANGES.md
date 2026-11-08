@@ -1,7 +1,7 @@
 # Правки main-test-4.0 после проверки командой (7 ноября 2026)
 
 Все правки — в ветке `main-test-4.0`, по одному коммиту на правку. Подробности проверки: [README-TEST.md](README-TEST.md),
-что осталось настроить: [TODO.md](TODO.md), [RAILWAY-STATUS.md](RAILWAY-STATUS.md).
+что осталось настроить: [TODO.md](TODO.md).
 
 ## Круг 1: квизы, карточки, чат, профиль
 
@@ -49,13 +49,9 @@
 - База V1–V25 с нуля, collector 23/23, бэк 106/106 (с `TEST_DB_URL`), фронт 125/125, сборка ✓.
 - В браузере: обе темы, 1200 и 390 px; квиз и занятие с карточками до итога; пробное письмо и письмо по расписанию
   в логе (`MAIL_DEV_LOG_CODES=true`), запись в `reminders`.
-- Не проверено здесь: настоящая отправка через Gmail и живой сайт на Railway и Vercel (из песочницы к ним нет доступа).
+- Не проверено здесь: настоящая отправка через Gmail.
 
-## Чтобы правки появились на сайте
+## Running it
 
-1. Railway → `backend` и `collector`: ветка `main-test-4.0`, Deploy Latest Commit.
-2. Облачная база: временно Public Access у Postgres → `git switch main-test-4.0 && git pull` →
-   `python3 database/setup_cloud_db.py` (накатит V23–V26 и новый промпт квиза) → Public Access убрать.
-3. Railway → `backend` → Variables: `MAIL_USERNAME`, `MAIL_PASSWORD` (Gmail, пароль приложения) — без них нет ни
-   регистрации, ни напоминаний.
-4. Vercel → Production Branch `main-test-4.0` → Redeploy.
+Locally: `cp .env.example .env && docker compose up --build` (see [README.md](README.md#getting-started)).
+An existing local database gets V23–V26: `python3 database/migrate.py postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar`.

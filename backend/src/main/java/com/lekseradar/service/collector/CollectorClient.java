@@ -89,7 +89,7 @@ public class CollectorClient {
                 case WRONG_KEY -> log.warn("collector {} не принял COLLECTOR_KEY: платформы не подключатся и ДЗ не попадут в базу. "
                         + "Ключ у бэкенда и у collector должен быть одинаковым", baseUrl);
                 case UNREACHABLE -> log.warn("collector {} недоступен: платформы не подключатся и ДЗ не попадут в базу. "
-                        + "Запустите его: cd database && docker compose up -d collector", baseUrl);
+                        + "Запустите его: docker compose up -d collector (из корня репозитория)", baseUrl);
             }
         });
     }

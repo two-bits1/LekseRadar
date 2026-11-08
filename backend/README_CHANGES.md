@@ -196,8 +196,8 @@ test data removed, the database is empty again.
 ### RU
 32. **ИИ:** при лимите Groq (429) запрос повторяется, если ждать нужно недолго.
 33. **Язык квиза** берётся из `language_code` (V20); ошибки ответа в квизе (V19) — 400, а не 500.
-34. **Деплой:** `Dockerfile` и `railway.json` для Railway.
-35. **`RAILWAY.md`** — деплой по шагам.
+34. **Docker:** `Dockerfile` (backend service in the root `docker-compose.yml`).
+35. —
 36. **Платформы, сбор ДЗ и регистрация по почте** (по `docs/PLAN-BACKEND.md`) и этот отчёт:
     - в бэкенд перенесены ДЗ, дашборд, история и лимиты из `main-test-3.0`;
     - `CredentialsCipher` — доступы к платформам шифруются AES-256-GCM (`CREDENTIALS_KEY`, обязателен);
@@ -219,8 +219,8 @@ Docker-образ собирается и запускается.
 ### EN
 32. **AI:** on a Groq rate limit (429) the request is retried when the wait is short.
 33. **Quiz language** comes from `language_code` (V20); quiz answer errors (V19) are 400, not 500.
-34. **Deploy:** `Dockerfile` and `railway.json` for Railway.
-35. **`RAILWAY.md`** — step-by-step deploy.
+34. **Docker:** `Dockerfile` (backend service in the root `docker-compose.yml`).
+35. —
 36. **Platforms, homework sync and email sign-up** (per `docs/PLAN-BACKEND.md`) and this report:
     - homework, dashboard, history and rate limits moved in from `main-test-3.0`;
     - `CredentialsCipher` — platform credentials encrypted with AES-256-GCM (`CREDENTIALS_KEY`, required);

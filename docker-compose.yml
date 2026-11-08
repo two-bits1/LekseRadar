@@ -1,0 +1,123 @@
+# LekseRadar локально одной командой (из корня репозитория):
+#
+#   cp .env.example .env      # один раз; впишите OPENAI_API_KEY, остальное по желанию
+#   docker compose up --build
+#
+# Сайт: http://localhost:5173 · API: http://localhost:8080 (Swagger: /swagger-ui.html) · база: 127.0.0.1:5432
+#
+# Что запускается:
+#   db         PostgreSQL 16, миграции database/migrations применяются при первом запуске пустого тома
+#   content    один раз загружает промпты ИИ и учебные файлы из ai-content/ в базу и завершается
+#   collector  сбор ДЗ с платформ (homework-collector), только для бэкенда
+#   backend    Spring Boot API (backend)
+#   frontend   Vite dev-сервер (frontend), правки в коде видны сразу
+#
+# Все порты открыты только на 127.0.0.1. Пароли и ключи ниже — только для своего компьютера.
+# Новая миграция на уже созданной базе сама не применится: python3 database/migrate.py "$DATABASE_URL"
+# (или сбросить базу: docker compose down -v). Секреты — только в .env, он в .gitignore.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: lekseradar
+      POSTGRES_USER: lekseradar
+      POSTGRES_PASSWORD: lekseradar   # только для локальной разработки
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./database/init.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lekseradar -d lekseradar"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  # Промпты ИИ и учебные файлы → в базу (ai-content/load/load.py). Без них чат и квиз отвечают «промпт не загружен».
+  # Повторный запуск ничего не дублирует.
+  content:
+    image: python:3.12-slim
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://lekseradar:lekseradar@db:5432/lekseradar
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PIP_ROOT_USER_ACTION: ignore
+    volumes:
+      - ./ai-content:/ai-content:ro
+    command: sh -c "pip install -q -r /ai-content/load/requirements.txt && python -X utf8 /ai-content/load/load.py"
+    restart: "no"
+
+  collector:
+    build: ./homework-collector
+    environment:
+      COLLECTOR_KEY: ${COLLECTOR_KEY:-local-dev-collector-key}
+      TEAMS_CLIENT_ID: ${TEAMS_CLIENT_ID:-}
+    ports:
+      - "127.0.0.1:8090:8090"
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+      content:
+        condition: service_completed_successfully
+      collector:
+        condition: service_started
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/lekseradar
+      DB_USER: lekseradar
+      DB_PASSWORD: lekseradar
+      COLLECTOR_URL: http://collector:8090
+      COLLECTOR_KEY: ${COLLECTOR_KEY:-local-dev-collector-key}
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      # Локальные ключи по умолчанию. Вне своего компьютера задайте свои: openssl rand -base64 32
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-do-not-use-outside-localhost}
+      CREDENTIALS_KEY: ${CREDENTIALS_KEY:-bGVrc2VyYWRhci1sb2NhbC1kZXYta2V5LTMyYnl0ZXM=}
+      # ИИ: любой OpenAI-совместимый сервис (в .env.example — Groq)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.groq.com/openai/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-openai/gpt-oss-120b}
+      # Почта: без MAIL_USERNAME/MAIL_PASSWORD код регистрации и напоминания печатаются в лог бэкенда
+      # (docker compose logs backend | grep "verification code")
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_DEV_LOG_CODES: ${MAIL_DEV_LOG_CODES:-true}
+      # Google Classroom (по желанию); redirect URI в Google Cloud: http://localhost:5173/settings/platforms
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 40
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    image: node:22-slim
+    working_dir: /app
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      API_PROXY_TARGET: http://backend:8080
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+    volumes:
+      - ./frontend:/app
+      - frontend-modules:/app/node_modules   # свои node_modules для Linux, не те, что на вашем компьютере
+    command: sh -c "corepack enable && pnpm install --frozen-lockfile && pnpm exec vite --host 0.0.0.0 --port 5173 --strictPort"
+    ports:
+      - "127.0.0.1:5173:5173"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  frontend-modules:

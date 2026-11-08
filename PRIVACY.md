@@ -52,7 +52,7 @@ Not stored in the database:
 | **Google** (OAuth and Classroom API) | your Google sign-in happens at Google; LekseRadar receives read-only access to your courses and coursework and uses it to read assignments; the access is revoked at Google when you disconnect | Google Classroom integration (`service/google/GoogleOAuthClient.java`) |
 | **Google Fonts** | your IP address and browser details when the page loads the Inter font | page typography (`frontend/src/styles.css`) |
 | **School platforms**: Canvas (Instructure), Microsoft Teams (Microsoft Graph), itslearning, Visma InSchool, Google Classroom | requests made with your own access, from the collector's server | to read your assignments (`homework-collector/homework/sources/`) |
-| **Hosting**: **Railway** (backend, collector, database) and **Vercel** (website) | all data above passes through or is stored on their servers; they may keep technical logs such as IP addresses | running the service (`docs/DEPLOY-RAILWAY.md`, `frontend/vercel.json`) |
+| **Hosting**: the servers that run the backend, collector and database, and **Vercel** for the website | all data above passes through or is stored on these servers; hosting providers may keep technical logs such as IP addresses | running the service (`docker-compose.yml`, `frontend/vercel.json`) |
 
 LekseRadar does not sell data and does not share it for advertising. Several recipients are outside the EU/EEA;
 see [COMPLIANCE.md](COMPLIANCE.md).

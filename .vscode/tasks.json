@@ -3,10 +3,10 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "База: запустить PostgreSQL",
+            "label": "База, промпты и collector: запустить",
             "type": "shell",
-            "command": "docker compose up -d",
-            "options": { "cwd": "${workspaceFolder}/database" },
+            "command": "docker compose up -d db content collector",
+            "options": { "cwd": "${workspaceFolder}" },
             "problemMatcher": []
         },
         {
@@ -34,6 +34,14 @@
             "windows": { "command": ".\\mvnw.cmd clean package -DskipTests" },
             "options": { "cwd": "${workspaceFolder}/backend" },
             "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Всё (база, collector, backend, frontend): docker compose up",
+            "type": "shell",
+            "command": "docker compose up --build",
+            "options": { "cwd": "${workspaceFolder}" },
+            "isBackground": true,
             "problemMatcher": []
         },
         {

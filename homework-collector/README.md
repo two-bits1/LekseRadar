@@ -33,7 +33,7 @@ result.model_dump(mode="json")   # готовый JSON для ответа бэ�
 Java вызывает сборщик по HTTP: `homework/server.py` (FastAPI). Контракт и примеры: [COLLECTOR-API.md](COLLECTOR-API.md).
 
 ```bash
-COLLECTOR_KEY=$(openssl rand -hex 32) uvicorn homework.server:app --port 8090   # или сервис collector в database/docker-compose.yml
+COLLECTOR_KEY=$(openssl rand -hex 32) uvicorn homework.server:app --port 8090   # или сервис collector в docker-compose.yml
 ```
 
 - Все запросы, кроме `/health`, с заголовком `X-Internal-Key`. Без ключа (≥ 16 символов) сервис не стартует.

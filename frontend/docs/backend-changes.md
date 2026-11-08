@@ -113,9 +113,9 @@ ALTER TYPE platform ADD VALUE IF NOT EXISTS 'classroom';
 3. **Credentials → Create OAuth client ID → Web application**. Authorized redirect URIs:
    - `http://localhost:5173/settings/platforms`;
    - `https://<адрес на Vercel>/settings/platforms`.
-4. `GOOGLE_CLIENT_ID` и `GOOGLE_CLIENT_SECRET` записать в env **бэкенда** (`backend/.env`, на Railway в Variables), не в репозиторий.
+4. `GOOGLE_CLIENT_ID` и `GOOGLE_CLIENT_SECRET` записать в env **бэкенда** (`.env` в корне для docker compose или `backend/.env`), не в репозиторий.
 5. Домен фронта на Vercel должен совпадать с Redirect URI и с `CORS_ORIGINS`: сейчас ожидается `https://lekseradar.vercel.app`.
-   Если выдан другой, его нужно поменять и в Google, и на Railway.
+   Если выдан другой, его нужно поменять и в Google, и в `CORS_ORIGINS` бэкенда.
 
 Школьные Google-аккаунты (Workspace for Education): админ школы может запретить сторонние приложения.
 Тогда Google вернёт ошибку, а фронт покажет «Innloggingen hos Google ble avbrutt» или текст 422.

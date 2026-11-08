@@ -1,6 +1,6 @@
 {
     // Запуск: F5, или вкладка "Run and Debug" (Ctrl+Shift+D) → ▶
-    // Перед запуском: PostgreSQL запущен (database/docker compose up -d), backend/.env заполнен
+    // Перед запуском: docker compose up -d db content collector (из корня репозитория), backend/.env заполнен
     "version": "0.2.0",
     "configurations": [
         {

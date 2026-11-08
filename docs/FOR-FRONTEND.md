@@ -91,10 +91,10 @@ platformsApi.connect('classroom', { code: ret.code, state: ret.state, redirect_u
 
 ## 6. Vercel
 
-- `VITE_API_URL=https://<адрес-бэкенда-на-railway>/api/v1`.
+- `VITE_API_URL=https://<backend address>/api/v1`.
 - Домен должен быть ровно `https://lekseradar.vercel.app`, тот же, что в Google Cloud (Authorized redirect URIs:
   `https://lekseradar.vercel.app/settings/platforms`) и в `CORS_ORIGINS` бэкенда. Если домен другой, сообщить №2:
-  его нужно поменять в Google и на Railway.
+  его нужно поменять в Google и в `CORS_ORIGINS` бэкенда.
 - Страница возврата работает и при прямом открытии: `vercel.json` уже отдаёт `index.html` на все пути.
 
 ## Как проверить
