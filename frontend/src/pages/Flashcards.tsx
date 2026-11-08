@@ -12,7 +12,10 @@ import { ResultCard } from '../components/ResultCard';
 import { useT } from '../i18n';
 import { GRADES } from './quizLogic';
 import { SubjectTopicForm } from './Quiz';
-import { ALL_TOPICS, DECK_MODES, buildDeck, counts, topics, type DeckMode } from './flashcardDeck';
+import { ALL_TOPICS, buildDeck, counts, topicKey, topics, type DeckMode } from './flashcardDeck';
+
+/** Счётчик над карточкой → какую колоду он открывает. */
+const STAT_MODES = [['all', 'statsCards'], ['due', 'statsDue'], ['learned', 'statsLearned'], ['hard', 'statsHard'], ['new', 'statsNew']] as const satisfies readonly (readonly [DeckMode, string])[];
 
 type GradeKey = keyof typeof GRADES;
 
@@ -45,6 +48,9 @@ export function Flashcards() {
     setMode(m); setTopic(tp); setShuffle(sh); setError(null); load(m, tp, sh);
   };
   const modeCounts = useMemo(() => all ? counts(all, topic) : null, [all, topic]);
+  // Повторений — по выбранной теме (по всей колоде — как в статистике сервера)
+  const reviews = useMemo(() => !all || topic === ALL_TOPICS ? stats?.reviews
+    : all.filter(x => topicKey(x) === topic).reduce((n, x) => n + (x.reviews ?? 0), 0), [all, topic, stats]);
   const topicList = useMemo(() => all ? topics(all) : [], [all]);
 
   const card = due?.[index];
@@ -73,11 +79,14 @@ export function Flashcards() {
 
   return <section className="page narrow app-page">
     <header className="page-head"><h1>{c.title}</h1><p>{c.intro}</p></header>
-    <div className="mini-stats">
-      <span><strong>{stats?.cards ?? '—'}</strong>{c.statsCards}</span>
-      <span className={stats?.dueNow ? 'hot' : ''}><strong>{stats?.dueNow ?? '—'}</strong>{c.statsDue}</span>
-      <span><strong>{stats?.learned ?? '—'}</strong>{c.statsLearned}</span>
-      <span><strong>{stats?.reviews ?? '—'}</strong>{c.statsReviews}</span>
+    {/* Счётчики — они же выбор колоды: «выучено» — повторить то, что знаешь, «трудных» — то, что не запоминается */}
+    <div className="mini-stats deck-stats" role="group" aria-label={c.statsPick}>
+      {STAT_MODES.map(([m, label]) => {
+        const n = modeCounts ? modeCounts[m] : m === 'all' ? stats?.cards : m === 'due' ? stats?.dueNow : m === 'learned' ? stats?.learned : undefined;
+        return <button key={m} type="button" className={`stat-pick${m === 'due' && n ? ' hot' : ''}`} aria-pressed={mode === m}
+          disabled={!all?.length} onClick={() => choose({ mode: m })}><strong>{n ?? '—'}</strong>{c[label]}</button>;
+      })}
+      <span><strong>{reviews ?? '—'}</strong>{c.statsReviews}</span>
     </div>
     {error && <p role="alert" className="feedback danger">{error.message}</p>}
 
@@ -92,10 +101,6 @@ export function Flashcards() {
             </select></label>}
           <button type="button" className="deck-shuffle" aria-pressed={shuffle} onClick={() => choose({ shuffle: !shuffle })}><Shuffle size={15} />{c.shuffle}</button>
         </div>
-      </div>
-      <div className="deck-modes" role="group" aria-label={c.practice}>
-        {DECK_MODES.map(m => <button key={m} type="button" className="deck-mode" aria-pressed={mode === m} onClick={() => choose({ mode: m })}>
-          {c.modes[m]}<span className="deck-count">{modeCounts?.[m] ?? 0}</span></button>)}
       </div>
       <p className="deck-hint">{c.modeHints[mode]}</p>
     </div>}
