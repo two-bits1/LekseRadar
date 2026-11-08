@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
 import { Dashboard } from './pages/Dashboard';
 import { Flashcards } from './pages/Flashcards';
 import { QuizStart, QuizRun } from './pages/Quiz';
@@ -15,6 +14,7 @@ import { PATHS } from './paths';
 import { AuthProvider, RequireAuth, useAuth } from './auth';
 import { Landing } from './pages/Landing';
 import { AppHeader } from './components/AppHeader';
+import { SiteFooter } from './components/SiteFooter';
 import { I18nProvider, useT } from './i18n';
 import './styles.css';
 const darkQuery='(prefers-color-scheme: dark)';
@@ -35,6 +35,11 @@ function useTheme(){
  useEffect(()=>{document.querySelector('meta[name="theme-color"]')?.setAttribute('content',themeColor(resolved))},[resolved]);
  return {choice,resolved,setChoice:(c:ThemeChoice)=>{setChoice(c);saveThemeChoice(c)}};
 }
+// Тексты политики и условий большие: отдельный чанк, грузится только на /privacy и /terms.
+const Legal=lazy(()=>import('./pages/Legal'));
+function LegalPage({doc}:{doc:'privacy'|'terms'}){const t=useT();return <Suspense fallback={<section className="page narrow"><p>{t.common.loading}</p></section>}><Legal doc={doc}/></Suspense>;}
+// Новая страница открывается сверху (иначе после ссылки из подвала остаёмся внизу). Якоря #… не трогаем.
+function ScrollToTop(){const {pathname}=useLocation();useEffect(()=>{window.scrollTo(0,0)},[pathname]);return null;}
 // Старые адреса (до API.md) ведут на новые, ?assignment=… сохраняется.
 function Moved({to}:{to:string}){const {search}=useLocation();return <Navigate to={to+search} replace/>;}
 function App(){
@@ -43,6 +48,7 @@ function App(){
  const landing=!token&&pathname===PATHS.home;  // лендинг всегда тёмный, как референс
  return <div className={landing?'app is-landing':'app'} data-theme={landing?'dark':resolved}>
   <a className="skip" href="#main">{t.header.skip}</a>
+  <ScrollToTop/>
   <AppHeader/>
   <main id="main"><Routes>
    {/* «/»: гость — лендинг с регистрацией, вошедший — главная (адрес тот же, как в API.md) */}
@@ -67,13 +73,15 @@ function App(){
    </Route>
    {/* 🔓 Только фронтенд */}
    <Route path={PATHS.status} element={<Status/>}/>
+   <Route path={PATHS.privacy} element={<LegalPage doc="privacy"/>}/>
+   <Route path={PATHS.terms} element={<LegalPage doc="terms"/>}/>
    {/* Старые адреса */}
    <Route path="/dashboard" element={<Moved to={PATHS.home}/>}/>
    <Route path="/tutor" element={<Moved to={PATHS.chats}/>}/>
    <Route path="/calendar" element={<Moved to={PATHS.homework}/>}/>
    <Route path="*" element={<section className="page"><h1>{t.notFound.title}</h1><p>{t.notFound.text}</p><Link className="button" to={PATHS.status}>{t.notFound.link}</Link></section>}/>
   </Routes></main>
-  <footer><Link to={PATHS.home}>LekseRadar.</Link><span>{t.footer.tagline}</span><Link to={PATHS.status}>{t.footer.status} <ArrowUpRight size={12}/></Link></footer>
+  <SiteFooter/>
  </div>;
 }
 createRoot(document.getElementById('root')!).render(<React.StrictMode><BrowserRouter><AuthProvider><I18nProvider><App/></I18nProvider></AuthProvider></BrowserRouter></React.StrictMode>);

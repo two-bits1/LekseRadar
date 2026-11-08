@@ -45,7 +45,7 @@ CI (`.github/workflows/frontend.yml`) запускает `pnpm test` и `pnpm bu
 | `src/api/types.ts` | типы из API.md: `User`, `Chat`, `Quiz`, `Question`, `Flashcard`, `ApiError` и тела запросов |
 | `src/auth.tsx` | вход/выход, токен, `RequireAuth` для 🔒-страниц |
 | `src/forms.tsx` | поле формы с ошибкой; ошибки бэкенда (по-русски) → свой текст по коду ответа для nb/en |
-| `src/pages/` | `Landing` (гость на «/»), `Account` (вход, регистрация с кодом, профиль), `Dashboard`, `Homework` (ДЗ, «Oppdater»), `Progress` (прогресс, история), `Chats` (тьютор), `Quiz`, `Flashcards`, `Other` (настройки, /status) |
+| `src/pages/` | `Landing` (гость на «/»), `Account` (вход, регистрация с кодом, профиль), `Dashboard`, `Homework` (ДЗ, «Oppdater»), `Progress` (прогресс, история), `Chats` (тьютор), `Quiz`, `Flashcards`, `Other` (настройки, /status), `Legal` (/privacy и /terms, тексты в `src/legal/`) |
 | `src/components/Platforms.tsx` | `/settings/platforms`: Canvas, Teams (код Microsoft), itslearning (вход на сайте школы), InSchool, Google Classroom (вход Google) |
 | `src/components/platformLogic.ts` | тело запроса платформы, обязательные поля, состояние карточки, возврат от Google |
 | `src/pages/quizLogic.ts` | правила API.md: ответ multiple_choice — JSON-строкой, оценки карточек 1/3/4/5 |

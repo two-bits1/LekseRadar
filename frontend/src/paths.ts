@@ -17,4 +17,6 @@ export const PATHS = {
   // Только фронтенд, в API.md их нет:
   settings: '/settings',
   status: '/status',
+  privacy: '/privacy',
+  terms: '/terms',
 } as const;

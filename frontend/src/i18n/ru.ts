@@ -3,7 +3,14 @@ import type { Dict } from './nb';
 export const ru: Dict = {
   nav: { main: 'Главное меню', calendar: 'Календарь', flashcards: 'Карточки', tutor: 'ИИ-наставник', profile: 'Профиль', settings: 'Настройки' },
   header: { home: 'LekseRadar — обзор', login: 'Войти', skip: 'Перейти к содержимому' },
-  footer: { tagline: 'Учись понемногу. Понимай больше.', status: 'Прототип · Статус разработки' },
+  footer: {
+    tagline: 'Учись понемногу. Понимай больше.',
+    about: 'Все домашние задания из Canvas, Teams, itslearning, Visma InSchool и Google Classroom в одном месте — и ИИ-репетитор, который помогает в них разобраться.',
+    nav: 'Нижнее меню', project: 'Проект', legal: 'Документы',
+    status: 'Статус разработки', source: 'Исходный код на GitHub', feedback: 'Оставить отзыв',
+    privacy: 'Политика конфиденциальности', terms: 'Условия использования', security: 'Сообщить об уязвимости',
+    made: 'Сделано на хакатоне Oslo Sprint 2026', demo: 'Прототип — не вводите настоящие данные учеников.', external: '(откроется в новой вкладке)',
+  },
   settings: {
     eyebrow: 'ТВОЙ МАЛЕНЬКИЙ УГОЛОК', title: 'Всё так, как тебе удобно.', intro: 'Настрой LekseRadar под себя.',
     appearance: 'Вид и язык', theme: 'Тема',
