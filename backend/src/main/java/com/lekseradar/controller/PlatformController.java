@@ -90,7 +90,7 @@ public class PlatformController {
     @DeleteMapping("/{platform}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Отключить платформу", description = "Доступ и задания этой платформы удаляются. "
-            + "Чаты и квизы по этим заданиям остаются без ссылки на задание. У Classroom доступ отзывается и в Google")
+            + "Вместе с ними удаляются чаты, квизы, карточки, ответы и история по этим заданиям. У Classroom доступ отзывается и в Google")
     public void disconnect(@CurrentUser UserEntity user, @PathVariable String platform) {
         platforms.disconnect(user.getId(), parse(platform));
     }

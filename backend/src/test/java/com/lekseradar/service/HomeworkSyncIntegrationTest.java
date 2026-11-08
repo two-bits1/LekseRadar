@@ -103,7 +103,7 @@ class HomeworkSyncIntegrationTest {
     }
 
     @Test
-    void disconnectRemovesAssignmentsButKeepsChats() throws Exception {
+    void disconnectRemovesAssignmentsAndEverythingMadeFromThem() throws Exception {
         Long userId = TestUsers.register(auth, mail, "disconnect-" + System.nanoTime() + "@example.com",
                 "password123", "Disconnect Elev").user().id();
         when(collector.collect(anyMap())).thenReturn(new CollectResult(JSON.readTree(ITEMS),
@@ -111,16 +111,54 @@ class HomeworkSyncIntegrationTest {
         platforms.connect(userId, PlatformEnum.CANVAS,
                 JSON.readTree("{\"base_url\": \"https://uio.instructure.com\", \"token\": \"t\"}"));
         Long first = assignments.findForUser(userId).get(0).getId();
-        jdbc.update("INSERT INTO chat_sessions (user_id, assignment_id, title) VALUES (?, ?, 'Om Oblig 1')", userId, first);
+
+        // по заданию: чат с сообщением, квиз из набора вопросов, карточка из него, событие «квиз начат»
+        Long chat = jdbc.queryForObject("INSERT INTO chat_sessions (user_id, assignment_id, title) VALUES (?, ?, 'Om Oblig 1') RETURNING id",
+                Long.class, userId, first);
+        jdbc.update("INSERT INTO chat_messages (session_id, role, content) VALUES (?, 'student', 'Hjelp')", chat);
+        Long subject = jdbc.queryForObject("INSERT INTO subjects (name, key) VALUES ('Test', ?) RETURNING id", Long.class,
+                "test-" + System.nanoTime());
+        Long set = quizSet(subject, "Oblig 1");
+        Long exercise = exercise(set);
+        Long quiz = jdbc.queryForObject("INSERT INTO quizzes (user_id, assignment_id, title, topic, level, quiz_set_id) "
+                + "VALUES (?, ?, 'Oblig 1', 'Oblig 1', 'intermediate', ?) RETURNING id", Long.class, userId, first, set);
+        jdbc.update("INSERT INTO flashcard_progress (user_id, exercise_id) VALUES (?, ?)", userId, exercise);
+        jdbc.update("INSERT INTO user_events (user_id, type, ref_table, ref_id) VALUES (?, 'quiz_started', 'quizzes', ?)", userId, quiz);
+
+        // не по платформе: свой квиз и карточка остаются
+        Long ownSet = quizSet(subject, "Brøk");
+        Long ownExercise = exercise(ownSet);
+        jdbc.update("INSERT INTO quizzes (user_id, title, topic, level, quiz_set_id) VALUES (?, 'Brøk', 'Brøk', 'intermediate', ?)",
+                userId, ownSet);
+        jdbc.update("INSERT INTO flashcard_progress (user_id, exercise_id) VALUES (?, ?)", userId, ownExercise);
 
         platforms.disconnect(userId, PlatformEnum.CANVAS);
         em.clear();
 
         assertThat(assignments.findForUser(userId)).isEmpty();
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM platform_connections WHERE user_id = ?", Integer.class, userId))
-                .isZero();
-        // чат по заданию остался, ссылка на задание обнулилась
-        assertThat(jdbc.queryForList("SELECT assignment_id FROM chat_sessions WHERE user_id = ?", userId))
-                .singleElement().satisfies(row -> assertThat(row.get("assignment_id")).isNull());
+        assertThat(count("SELECT count(*) FROM platform_connections WHERE user_id = ?", userId)).isZero();
+        assertThat(count("SELECT count(*) FROM chat_sessions WHERE user_id = ?", userId)).isZero();
+        assertThat(count("SELECT count(*) FROM quizzes WHERE user_id = ? AND topic = 'Oblig 1'", userId)).isZero();
+        assertThat(count("SELECT count(*) FROM user_events WHERE user_id = ? AND ref_table = 'quizzes'", userId)).isZero();
+        assertThat(jdbc.queryForList("SELECT exercise_id FROM flashcard_progress WHERE user_id = ?", Long.class, userId))
+                .containsExactly(ownExercise);
+        assertThat(count("SELECT count(*) FROM quizzes WHERE user_id = ? AND topic = 'Brøk'", userId)).isEqualTo(1);
+        // общий набор вопросов не удаляется: им могут пользоваться другие ученики
+        assertThat(count("SELECT count(*) FROM exercises WHERE id = ?", exercise)).isEqualTo(1);
+    }
+
+    private Long quizSet(Long subject, String topic) {
+        return jdbc.queryForObject("INSERT INTO quiz_sets (subject_id, topic, topic_key, level, title, question_count, "
+                + "source_json, content_hash) VALUES (?, ?, lower(?), 'intermediate', ?, 1, '{}', ?) RETURNING id",
+                Long.class, subject, topic, topic, topic, "hash-" + System.nanoTime());
+    }
+
+    private Long exercise(Long set) {
+        return jdbc.queryForObject("INSERT INTO exercises (topic, level, statement, correct_answer, answer_type, quiz_set_id, "
+                + "position) VALUES ('t', 'intermediate', '1+1?', '2', 'exact', ?, 1) RETURNING id", Long.class, set);
+    }
+
+    private int count(String sql, Object... args) {
+        return jdbc.queryForObject(sql, Integer.class, args);
     }
 }

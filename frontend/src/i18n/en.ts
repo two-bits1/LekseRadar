@@ -29,7 +29,7 @@ export const en: Dict = {
   },
   platforms: {
     connect: 'Connect', connecting: 'Connecting …', connected: 'Connected', disconnect: 'Disconnect', confirmDisconnect: 'Yes, disconnect', cancel: 'Cancel',
-    disconnectHint: (name: string) => `Assignments from ${name} will be deleted from LekseRadar. Your chats and quizzes stay.`,
+    disconnectHint: (name: string) => `Assignments from ${name} will be deleted from LekseRadar, together with the chats, quizzes and flashcards you made for them.`,
     reconnect: 'Needs reconnecting', failing: 'Fetching failed', retry: 'Try again', notConnected: 'Not connected',
     saved: 'Connected. Fetching your homework now.', required: 'Fill in the missing fields.',
     lastSynced: (d: string) => `Last updated ${d}`, never: 'Not fetched yet',

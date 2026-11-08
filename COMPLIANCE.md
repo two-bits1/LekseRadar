@@ -57,7 +57,7 @@ GDPR Chapter V) and the hosting regions should be checked for each of them.
 |---|---|
 | Access (Art. 15) | Partly: the student can see their profile, assignments, chats, quizzes and history in the app. No full export. |
 | Rectification (Art. 16) | Partly: name, language, time zone and password can be changed (`PATCH /api/v1/users/me`, `PUT /api/v1/users/me/password`). |
-| Erasure (Art. 17) | **Missing**: no account deletion (`backend/src/main/java/com/lekseradar/controller/UserController.java`). Chats can be deleted; disconnecting a platform deletes its assignments. |
+| Erasure (Art. 17) | **Missing**: no account deletion (`backend/src/main/java/com/lekseradar/controller/UserController.java`). Chats can be deleted; disconnecting a platform deletes its assignments and the chats, quizzes, flashcards and history made for them. |
 | Portability (Art. 20) | **Missing**: no export. |
 | Objection / withdrawal | Email reminders can be turned off. Other processing has no opt-out. |
 

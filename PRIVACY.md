@@ -60,9 +60,9 @@ see [COMPLIANCE.md](COMPLIANCE.md).
 ## Retention and deletion
 
 - Data is kept until it is deleted. There are no automatic deletion periods yet.
-- **Disconnecting a platform** deletes the stored access and all assignments from that platform. Chats and quizzes
-  you made about those assignments are kept, without the link to the assignment
-  (`service/PlatformService.java`, `database/migrations/V26__disconnect_removes_assignments.sql`).
+- **Disconnecting a platform** deletes the stored access, all assignments from that platform and everything made for
+  them: chats, quizzes, flashcards, answers and activity history. Shared question sets used by other students are kept
+  (`repository/AssignmentRepository.java`, `service/PlatformService.java`, `database/migrations/V26__disconnect_removes_assignments.sql`).
 - **Deleting a chat** deletes it with all its messages (`controller/ChatController.java`).
 - **Email reminders** can be turned off in Settings (`users.email_reminders`).
 - **Deleting an account is not possible yet.** There is no button or API for it. Account deletion and data export
