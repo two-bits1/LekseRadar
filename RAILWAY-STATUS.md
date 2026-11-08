@@ -19,7 +19,7 @@
 | Что | Причина | Что сделать | Кто |
 |---|---|---|---|
 | Регистрация и напоминания на почту | у бэкенда нет `MAIL_USERNAME` / `MAIL_PASSWORD`, письма с кодом и напоминания не отправляются (503) | задать их в Railway → backend → Variables; для показа можно `MAIL_DEV_LOG_CODES=true` (код в Deploy Logs) | №2 |
-| Исправления квизов и карточек | на облачной базе нет V23–V25 (V25 — напоминания на почту) и нового промпта квиза | `git switch main-test-4.0`, `git pull`, временно Public Access у Postgres, `python3 database/setup_cloud_db.py`, Public Access убрать | №3 |
+| Исправления квизов и карточек | на облачной базе нет V23–V26 (V25 — напоминания на почту) и нового промпта квиза | `git switch main-test-4.0`, `git pull`, временно Public Access у Postgres, `python3 database/setup_cloud_db.py`, Public Access убрать | №3 |
 | Исправления фронта (чат, лого, профиль, карточки) | Vercel собирает Production не из `main-test-4.0` | Vercel → Settings → Git → Production Branch: `main-test-4.0` → Redeploy | №1 |
 | Google Classroom | нет `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (503) | задать их; в Google Cloud Console redirect URI `https://lekseradar-eight.vercel.app/settings/platforms` | №2 |
 | Безопасность | в `backend/.env.example` был вписан пароль приложения Gmail | отозвать его и оставить `MAIL_PASSWORD=` | №2 |

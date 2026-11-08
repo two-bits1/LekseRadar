@@ -21,7 +21,7 @@
 - [ ] **Чтобы исправления из main-test-4.0 попали на сайт** (квизы, карточки, чат, профиль, вход):
   1. Railway → `backend` → Settings → Source → Branch: `main-test-4.0` (Root Directory `backend` тот же);
   2. Railway → `collector` → Branch: `main-test-4.0` (Root Directory `homework-collector`);
-  3. **№3**: V23–V25 и новый промпт квиза на облачную базу (V25 — напоминания на почту): `git switch main-test-4.0 && git pull`, временно Public Access,
+  3. **№3**: V23–V26 и новый промпт квиза на облачную базу (V25 — напоминания на почту): `git switch main-test-4.0 && git pull`, временно Public Access,
      `python3 database/setup_cloud_db.py`, Public Access убрать;
   4. Vercel → Settings → Git → Production Branch: `main-test-4.0` → Redeploy.
 - [ ] По желанию: `TEAMS_CLIENT_ID` у collector (вход в Teams по коду).

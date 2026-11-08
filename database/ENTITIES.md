@@ -136,7 +136,7 @@ erDiagram
 
 #### `assignments`
 
-ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id) через `sync_assignments()` (V21). Отключение платформы удаляет её задания: `remove_platform_assignments()` (V26). Бэкенд: 📝 `Assignment`.
+ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id) через `sync_assignments()` (V21). Отключение платформы удаляет её задания (бэкенд, `AssignmentRepository.removePlatformAssignments`); V26 убрала задания платформ, отключённых раньше. Бэкенд: 📝 `Assignment`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|

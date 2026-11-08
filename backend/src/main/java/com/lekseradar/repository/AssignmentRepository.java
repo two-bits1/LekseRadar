@@ -52,14 +52,31 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
     @Query(value = "SELECT added, updated FROM sync_assignments(:userId, CAST(:items AS jsonb))", nativeQuery = true)
     SyncCounts syncAssignments(@Param("userId") Long userId, @Param("items") String items);
 
+    /** Файлы ДЗ с платформы ({@code materials.source = 'platform'}), привязанные к её заданиям ученика. */
+    @Modifying
+    @Query(value = """
+            DELETE FROM materials m USING assignments a
+            WHERE m.assignment_id = a.id AND m.source = 'platform'
+              AND a.user_id = :userId AND a.source = CAST(:source AS platform)
+            """, nativeQuery = true)
+    int deletePlatformFiles(@Param("userId") Long userId, @Param("source") String source);
+
+    /** Задания ученика с этой платформы. Чаты и квизы по ним остаются (ON DELETE SET NULL), напоминания удаляются. */
+    @Modifying
+    @Query(value = "DELETE FROM assignments WHERE user_id = :userId AND source = CAST(:source AS platform)",
+            nativeQuery = true)
+    int deleteBySource(@Param("userId") Long userId, @Param("source") String source);
+
     /**
-     * Ученик отключил платформу: удалить её задания и файлы ДЗ с неё (функция базы V26). Чаты и квизы остаются
-     * без ссылки на задание (ON DELETE SET NULL), напоминания удаляются. Вызывать в транзакции.
+     * Ученик отключил платформу: удалить её задания и файлы ДЗ с неё. Вызывать в транзакции. Обычный SQL, без функции
+     * базы: работает и на базе, куда V26 (очистка старых остатков) ещё не накатили.
      * @param source значение enum'а в базе ("classroom", "canvas"…)
      * @return сколько заданий удалено
      */
-    @Query(value = "SELECT remove_platform_assignments(:userId, CAST(:source AS platform))", nativeQuery = true)
-    int removePlatformAssignments(@Param("userId") Long userId, @Param("source") String source);
+    default int removePlatformAssignments(Long userId, String source) {
+        deletePlatformFiles(userId, source);
+        return deleteBySource(userId, source);
+    }
 
     /** Несданные задания со сроком в ближайшие {@code within} (например "24 hours"), о которых ещё не было письма (V25). */
     @Query(value = "SELECT * FROM assignments_to_remind(CAST(:within AS interval))", nativeQuery = true)
