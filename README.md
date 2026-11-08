@@ -121,7 +121,7 @@ browser ──► frontend (React + Vite) ──/api/v1──► backend (Spring
 | Frontend | `frontend/` | React 19, TypeScript, Vite, React Router, KaTeX, lucide-react, Vitest, Vercel config |
 | Backend | `backend/` | Java 21, Spring Boot 3.5, Spring Security + JWT, Spring Data JPA, Spring Mail, springdoc (Swagger) |
 | Collector | `homework-collector/` | Python 3.12, FastAPI, httpx, pydantic |
-| Database | `database/` | PostgreSQL 16, SQL migrations V1–V25 with stored functions, `migrate.py`, Docker Compose |
+| Database | `database/` | PostgreSQL 16, SQL migrations V1–V26 with stored functions, `migrate.py`, Docker Compose |
 | AI content | `ai-content/` | Prompts (Markdown), study materials, loader `load/load.py` |
 
 More detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). API reference: [docs/API.md](docs/API.md).
@@ -173,7 +173,7 @@ assistant (commit author "Claude"); those are counted for the team member whose 
 **@SatohyNo — Python API, Database & AI Content Developer; integration and deploy** (188 commits)
 - Homework collector with adapters for Canvas, Teams, itslearning, Visma InSchool and Google Classroom, and the
   FastAPI service that the backend calls.
-- PostgreSQL schema and migrations V1–V25 with stored functions: quiz import and scoring, spaced repetition,
+- PostgreSQL schema and migrations V1–V26 with stored functions: quiz import and scoring, spaced repetition,
   progress and dashboard views, `sync_assignments`, `chat_prompt_vars`, reminders.
 - AI prompts, study materials and the loader script.
 - Built the integrated test branches (`main-test-1.0` to `main-test-4.0`), ran the checks and deployed to Railway.

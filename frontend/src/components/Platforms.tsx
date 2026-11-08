@@ -218,6 +218,7 @@ function PlatformCard({ pl, conn, classroomError: cErr, pending = false, justCon
         {!pending && (state === 'off' || state === 'reconnect') && <button className="btn btn-sm" aria-expanded={open} onClick={() => setOpen(o => !o)}>{open ? p.cancel : p.connect}</button>}
       </div>
     </div>
+    {confirm && <p role="alert" className="feedback warning">{p.disconnectHint(pl.name)}</p>}
     {pending && <p role="status" className="feedback plat-wait"><RefreshCw size={14} className="spin" />{p.classroomConnecting}</p>}
     {(saved || justConnected) && state === 'on' && <p role="status" className="feedback success"><Check size={16} />{p.saved} <Link to={PATHS.homework}>{p.seeHomework}</Link></p>}
     {(state === 'reconnect' || state === 'error') && conn?.lastError && <p role="alert" className="feedback danger">{conn.lastError}</p>}

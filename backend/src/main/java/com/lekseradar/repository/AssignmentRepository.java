@@ -52,6 +52,15 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
     @Query(value = "SELECT added, updated FROM sync_assignments(:userId, CAST(:items AS jsonb))", nativeQuery = true)
     SyncCounts syncAssignments(@Param("userId") Long userId, @Param("items") String items);
 
+    /**
+     * Ученик отключил платформу: удалить её задания и файлы ДЗ с неё (функция базы V26). Чаты и квизы остаются
+     * без ссылки на задание (ON DELETE SET NULL), напоминания удаляются. Вызывать в транзакции.
+     * @param source значение enum'а в базе ("classroom", "canvas"…)
+     * @return сколько заданий удалено
+     */
+    @Query(value = "SELECT remove_platform_assignments(:userId, CAST(:source AS platform))", nativeQuery = true)
+    int removePlatformAssignments(@Param("userId") Long userId, @Param("source") String source);
+
     /** Несданные задания со сроком в ближайшие {@code within} (например "24 hours"), о которых ещё не было письма (V25). */
     @Query(value = "SELECT * FROM assignments_to_remind(CAST(:within AS interval))", nativeQuery = true)
     List<AssignmentEntity> findToRemind(@Param("within") String within);

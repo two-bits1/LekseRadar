@@ -2,7 +2,7 @@
 
 Все таблицы, перечисления, виды и функции базы и как они отображаются в бэкенде (JPA-сущности, DTO)
 и во фронтенде (TypeScript-типы). База — ветка `PythonAPI`, бэкенд — ветка `JavaAPI-setup`.
-Источник правды — миграции `database/migrations/V1–V25`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
+Источник правды — миграции `database/migrations/V1–V26`. Бэкенд таблицы не создаёт (`ddl-auto: none`),
 поэтому поля сущностей должны совпадать с колонками ниже.
 
 **Состояние бэкенда.** Сейчас в `JavaAPI-setup` есть только `User`, `ChatSession`, `ChatMessage`, `MessageRole`
@@ -136,7 +136,7 @@ erDiagram
 
 #### `assignments`
 
-ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id) через `sync_assignments()` (V21). Бэкенд: 📝 `Assignment`.
+ДЗ из `collect()`. При каждой синхронизации UPSERT по (user_id, source, external_id) через `sync_assignments()` (V21). Отключение платформы удаляет её задания: `remove_platform_assignments()` (V26). Бэкенд: 📝 `Assignment`.
 
 | Колонка | PostgreSQL | Java | NULL | По умолчанию | Ключи | Описание |
 |---|---|---|---|---|---|---|

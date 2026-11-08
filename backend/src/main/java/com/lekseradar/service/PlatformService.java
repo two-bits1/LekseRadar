@@ -12,6 +12,7 @@ import com.lekseradar.exception.BadRequestException;
 import com.lekseradar.exception.TooManyRequestsException;
 import com.lekseradar.model.PlatformConnectionEntity;
 import com.lekseradar.model.enums.PlatformEnum;
+import com.lekseradar.repository.AssignmentRepository;
 import com.lekseradar.repository.PlatformConnectionRepository;
 import com.lekseradar.security.CredentialsCipher;
 import com.lekseradar.security.RateLimiter;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
  * Подключение платформ ({@code POST /platforms/{platform}}): тело — доступы в формате homework-collector (snake_case),
  * как их собирает фронт. Проверить адрес (SSRF) → проверить доступ одним collect() → сохранить зашифрованным →
  * сразу записать собранные ДЗ. 401 отсюда не отдаётся никогда (фронт на 401 разлогинивает): доступ не принят — 422.
+ * Отключение ({@code DELETE /platforms/{platform}}) удаляет доступ и задания этой платформы.
  */
 @Service
 public class PlatformService {
@@ -61,6 +63,7 @@ public class PlatformService {
     private static final int MAX_COOKIES = 30;
 
     private final PlatformConnectionRepository connections;
+    private final AssignmentRepository assignments;
     private final CollectorClient collector;
     private final CredentialsCipher cipher;
     private final HomeworkSyncService sync;
@@ -74,11 +77,13 @@ public class PlatformService {
     private final Set<String> classroomRedirects;
     static final String CLASSROOM_PATH = "/settings/platforms";
 
-    public PlatformService(PlatformConnectionRepository connections, CollectorClient collector, CredentialsCipher cipher,
+    public PlatformService(PlatformConnectionRepository connections, AssignmentRepository assignments,
+                           CollectorClient collector, CredentialsCipher cipher,
                            HomeworkSyncService sync, RateLimiter limiter, ObjectMapper json,
                            PlatformTransactionManager txManager, AppConfig cfg, GoogleOAuthClient google,
                            OAuthStates states) {
         this.connections = connections;
+        this.assignments = assignments;
         this.collector = collector;
         this.cipher = cipher;
         this.sync = sync;
@@ -200,9 +205,25 @@ public class PlatformService {
         return r;
     }
 
-    /** ДЗ этой платформы остаются в базе. */
+    /**
+     * Удалить доступ и задания этой платформы одной транзакцией (V26). Задания удаляются, даже если доступа уже нет:
+     * так повторное отключение убирает задания, оставшиеся с прошлого раза. У Classroom после этого доступ
+     * отзывается и в Google (по возможности: ошибка Google не мешает отключению).
+     */
     public void disconnect(Long userId, PlatformEnum platform) {
-        connections.findByUserIdAndPlatform(userId, platform).ifPresent(connections::delete);
+        Optional<PlatformConnectionEntity> conn = tx.execute(status -> {
+            Optional<PlatformConnectionEntity> c = connections.findByUserIdAndPlatform(userId, platform);
+            c.ifPresent(connections::delete);
+            assignments.removePlatformAssignments(userId, platform.value());
+            return c;
+        });
+        if (platform == PlatformEnum.CLASSROOM && conn != null && conn.isPresent()) {
+            try {
+                google.revoke(cipher.decrypt(conn.get().getCredentialsEnc()));
+            } catch (IllegalStateException e) {
+                // доступ не расшифровать (сменился CREDENTIALS_KEY): отзывать нечего, отключение уже сделано
+            }
+        }
     }
 
     private ObjectNode canvas(JsonNode body) {

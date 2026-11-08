@@ -30,6 +30,8 @@ class GoogleOAuthClientTest {
     private final AtomicReference<String> lastForm = new AtomicReference<>();
     private final AtomicReference<Integer> status = new AtomicReference<>(200);
     private final AtomicReference<String> reply = new AtomicReference<>();
+    private final AtomicReference<String> revoked = new AtomicReference<>();
+    private final AtomicReference<Integer> revokeStatus = new AtomicReference<>(200);
     private GoogleOAuthClient client;
 
     @BeforeEach
@@ -43,6 +45,11 @@ class GoogleOAuthClientTest {
             ex.getResponseBody().write(out);
             ex.close();
         });
+        server.createContext("/revoke", ex -> {
+            revoked.set(URLDecoder.decode(new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8), StandardCharsets.UTF_8));
+            ex.sendResponseHeaders(revokeStatus.get(), -1);
+            ex.close();
+        });
         server.start();
         client = new GoogleOAuthClient("id-123.apps.googleusercontent.com", "GOCSPX-secret", "https://accounts.google.com/o/oauth2/v2/auth",
                 "http://127.0.0.1:" + server.getAddress().getPort() + "/token", Clock.fixed(NOW, ZoneOffset.UTC));
@@ -51,6 +58,19 @@ class GoogleOAuthClientTest {
     @AfterEach
     void stop() {
         server.stop(0);
+    }
+
+    @Test
+    void revokeSendsRefreshTokenToGoogle() throws Exception {
+        client.revoke(JSON.readTree("{\"access_token\": \"ya29.a\", \"refresh_token\": \"1//r\"}"));
+        assertEquals("token=1//r", revoked.get());
+    }
+
+    @Test
+    void revokeFailureDoesNotThrow() throws Exception {
+        revokeStatus.set(400);   // invalid_token: уже отозван
+        assertDoesNotThrow(() -> client.revoke(JSON.readTree("{\"access_token\": \"ya29.a\"}")));
+        assertEquals("token=ya29.a", revoked.get());
     }
 
     @Test

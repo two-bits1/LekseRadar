@@ -21,6 +21,7 @@ export const nb = {
   },
   platforms: {
     connect: 'Koble til', connecting: 'Kobler til …', connected: 'Tilkoblet', disconnect: 'Koble fra', confirmDisconnect: 'Ja, koble fra', cancel: 'Avbryt',
+    disconnectHint: (name: string) => `Oppgavene fra ${name} slettes fra LekseRadar. Samtaler og quizer beholdes.`,
     reconnect: 'Må kobles til på nytt', failing: 'Henting feilet', retry: 'Prøv igjen', notConnected: 'Ikke tilkoblet',
     saved: 'Koblet til. Leksene hentes nå.', required: 'Fyll ut feltene som mangler.',
     lastSynced: (d: string) => `Sist oppdatert ${d}`, never: 'Ikke hentet ennå',

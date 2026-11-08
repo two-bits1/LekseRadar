@@ -104,6 +104,25 @@ class HomeworkSyncServiceTest {
     }
 
     @Test
+    void platformDisconnectedDuringSyncDoesNotGetItsAssignmentsBack() throws Exception {
+        PlatformConnectionEntity canvas = connection(1, PlatformEnum.CANVAS, "{\"token\": \"t\"}");
+        PlatformConnectionEntity classroom = connection(2, PlatformEnum.CLASSROOM, "{\"access_token\": \"ya29\"}");
+        when(connections.findByUserIdOrderByPlatform(USER)).thenReturn(List.of(canvas, classroom));
+        JsonNode items = JSON.readTree("[{\"source\": \"canvas\", \"id\": \"c1\"}, {\"source\": \"classroom\", \"id\": \"g1\"}]");
+        when(collector.collect(anyMap())).thenAnswer(inv -> {
+            // пока collector ходит по платформам, ученик отключает Classroom
+            when(connections.findById(2L)).thenReturn(Optional.empty());
+            return new CollectResult(items, Map.of("canvas", new Source(true, 1, null, false),
+                    "classroom", new Source(true, 1, null, false)), Map.of());
+        });
+
+        SyncResponseDTO res = service.sync(USER);
+
+        verify(assignments).syncAssignments(eq(USER), argThat(s -> s.contains("\"c1\"") && !s.contains("\"g1\"")));
+        assertEquals(List.of(new SourceStatusResponseDTO(PlatformEnum.CANVAS, true, 1, null, false)), res.sources());
+    }
+
+    @Test
     void needsReconnectIsSkipped() throws Exception {
         PlatformConnectionEntity c = connection(1, PlatformEnum.CANVAS, "{\"token\": \"t\"}");
         c.markSynced(false, "Токен Canvas отозван", true);
