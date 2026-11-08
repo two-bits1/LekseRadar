@@ -143,6 +143,23 @@ export const en: Dict = {
     sessionEyebrow: 'Session finished', sessionTitle: (n: number) => `You reviewed ${n} cards`, remembered: 'remembered',
     sessionText: (learned: number) => `${learned} cards learned in total. The ones you struggled with will come back soon.`,
     more: 'Check for more cards', toHome: 'To the overview',
+    practice: 'What do you want to practise?', topic: 'Topic', allTopics: 'All topics', shuffle: 'Shuffle',
+    modes: { due: 'Due now', hard: 'Hard to remember', learned: 'Already know', new: 'New', all: 'All cards' },
+    modeHints: {
+      due: 'Spaced repetition: cards that are due today.',
+      hard: 'Cards you forgot or marked “Hard”, the hardest first.',
+      learned: 'Cards you already remember — check they stick.',
+      new: 'Cards you have not seen yet.',
+      all: 'Every card in the deck.',
+    },
+    modeEmpty: {
+      due: 'Nothing is due right now. Practise hard cards or the ones you already know.',
+      hard: 'No hard cards. Cards you forget or mark “Hard” show up here.',
+      learned: 'No learned cards yet. A card counts as learned after you answer “Remembered”.',
+      new: 'No new cards. Make cards with AI below.',
+      all: 'No cards in this topic.',
+    },
+    again: 'Practise again',
   },
   hw: {
     title: 'Homework', intro: 'All homework from your school platforms, nearest deadline first.',

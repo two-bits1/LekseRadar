@@ -1,7 +1,8 @@
-// Флеш-карты на настоящем API (API.md, «Флеш-карты»): к повторению → переворот → оценка 0–5 (SM-2).
-import { useCallback, useEffect, useState } from 'react';
+// Флеш-карты на настоящем API (API.md, «Флеш-карты»): выбор колоды (к повторению, трудные, уже знаю, новые, все;
+// тема; перемешать) → переворот → оценка 0–5 (SM-2). Какие карточки попадут в колоду — flashcardDeck.ts.
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, ListChecks, RotateCcw } from 'lucide-react';
+import { Check, ListChecks, RotateCcw, Shuffle } from 'lucide-react';
 import { PATHS } from '../paths';
 import { flashcardsApi } from '../api/endpoints';
 import type { ApiError, Flashcard, FlashcardStats } from '../api/types';
@@ -11,24 +12,40 @@ import { ResultCard } from '../components/ResultCard';
 import { useT } from '../i18n';
 import { GRADES } from './quizLogic';
 import { SubjectTopicForm } from './Quiz';
+import { ALL_TOPICS, DECK_MODES, buildDeck, counts, topics, type DeckMode } from './flashcardDeck';
 
 type GradeKey = keyof typeof GRADES;
 
 export function Flashcards() {
   const t = useT(); const c = t.cards;
   const [stats, setStats] = useState<FlashcardStats | null>(null);
-  const [due, setDue] = useState<Flashcard[] | null>(null);
+  const [all, setAll] = useState<Flashcard[] | null>(null);   // вся колода с прогрессом
+  const [due, setDue] = useState<Flashcard[] | null>(null);   // карточки этого занятия
+  const [mode, setMode] = useState<DeckMode>('due');
+  const [topic, setTopic] = useState<string>(ALL_TOPICS);
+  const [shuffle, setShuffle] = useState(false);
   const [index, setIndex] = useState(0); const [flipped, setFlipped] = useState(false);
   const [busy, setBusy] = useState(false); const [error, setError] = useState<ApiError | null>(null);
   const [generated, setGenerated] = useState<number | null>(null);
   const [session, setSession] = useState<Record<GradeKey, number>>({ again: 0, hard: 0, good: 0, easy: 0 });  // оценки за это занятие
 
-  const load = useCallback(() => {
+  // Новое занятие: колода заново с сервера (прогресс после оценок свежий), потом отбор по режиму и теме.
+  const load = useCallback((m: DeckMode = mode, tp: string = topic, sh: boolean = shuffle) => {
     setIndex(0); setFlipped(false); setSession({ again: 0, hard: 0, good: 0, easy: 0 });
     flashcardsApi.stats().then(setStats).catch(() => {});
-    flashcardsApi.due().then(setDue).catch(e => { setDue([]); setError(asApiError(e, t.common)); });
-  }, []);
-  useEffect(load, [load]);
+    flashcardsApi.list().then(cards => {
+      const tps = topics(cards).map(x => x.key);
+      const tp2 = tp === ALL_TOPICS || tps.includes(tp) ? tp : ALL_TOPICS;
+      setAll(cards); setTopic(tp2); setDue(buildDeck(cards, m, tp2, sh));
+    }).catch(e => { setAll([]); setDue([]); setError(asApiError(e, t.common)); });
+  }, [mode, topic, shuffle]);
+  useEffect(() => { load(); }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+  const choose = (next: { mode?: DeckMode; topic?: string; shuffle?: boolean }) => {
+    const m = next.mode ?? mode, tp = next.topic ?? topic, sh = next.shuffle ?? shuffle;
+    setMode(m); setTopic(tp); setShuffle(sh); setError(null); load(m, tp, sh);
+  };
+  const modeCounts = useMemo(() => all ? counts(all, topic) : null, [all, topic]);
+  const topicList = useMemo(() => all ? topics(all) : [], [all]);
 
   const card = due?.[index];
   const reviewed = session.again + session.hard + session.good + session.easy;
@@ -64,6 +81,25 @@ export function Flashcards() {
     </div>
     {error && <p role="alert" className="feedback danger">{error.message}</p>}
 
+    {all && all.length > 0 && <div className="deck-picker">
+      <div className="deck-head">
+        <h2>{c.practice}</h2>
+        <div className="deck-tools">
+          {topicList.length > 1 && <label className="deck-topic"><span className="sr-only">{c.topic}</span>
+            <select value={topic} onChange={e => choose({ topic: e.target.value })}>
+              <option value={ALL_TOPICS}>{c.allTopics} ({all.length})</option>
+              {topicList.map(x => <option key={x.key} value={x.key}>{x.key || '—'} ({x.count})</option>)}
+            </select></label>}
+          <button type="button" className="deck-shuffle" aria-pressed={shuffle} onClick={() => choose({ shuffle: !shuffle })}><Shuffle size={15} />{c.shuffle}</button>
+        </div>
+      </div>
+      <div className="deck-modes" role="group" aria-label={c.practice}>
+        {DECK_MODES.map(m => <button key={m} type="button" className="deck-mode" aria-pressed={mode === m} onClick={() => choose({ mode: m })}>
+          {c.modes[m]}<span className="deck-count">{modeCounts?.[m] ?? 0}</span></button>)}
+      </div>
+      <p className="deck-hint">{c.modeHints[mode]}</p>
+    </div>}
+
     {due === null ? <p className="quiet-note">{t.common.loading}</p>
       : card ? <>
         <p className="dash-date">{[card.subject, card.topic].filter(Boolean).join(' · ')} · {c.progress(index + 1, due.length)}</p>
@@ -86,10 +122,11 @@ export function Flashcards() {
             { label: c.grades.hard, value: session.hard, tone: 'warning' },
             { label: c.grades.again, value: session.again, tone: 'danger' },
           ]}
-          footer={<><button className="btn btn-primary" onClick={load}><RotateCcw size={16} />{c.more}</button>
+          footer={<><button className="btn btn-primary" onClick={() => load()}><RotateCcw size={16} />{mode === 'due' ? c.more : c.again}</button>
             <Link className="btn" to={PATHS.quizzes}><ListChecks size={16} />{t.quiz.newTitle}</Link>
             <Link className="btn" to={PATHS.home}>{c.toHome}</Link></>} />
-      : <p className="feedback success"><Check size={17} />{stats && stats.cards > 0 ? (due.length ? c.done : c.none) : c.empty}</p>}
+      : all && all.length > 0 ? <p className={`feedback ${mode === 'due' ? 'success' : 'hint'}`}><Check size={17} />{due.length ? c.done : c.modeEmpty[mode]}</p>
+      : <p className="feedback success"><Check size={17} />{c.empty}</p>}
 
     <h2 className="section-label">{c.generateTitle}</h2>
     <p className="section-sub">{c.generateIntro}</p>

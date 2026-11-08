@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -26,19 +27,25 @@ public interface FlashcardRepository extends JpaRepository<FlashcardProgressEnti
         Integer getIntervalDays();
         Integer getReviews();
         Boolean getDue();
+        /** Сколько раз ответили «не помню» после того, как уже помнили (SM-2 lapses). */
+        Integer getLapses();
+        /** Лёгкость SM-2: 2.5 у новой карточки, меньше — запоминается труднее. */
+        BigDecimal getEase();
     }
 
     String CARD_COLUMNS = """
-            exercise_id AS exerciseId, quiz_set_id AS quizSetId, subject, topic, front, back, explanation,
-            next_review_at AS nextReviewAt, interval_days AS intervalDays, reviews, due
+            f.exercise_id AS exerciseId, f.quiz_set_id AS quizSetId, f.subject, f.topic, f.front, f.back, f.explanation,
+            f.next_review_at AS nextReviewAt, f.interval_days AS intervalDays, f.reviews, f.due, p.lapses, p.ease
             """;
+    /** Вид flashcards + прогресс SM-2 из flashcard_progress (lapses, ease нет в виде). */
+    String CARDS_FROM = " FROM flashcards f JOIN flashcard_progress p ON p.user_id = f.user_id AND p.exercise_id = f.exercise_id ";
 
-    @Query(value = "SELECT " + CARD_COLUMNS + " FROM flashcards WHERE user_id = :userId ORDER BY next_review_at",
+    @Query(value = "SELECT " + CARD_COLUMNS + CARDS_FROM + "WHERE f.user_id = :userId ORDER BY f.next_review_at",
             nativeQuery = true)
     List<Card> findCards(@Param("userId") Long userId);
 
     /** Что повторять сейчас. */
-    @Query(value = "SELECT " + CARD_COLUMNS + " FROM flashcards WHERE user_id = :userId AND due ORDER BY next_review_at",
+    @Query(value = "SELECT " + CARD_COLUMNS + CARDS_FROM + "WHERE f.user_id = :userId AND f.due ORDER BY f.next_review_at",
             nativeQuery = true)
     List<Card> findDueCards(@Param("userId") Long userId);
 

@@ -83,6 +83,8 @@ export type AnswerResult = {
 export type Flashcard = {
   exerciseId: number; subject: string | null; topic: string;
   front: string; back: string; explanation: string | null; nextReviewAt: string;
+  // Прогресс SM-2 (GET /flashcards): по нему выбираются «выученные» и «трудные» карточки
+  intervalDays?: number; reviews?: number; lapses?: number; ease?: number; due?: boolean;
 };
 
 export type FlashcardStats = { cards: number; dueNow: number; learned: number; reviews: number };
