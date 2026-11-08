@@ -24,7 +24,7 @@ Each item uses the same structure: **Problem**, **Why It Happened**, **Solution*
   dashboard, tutor, quizzes and flashcards to the real endpoints; M7 (`8f208fd`) checked mobile and docs.
   Backend error messages are shown by HTTP status code for nb/en, and the backend text is used for ru.
 - **Result:** All pages use the real API with no demo data. A later automated check found that all 40 frontend
-  API calls exist in the backend (see [README-TEST.md](README-TEST.md)).
+  API calls exist in the backend (see [README-TEST.md](docs/ru/README-TEST.md)).
 
 ### 2. Registration had to become a two-step flow
 - **Problem:** The backend added email verification, so `POST /auth/register` no longer returned a token.

@@ -6,19 +6,10 @@ LekseRadar collects a student's assignments from the school platforms they alrea
 itslearning, Visma InSchool and Google Classroom), sorts them by deadline, and then helps with the work itself:
 an AI tutor chat, AI-generated quizzes with explanations, flashcards with spaced repetition, and a progress dashboard.
 
-> This branch (`main-test-4.0`) is the integrated build of the three team branches: `PythonAPI` (#9),
-> `JavaAPI-setup` (#2) and `Frontend-setup` (#10). The previous README in Russian is kept at
+> `main` is the integrated build of the three team branches: `PythonAPI`, `JavaAPI-setup` and `Frontend-setup`. The previous README in Russian is kept at
 > [docs/README-RU.md](docs/README-RU.md).
 
-<table>
-  <tr>
-    <td align="center">
-      <h3>🏆 Oslo Sprint Hackathon</h3>
-      Built at the <a href="https://oslosprint.org/"><b>Oslo Sprint Hackathon</b></a>, 6–8 November 2026<br><br>
-      <b>Final Score: TBD</b> &nbsp;·&nbsp; <b>Final Placement: TBD</b>
-    </td>
-  </tr>
-</table>
+Built in 48 hours at [Oslo Sprint Hackathon](https://oslosprint.org/) 2026 (team of 3).
 
 ## Contents
 
@@ -210,17 +201,7 @@ assistant (commit author "Claude"); those are counted for the team member whose 
 
 ## Hackathon
 
-<table>
-  <tr>
-    <td>
-      <b>Event:</b> <a href="https://oslosprint.org/">Oslo Sprint Hackathon</a><br>
-      <b>Dates:</b> 6–8 November 2026<br>
-      <b>Project:</b> LekseRadar<br><br>
-      🏆 <b>Final Score: TBD</b><br>
-      🥇 <b>Final Placement: TBD</b>
-    </td>
-  </tr>
-</table>
+Built in 48 hours at [Oslo Sprint Hackathon](https://oslosprint.org/) 2026 (team of 3), 6–8 November 2026.
 
 ## Further Documentation
 
@@ -231,7 +212,7 @@ assistant (commit author "Claude"); those are counted for the team member whose 
 | [TERMS.md](TERMS.md) | Terms of use (also on the site at `/terms`) |
 | [COMPLIANCE.md](COMPLIANCE.md) | GDPR mapping (legal bases, rights, records of processing, processors) and the operator's to-do before launch |
 | [TECHNICAL_CHALLENGES.md](TECHNICAL_CHALLENGES.md) | Problems the team hit during development and how they were solved |
-| [CHANGES.md](CHANGES.md) | Fixes made after the team checked the integrated build (in Russian) |
-| [README-TEST.md](README-TEST.md) | Test results and known weak points (in Russian) |
+| [CHANGES.md](docs/ru/CHANGES.md) | Fixes made after the team checked the integrated build (in Russian) |
+| [README-TEST.md](docs/ru/README-TEST.md) | Test results and known weak points (in Russian) |
 | [TODO.md](TODO.md) | What is left to do |
 | [docs/README-RU.md](docs/README-RU.md) | Previous README in Russian |
