@@ -89,7 +89,8 @@ public class PlatformController {
 
     @DeleteMapping("/{platform}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Отключить платформу", description = "Доступ удаляется, ДЗ этой платформы остаются")
+    @Operation(summary = "Отключить платформу", description = "Доступ и задания этой платформы удаляются (V26). "
+            + "Чаты и квизы по этим заданиям остаются без ссылки на задание. У Classroom доступ отзывается и в Google")
     public void disconnect(@CurrentUser UserEntity user, @PathVariable String platform) {
         platforms.disconnect(user.getId(), parse(platform));
     }

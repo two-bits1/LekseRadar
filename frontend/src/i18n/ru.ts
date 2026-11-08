@@ -22,6 +22,7 @@ export const ru: Dict = {
   },
   platforms: {
     connect: 'Подключить', connecting: 'Подключаю …', connected: 'Подключено', disconnect: 'Отключить', confirmDisconnect: 'Да, отключить', cancel: 'Отмена',
+    disconnectHint: (name: string) => `Задания из ${name} удалятся из LekseRadar. Чаты и квизы останутся.`,
     reconnect: 'Нужно подключить заново', failing: 'Не удалось получить ДЗ', retry: 'Повторить', notConnected: 'Не подключено',
     saved: 'Подключено. ДЗ уже загружаются.', required: 'Заполни недостающие поля.',
     lastSynced: (d: string) => `Обновлено ${d}`, never: 'Ещё не загружалось',

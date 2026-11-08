@@ -8,6 +8,7 @@ import com.lekseradar.exception.BadRequestException;
 import com.lekseradar.exception.TooManyRequestsException;
 import com.lekseradar.model.PlatformConnectionEntity;
 import com.lekseradar.model.enums.PlatformEnum;
+import com.lekseradar.repository.AssignmentRepository;
 import com.lekseradar.repository.PlatformConnectionRepository;
 import com.lekseradar.security.CredentialsCipher;
 import com.lekseradar.security.RateLimiter;
@@ -41,6 +42,7 @@ class PlatformServiceTest {
     private static final long USER = 7L;
 
     private PlatformConnectionRepository connections;
+    private AssignmentRepository assignments;
     private CollectorClient collector;
     private HomeworkSyncService sync;
     private CredentialsCipher cipher;
@@ -51,6 +53,7 @@ class PlatformServiceTest {
     @BeforeEach
     void setUp() {
         connections = mock(PlatformConnectionRepository.class);
+        assignments = mock(AssignmentRepository.class);
         collector = mock(CollectorClient.class);
         sync = mock(HomeworkSyncService.class);
         cipher = new CredentialsCipher(Base64.getEncoder().encodeToString(new byte[32]), JSON);
@@ -59,7 +62,7 @@ class PlatformServiceTest {
                 new AppConfig.Platforms(List.of("canvas.uio.no")), null, null);
         google = mock(GoogleOAuthClient.class);
         states = new OAuthStates("unit-test-secret-unit-test-secret-1234", java.time.Clock.systemUTC());
-        service = new PlatformService(connections, collector, cipher, sync, new RateLimiter(), JSON,
+        service = new PlatformService(connections, assignments, collector, cipher, sync, new RateLimiter(), JSON,
                 mock(PlatformTransactionManager.class), cfg, google, states);
     }
 
@@ -89,6 +92,40 @@ class PlatformServiceTest {
         ArgumentCaptor<Map<PlatformEnum, JsonNode>> c = ArgumentCaptor.forClass(Map.class);
         verify(collector).collect(c.capture());
         return c.getValue().get(p);
+    }
+
+    @Test
+    void disconnectRemovesAccessAndAssignmentsOfThatPlatform() {
+        PlatformConnectionEntity c = new PlatformConnectionEntity(USER, PlatformEnum.CANVAS, cipher.encrypt(canvas("https://x.instructure.com", "t")));
+        when(connections.findByUserIdAndPlatform(USER, PlatformEnum.CANVAS)).thenReturn(Optional.of(c));
+
+        service.disconnect(USER, PlatformEnum.CANVAS);
+
+        verify(connections).delete(c);
+        verify(assignments).removePlatformAssignments(USER, "canvas");
+        verifyNoInteractions(google);
+    }
+
+    @Test
+    void disconnectClassroomRemovesAssignmentsAndRevokesGoogleAccess() throws Exception {
+        JsonNode creds = body("{\"access_token\": \"ya29.a\", \"refresh_token\": \"1//r\", \"expires_at\": 1}");
+        PlatformConnectionEntity c = new PlatformConnectionEntity(USER, PlatformEnum.CLASSROOM, cipher.encrypt(creds));
+        when(connections.findByUserIdAndPlatform(USER, PlatformEnum.CLASSROOM)).thenReturn(Optional.of(c));
+
+        service.disconnect(USER, PlatformEnum.CLASSROOM);
+
+        verify(connections).delete(c);
+        verify(assignments).removePlatformAssignments(USER, "classroom");
+        verify(google).revoke(creds);
+    }
+
+    @Test
+    void disconnectWithoutConnectionStillRemovesLeftoverAssignments() {
+        service.disconnect(USER, PlatformEnum.CLASSROOM);
+
+        verify(connections, never()).delete(any());
+        verify(assignments).removePlatformAssignments(USER, "classroom");
+        verify(google, never()).revoke(any());
     }
 
     @Test

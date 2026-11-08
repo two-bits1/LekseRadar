@@ -101,4 +101,28 @@ class HomeworkSyncIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM user_events WHERE user_id = ? AND type = 'homework_synced'",
                 Integer.class, userId)).isEqualTo(2);
     }
+
+    @Test
+    void disconnectRemovesAssignmentsButKeepsChats() throws Exception {
+        Boolean v26 = jdbc.queryForObject("SELECT to_regproc('remove_platform_assignments') IS NOT NULL", Boolean.class);
+        assumeTrue(Boolean.TRUE.equals(v26), "нет функции remove_platform_assignments (миграция V26)");
+        Long userId = TestUsers.register(auth, mail, "disconnect-" + System.nanoTime() + "@example.com",
+                "password123", "Disconnect Elev").user().id();
+        when(collector.collect(anyMap())).thenReturn(new CollectResult(JSON.readTree(ITEMS),
+                Map.of("canvas", new Source(true, 2, null, false)), Map.of()));
+        platforms.connect(userId, PlatformEnum.CANVAS,
+                JSON.readTree("{\"base_url\": \"https://uio.instructure.com\", \"token\": \"t\"}"));
+        Long first = assignments.findForUser(userId).get(0).getId();
+        jdbc.update("INSERT INTO chat_sessions (user_id, assignment_id, title) VALUES (?, ?, 'Om Oblig 1')", userId, first);
+
+        platforms.disconnect(userId, PlatformEnum.CANVAS);
+        em.clear();
+
+        assertThat(assignments.findForUser(userId)).isEmpty();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM platform_connections WHERE user_id = ?", Integer.class, userId))
+                .isZero();
+        // чат по заданию остался, ссылка на задание обнулилась
+        assertThat(jdbc.queryForList("SELECT assignment_id FROM chat_sessions WHERE user_id = ?", userId))
+                .singleElement().satisfies(row -> assertThat(row.get("assignment_id")).isNull());
+    }
 }

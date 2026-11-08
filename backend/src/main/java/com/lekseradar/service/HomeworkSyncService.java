@@ -3,6 +3,7 @@ package com.lekseradar.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.lekseradar.dto.homework.SourceStatusResponseDTO;
 import com.lekseradar.dto.homework.SyncResponseDTO;
 import com.lekseradar.exception.TooManyRequestsException;
@@ -27,8 +28,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@code POST /homework/sync}: расшифровать все подключения ученика → один {@code collector /collect} →
@@ -122,7 +125,9 @@ public class HomeworkSyncService {
         CollectResult result = collector.collect(creds);
 
         return tx.execute(status -> {
+            Set<String> stillConnected = new HashSet<>();
             ids.forEach((platform, id) -> connections.findById(id).ifPresent(c -> {   // ученик мог отключить её за это время
+                stillConnected.add(platform.value());
                 Source s = result.source(platform);
                 if (s == null) s = new Source(false, 0, "Платформа не ответила", false);
                 c.markSynced(s.ok(), s.error(), s.needsReconnect());
@@ -131,7 +136,8 @@ public class HomeworkSyncService {
                 connections.save(c);
                 sources.add(new SourceStatusResponseDTO(platform, s.ok(), s.count(), s.error(), c.isNeedsReconnect()));
             }));
-            Counts n = store(userId, result.assignments());
+            // Задания отключённой за это время платформы не записываем: отключение их уже удалило (V26)
+            Counts n = store(userId, onlyFrom(result.assignments(), stillConnected));
             return new SyncResponseDTO(sorted(sources), n.added(), n.updated());
         });
     }
@@ -149,6 +155,17 @@ public class HomeworkSyncService {
         events.addWithPayload(userId, "homework_synced",
                 json.createObjectNode().put("added", n.added()).put("updated", n.updated()).toString());
         return n;
+    }
+
+    /** Только задания с {@code source} из списка. */
+    private JsonNode onlyFrom(JsonNode items, Set<String> sources) {
+        ArrayNode out = json.createArrayNode();
+        if (items != null && items.isArray()) {
+            for (JsonNode a : items) {
+                if (sources.contains(a.path("source").asText())) out.add(a);
+            }
+        }
+        return out;
     }
 
     private static SourceStatusResponseDTO reconnect(PlatformEnum p, String error) {

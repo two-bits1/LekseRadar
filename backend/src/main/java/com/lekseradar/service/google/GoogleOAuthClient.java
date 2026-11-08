@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * Вход в Google Classroom (OAuth 2.0, «Web application»): ссылка на страницу Google, обмен кода на токены,
- * обновление access_token по refresh_token. Секрет клиента есть только у бэкенда; collector получает готовый
+ * обновление access_token по refresh_token, отзыв доступа при отключении. Секрет клиента есть только у бэкенда; collector получает готовый
  * access_token. Токены и коды не логируются.
  */
 @Component
@@ -45,6 +45,8 @@ public class GoogleOAuthClient {
     private final String clientSecret;
     private final String authUrl;
     private final String tokenUrl;
+    /** Отзыв доступа: тот же хост, что и у tokenUrl ({@code https://oauth2.googleapis.com/revoke}). */
+    private final String revokeUrl;
     private final RestClient http;
     private final Clock clock;
 
@@ -59,6 +61,7 @@ public class GoogleOAuthClient {
         this.clientSecret = clientSecret == null ? "" : clientSecret.strip();
         this.authUrl = authUrl;
         this.tokenUrl = tokenUrl;
+        this.revokeUrl = tokenUrl.replaceFirst("/token$", "/revoke");
         this.clock = clock;
         SimpleClientHttpRequestFactory rf = new SimpleClientHttpRequestFactory();
         rf.setConnectTimeout(Duration.ofSeconds(10));
@@ -137,6 +140,28 @@ public class GoogleOAuthClient {
         out.put("expires_at", expiresAt(res));
         if (res.hasNonNull("refresh_token")) out.put("refresh_token", res.path("refresh_token").asText());
         return out;
+    }
+
+    /**
+     * Ученик отключил Classroom: отозвать доступ LekseRadar в Google (refresh_token, иначе access_token), чтобы
+     * приложение пропало из «Сторонние приложения с доступом к аккаунту». По возможности: ошибка только в лог,
+     * доступ в базе к этому времени уже удалён. Секрет клиента для отзыва не нужен.
+     */
+    public void revoke(JsonNode creds) {
+        String token = creds == null ? "" : creds.path("refresh_token").asText("");
+        if (token.isEmpty() && creds != null) token = creds.path("access_token").asText("");
+        if (token.isEmpty()) return;
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("token", token);
+        try {
+            http.post().uri(revokeUrl).contentType(MediaType.APPLICATION_FORM_URLENCODED).body(form)
+                    .retrieve().toBodilessEntity();
+        } catch (RestClientResponseException e) {
+            // 400 invalid_token: Google уже не знает этот токен (отозван раньше) — отзывать нечего
+            log.warn("google revoke failed: HTTP {}", e.getStatusCode().value());
+        } catch (RestClientException e) {
+            log.warn("google revoke failed: {}", e.getClass().getSimpleName());
+        }
     }
 
     private JsonNode token(MultiValueMap<String, String> form, String what) {
