@@ -26,6 +26,12 @@ export const en: Dict = {
     preview: 'This is a preview. No information is sent or stored.',
     calendarUrl: 'Calendar URL', schoolUrl: 'School URL', connectLater: 'Connect — coming later',
     account: 'Account', loggedInAs: (email: string) => `Logged in as ${email}.`, logout: 'Log out',
+    dataTitle: 'Your data', dataIntro: 'Download everything LekseRadar stores about you, or delete your account.', dataPolicy: 'Privacy policy',
+    exportTitle: 'Download my data', exportHint: 'One JSON file: profile, platforms (without access keys), homework, chats, quizzes, flashcards and history.',
+    export: 'Download', exporting: 'Preparing …', exported: 'Your data has been downloaded.',
+    deleteTitle: 'Delete account', deleteHint: 'Deletes your account and all your data. This cannot be undone.', deleteStart: 'Delete account …',
+    deleteWarning: 'Everything will be deleted for good: profile, connected platforms, homework, chats, quizzes, flashcards and history. Google Classroom access is revoked.',
+    deletePassword: 'Your password', deleteConfirm: 'Delete my account', deleting: 'Deleting …',
   },
   platforms: {
     connect: 'Connect', connecting: 'Connecting …', connected: 'Connected', disconnect: 'Disconnect', confirmDisconnect: 'Yes, disconnect', cancel: 'Cancel',
@@ -60,6 +66,8 @@ export const en: Dict = {
     name: 'Name', namePlaceholder: 'First name', email: 'Email', emailPlaceholder: 'you@school.no',
     password: 'Password', passwordHint: 'At least 8 characters', loggingIn: 'Logging in …', registering: 'Creating account …',
     toLogin: 'Already have an account? Log in', toRegister: 'New here? Create an account',
+    consentBefore: 'I am 13 or older (or my parent or guardian agrees), and I accept the ', consentTerms: 'terms of use',
+    consentAnd: ' and the ', consentPrivacy: 'privacy policy', consentAfter: '.',
   },
   profile: {
     eyebrow: 'YOUR PROFILE', title: 'You’re on your way.', titleNamed: (name: string) => `You’re on your way, ${name}.`, loading: 'Loading your profile …',

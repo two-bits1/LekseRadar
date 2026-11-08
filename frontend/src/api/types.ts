@@ -101,7 +101,7 @@ export type ApiError = {
 export type Health = { status: 'UP' | 'DOWN' };
 
 // Тела запросов
-export type RegisterRequest = { email: string; password: string; displayName: string };
+export type RegisterRequest = { email: string; password: string; displayName: string; acceptTerms: boolean };  // acceptTerms: GDPR, обязательно true
 export type RegisterStarted = { email: string; expiresInSeconds: number };  // 202: код ушёл на почту, токена нет
 export type VerifyEmailRequest = { email: string; code: string };
 export type LoginRequest = { email: string; password: string };

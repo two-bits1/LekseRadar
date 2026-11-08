@@ -1,5 +1,10 @@
 package com.lekseradar.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
+import com.lekseradar.dto.user.DeleteAccountRequestDTO;
+import com.lekseradar.service.AccountService;
 import com.lekseradar.dto.reminder.ReminderTestResponseDTO;
 import com.lekseradar.dto.user.ChangePasswordRequestDTO;
 import com.lekseradar.dto.user.UpdateProfileRequestDTO;
@@ -20,10 +25,32 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService users;
     private final ReminderService reminders;
+    private final AccountService account;
 
-    public UserController(UserService users, ReminderService reminders) {
+    public UserController(UserService users, ReminderService reminders, AccountService account) {
         this.users = users;
         this.reminders = reminders;
+        this.account = account;
+    }
+
+    @GetMapping("/export")
+    @Operation(summary = "Скачать мои данные (GDPR, ст. 15 и 20)",
+            description = "Все данные ученика одним JSON-файлом: профиль, платформы (без доступов), задания, чаты, "
+                    + "квизы и ответы, карточки, история, напоминания. Не чаще 5 раз в час")
+    public ResponseEntity<String> export(@CurrentUser UserEntity user) {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"lekseradar-data.json\"")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(account.export(user.getId()));
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Удалить аккаунт и все данные (GDPR, ст. 17)",
+            description = "Нужен текущий пароль. Удаляется всё: профиль, платформы (доступ Google отзывается), задания, "
+                    + "чаты, квизы, карточки, история. Отменить нельзя")
+    public void delete(@CurrentUser UserEntity user, @Valid @RequestBody DeleteAccountRequestDTO req) {
+        account.delete(user.getId(), req.password());
     }
 
     @GetMapping

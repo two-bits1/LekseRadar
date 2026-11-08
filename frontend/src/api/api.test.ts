@@ -26,11 +26,13 @@ const mockFetch = (status: number, body?: unknown) => {
 // Контракт с бэкендом: таблица «Все URL бэкенда» в docs/API.md.
 describe('URL бэкенда из API.md', () => {
   const cases: [string, () => Promise<unknown>, string, string, unknown?][] = [
-    ['#1 регистрация', () => authApi.register({ email: 'ann@example.com', password: 'secret123', displayName: 'Ann' }), 'POST', '/api/v1/auth/register', { email: 'ann@example.com', password: 'secret123', displayName: 'Ann' }],
+    ['#1 регистрация', () => authApi.register({ email: 'ann@example.com', password: 'secret123', displayName: 'Ann', acceptTerms: true }), 'POST', '/api/v1/auth/register', { email: 'ann@example.com', password: 'secret123', displayName: 'Ann', acceptTerms: true }],
     ['#2 вход', () => authApi.login({ email: 'demo@lekseradar.no', password: 'demo1234' }), 'POST', '/api/v1/auth/login', { email: 'demo@lekseradar.no', password: 'demo1234' }],
     ['#44 код из письма', () => authApi.verifyEmail({ email: 'ann@example.com', code: '123456' }), 'POST', '/api/v1/auth/register/verify', { email: 'ann@example.com', code: '123456' }],
     ['#3 мой профиль', () => usersApi.me(), 'GET', '/api/v1/users/me'],
     ['#4 изменить профиль', () => usersApi.update({ locale: 'en' }), 'PATCH', '/api/v1/users/me', { locale: 'en' }],
+    ['#47 мои данные (GDPR)', () => usersApi.exportData(), 'GET', '/api/v1/users/me/export'],
+    ['#48 удалить аккаунт (GDPR)', () => usersApi.deleteAccount('secret123'), 'DELETE', '/api/v1/users/me', { password: 'secret123' }],
     ['#5 сменить пароль', () => usersApi.changePassword({ currentPassword: 'a', newPassword: 'newSecret123' }), 'PUT', '/api/v1/users/me/password', { currentPassword: 'a', newPassword: 'newSecret123' }],
     ['#6 все чаты', () => chatsApi.list(), 'GET', '/api/v1/chats'],
     ['#6 активные чаты', () => chatsApi.list(false), 'GET', '/api/v1/chats?archived=false'],
@@ -128,7 +130,7 @@ describe('клиент API', () => {
   it('400 с fields передаётся как есть', async () => {
     const error = { status: 400, message: 'Sjekk feltene', fields: { email: 'Ugyldig e-post' }, timestamp: 't' };
     mockFetch(400, error);
-    await expect(authApi.register({ email: 'x', password: 'y', displayName: '' })).rejects.toEqual(error);
+    await expect(authApi.register({ email: 'x', password: 'y', displayName: '', acceptTerms: true })).rejects.toEqual(error);
   });
 
   it('ответ не JSON (бэкенд выключен, proxy вернул 502) → понятная ApiError', async () => {

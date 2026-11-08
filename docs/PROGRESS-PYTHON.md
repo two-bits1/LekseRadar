@@ -32,14 +32,14 @@ COLLECTOR_KEY=$(openssl rand -hex 32) uvicorn homework.server:app --port 8090
 
 **Обновить свою локальную базу до V21:**
 ```bash
-database/migrate.sh "postgresql://lekseradar:lekseradar@localhost:5432/lekseradar" --baseline 20
+database/migrate.sh "postgresql://lekseradar:<DB_PASSWORD>@localhost:5432/lekseradar" --baseline 20
 ```
 
 **Проверить ИИ с ключом Groq** (ключ в `backend/.env`, бэкенд запущен):
 ```bash
 pip install 'psycopg[binary]'
 python ai-content/check/check_ai.py --email test@lekseradar.no --password LekseRadar2026 \
-  --database-url postgresql://lekseradar:lekseradar@localhost:5432/lekseradar
+  --database-url postgresql://lekseradar:<DB_PASSWORD>@localhost:5432/lekseradar
 ```
 Таблицу из вывода — в README-TEST.md.
 

@@ -22,23 +22,26 @@ export function Auth({register=false}:{register?:boolean}){
 // Сама форма — та же на /login, /register и в центре лендинга.
 export function AuthForm({register=false}:{register?:boolean}){
  const auth=useAuth();const navigate=useNavigate();const t=useT();const a=t.auth;
- const [form,setForm]=useState({email:'',password:'',displayName:''});
+ const [form,setForm]=useState({email:'',password:'',displayName:''});const [accept,setAccept]=useState(false);
  const [error,setError]=useState<ApiError|null>(null);const [busy,setBusy]=useState(false);
  const [sentTo,setSentTo]=useState<string|null>(null);
  const set=(k:keyof typeof form)=>(e:ChangeEvent<HTMLInputElement>)=>setForm(f=>({...f,[k]:e.target.value}));
  const errorFor=(k:string)=>fieldError(error,k)??(error?.status===409&&k==='email'?error.message:undefined);
  const general=error?.status===409?null:generalError(error);
  const submit=async(e:FormEvent)=>{e.preventDefault();setBusy(true);setError(null);
-  try{if(register)setSentTo((await auth.register(form)).email);else{await auth.login({email:form.email,password:form.password});navigate(PATHS.home,{replace:true})}}
+  try{if(register)setSentTo((await auth.register({...form,acceptTerms:accept})).email);else{await auth.login({email:form.email,password:form.password});navigate(PATHS.home,{replace:true})}}
   catch(err){setError(asApiError(err,t.common))}
   finally{setBusy(false)}};
- if(register&&sentTo)return <VerifyEmailForm email={sentTo} resend={()=>auth.register(form)} back={()=>setSentTo(null)}/>;
+ if(register&&sentTo)return <VerifyEmailForm email={sentTo} resend={()=>auth.register({...form,acceptTerms:true})} back={()=>setSentTo(null)}/>;
  return <form className="lesson-card auth-form" onSubmit={submit} noValidate><h2>{register?a.register:a.login}</h2>
   {register&&<Field name="displayName" label={a.name} type="text" autoComplete="name" required placeholder={a.namePlaceholder} value={form.displayName} onChange={set('displayName')} error={errorFor('displayName')}/>}
   <Field name="email" label={a.email} type="email" autoComplete="email" required placeholder={a.emailPlaceholder} value={form.email} onChange={set('email')} error={errorFor('email')}/>
   <Field name="password" label={a.password} type="password" autoComplete={register?'new-password':'current-password'} required minLength={register?8:undefined} placeholder={register?a.passwordHint:''} value={form.password} onChange={set('password')} error={errorFor('password')}/>
+  {register&&<label className="consent"><input type="checkbox" name="acceptTerms" checked={accept} onChange={e=>setAccept(e.target.checked)} required/>
+   <span>{a.consentBefore}<Link to={PATHS.terms} target="_blank">{a.consentTerms}</Link>{a.consentAnd}<Link to={PATHS.privacy} target="_blank">{a.consentPrivacy}</Link>{a.consentAfter}</span></label>}
+  {register&&fieldError(error,'acceptTerms')&&<p role="alert" className="field-error">{fieldError(error,'acceptTerms')}</p>}
   {general&&<p role="alert" className="feedback danger">{general}</p>}
-  <button className="button dark-button" disabled={busy}>{busy?(register?a.registering:a.loggingIn):(register?a.register:a.login)}</button>
+  <button className="button dark-button" disabled={busy||(register&&!accept)}>{busy?(register?a.registering:a.loggingIn):(register?a.register:a.login)}</button>
  </form>;
 }
 

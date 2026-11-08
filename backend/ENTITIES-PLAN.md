@@ -270,7 +270,7 @@ String promptVars(@Param("sessionId") Long sessionId);   // JSON для {{...}}
 @SpringBootTest(properties = {
         "spring.datasource.url=${TEST_DB_URL}",
         "spring.datasource.username=${TEST_DB_USER:lekseradar}",
-        "spring.datasource.password=${TEST_DB_PASSWORD:lekseradar}",
+        "spring.datasource.password=${TEST_DB_PASSWORD:}",
         "app.jwt.secret=integration-test-secret-integration-test",
         "app.openai.api-key=sk-not-used"})
 @EnabledIfEnvironmentVariable(named = "TEST_DB_URL", matches = ".+")   // без базы тест пропускается

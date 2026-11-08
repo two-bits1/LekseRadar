@@ -1,6 +1,6 @@
 """Записать настоящие ДЗ ученика в базу, пока нет POST /homework/sync в бэкенде.
 
-    DATABASE_URL=postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar \\
+    DATABASE_URL=postgresql://lekseradar:<DB_PASSWORD>@127.0.0.1:5432/lekseradar \\
     python -m homework.to_db --email ученик@школа.no --creds creds.json
 
 collect() по creds.json → sync_assignments() (V21): UPSERT в assignments по (user_id, source, external_id).

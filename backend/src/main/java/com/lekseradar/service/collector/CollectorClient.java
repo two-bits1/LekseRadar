@@ -1,5 +1,6 @@
 package com.lekseradar.service.collector;
 
+import com.lekseradar.security.InsecureSecrets;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -40,6 +41,10 @@ public class CollectorClient {
     @Autowired
     public CollectorClient(AppConfig cfg) {
         this(cfg.collector().url(), cfg.collector().key(), Duration.ofSeconds(cfg.collector().timeoutSeconds()));
+        InsecureSecrets.reject("COLLECTOR_KEY", cfg.collector().key());
+        if (cfg.collector().key() == null || cfg.collector().key().isBlank()) {
+            log.error("COLLECTOR_KEY не задан: платформы не подключатся. Тот же ключ, что у collector (openssl rand -hex 32)");
+        }
     }
 
     public CollectorClient(String baseUrl, String key, Duration timeout) {

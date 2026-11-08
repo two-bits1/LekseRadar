@@ -246,7 +246,7 @@ mvnw   text eol=lf
 `ai-content/load/load.py` и README-TEST:
 
 ```
-postgresql://lekseradar:lekseradar@127.0.0.1:5432/lekseradar
+postgresql://lekseradar:<DB_PASSWORD>@127.0.0.1:5432/lekseradar
 ```
 
 ## 5. `homework-collector/COLLECTOR-API.md`

@@ -18,7 +18,7 @@ public final class TestUsers {
     private TestUsers() {}
 
     public static AuthResponseDTO register(AuthService auth, MailService mail, String email, String password, String name) {
-        auth.register(new RegisterRequestDTO(email, password, name), "test-" + System.nanoTime());
+        auth.register(new RegisterRequestDTO(email, password, name, true), "test-" + System.nanoTime());
         ArgumentCaptor<String> code = ArgumentCaptor.forClass(String.class);
         verify(mail, atLeastOnce()).sendVerificationCode(eq(email), anyString(), code.capture(), anyLong());
         return auth.verify(new VerifyEmailRequestDTO(email, code.getValue()));

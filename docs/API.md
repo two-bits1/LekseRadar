@@ -19,6 +19,8 @@
 | 4 | PATCH | 🔒 `/api/v1/users/me` | изменить имя / язык / часовой пояс / напоминания на почту (`emailReminders`) | 200 `User` |
 | 5 | PUT | 🔒 `/api/v1/users/me/password` | сменить пароль | 204 |
 | 45 | POST | 🔒 `/api/v1/users/me/reminders/test` | пробное письмо-напоминание о ДЗ на почту из профиля | 200 `{email, count}`, 429, 503 |
+| 47 | GET | 🔒 `/api/v1/users/me/export` | GDPR: all my data as one JSON file (no password hash, no platform credentials) | 200 JSON, 429 (5/hour) |
+| 48 | DELETE | 🔒 `/api/v1/users/me` | GDPR: delete account and all data, body `{password}` | 204, 400 wrong password |
 | 6 | GET | 🔒 `/api/v1/chats?archived=` | список чатов | 200 `Chat[]` |
 | 7 | POST | 🔒 `/api/v1/chats` | создать чат | 201 `Chat` |
 | 8 | GET | 🔒 `/api/v1/chats/{chatId}` | один чат | 200 `Chat` |
@@ -243,9 +245,10 @@ type ApiError = {
 
 ### `POST /auth/register` — регистрация
 ```json
-{ "email": "ann@example.com", "password": "secret123", "displayName": "Ann" }
+{ "email": "ann@example.com", "password": "secret123", "displayName": "Ann", "acceptTerms": true }
 ```
 - `password` — от 8 до 100 символов
+- `acceptTerms` — must be `true`: accepts the terms and privacy policy and confirms age 13+ or parental agreement (stored in `users.terms_accepted_at`, V27)
 - **201** → `AuthResponse`
 - **400** → неверный email / короткий пароль (`fields`)
 - **409** → email уже занят
